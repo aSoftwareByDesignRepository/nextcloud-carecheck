@@ -1,0 +1,102 @@
+/*
+ * CareCheck design tokens (--cck-*).
+ * Colors derive from Nextcloud theme variables; no raw hex in feature CSS.
+ * Spacing/typography on :root; theme colors on body (NC sets --color-* on body).
+ */
+:root {
+	--cck-space-1: 4px;
+	--cck-space-2: 8px;
+	--cck-space-3: 12px;
+	--cck-space-4: 16px;
+	--cck-space-5: 24px;
+	--cck-space-6: 32px;
+	--cck-space-7: 48px;
+	--cck-space-8: 64px;
+
+	--cck-radius-sm: 6px;
+	--cck-radius-md: 12px;
+	--cck-radius-lg: 16px;
+
+	--cck-fs-xs: 0.75rem;
+	--cck-fs-sm: 0.875rem;
+	--cck-fs-md: 1rem;
+	--cck-fs-lg: 1.125rem;
+	--cck-fs-xl: 1.5rem;
+	--cck-fs-2xl: 1.875rem;
+
+	--cck-line-tight: 1.2;
+	--cck-line-base: 1.45;
+
+	--cck-breakpoint-sm: 480px;
+	--cck-breakpoint-md: 768px;
+	--cck-breakpoint-lg: 1024px;
+
+	/* Inline SVG catalogue (IconCatalog) */
+	--cck-icon-sm: 1rem;
+	--cck-icon-md: 1.125rem;
+	--cck-icon-lg: 1.375rem;
+	--cck-icon-well: 2.25rem;
+	--cck-icon-stroke: 2;
+
+	--cck-tab-num: tabular-nums;
+
+	/* Touch targets (WCAG 2.5.5 / design-system §0.4) */
+	--cck-touch: 44px;
+	--cck-touch-lg: 48px;
+}
+
+/* Theme-bound tokens — must follow body [data-theme-*] where NC defines --color-* */
+body {
+	/* Fixed overlays (mobile nav drawer) sit below NC #header, not under the profile menu */
+	--cck-overlay-top: var(--header-height, 50px);
+	--cck-overlay-height: calc(100dvh - var(--header-height, 50px));
+
+	--cck-bg-soft: color-mix(in srgb, var(--color-main-background) 96%, var(--color-main-text) 4%);
+	--cck-bg-card: var(--color-main-background);
+	--cck-text: var(--color-main-text);
+	--cck-muted: var(--color-text-maxcontrast);
+	--cck-border: color-mix(in srgb, var(--color-main-text) 12%, transparent);
+	--cck-border-strong: color-mix(in srgb, var(--color-main-text) 24%, transparent);
+	/* Interactive controls need >=3:1 (WCAG 1.4.11): maxcontrast is NC's own
+	   input border; --color-border / --cck-border stay surface-only. */
+	--cck-form-border: var(--color-border-maxcontrast, var(--cck-border-strong));
+
+	/* Mix with main background — not transparent — so callouts stay visible on all NC themes */
+	--cck-tint-success: color-mix(in srgb, var(--color-success-text, var(--color-success)) 18%, var(--color-main-background));
+	--cck-tint-warning: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 22%, var(--color-main-background));
+	--cck-tint-danger: color-mix(in srgb, var(--color-error-text, var(--color-error)) 18%, var(--color-main-background));
+	--cck-tint-info: color-mix(in srgb, var(--color-primary-element) 16%, var(--color-main-background));
+
+	--cck-shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
+	--cck-shadow-md: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+
+	/* Modal / drawer scrim — theme-aware, never raw black rgba */
+	--cck-scrim: color-mix(in srgb, var(--color-main-text) 45%, transparent);
+
+	/*
+	 * Solid danger CTA fill (design-system §3.3 / WCAG 1.4.3).
+	 * NC 30+ maps --color-error to a pale tint — never put on-fill text on that.
+	 * Use --color-element-error; dark themes darken the fill so ink stays ≥ 4.5:1.
+	 */
+	/* NC 30+: element-error is the solid element red (#c90000 default).
+	   If a theme lacks it, error-text (dark ink, e.g. #8A0000) is a safer
+	   fill than the pale --color-error tint (#FFE7E7) under white text. */
+	--cck-danger-fill: var(--color-element-error, var(--color-error-text, var(--color-error)));
+	--cck-danger-on-fill: #ffffff;
+	--cck-danger-ink: var(--color-error-text, var(--color-error));
+}
+
+/* Dark themes turn --color-element-error into a bright accent — darken the
+ * solid CTA fill so white ink stays >= 4.5:1 (design-system §3.1). */
+body[data-theme-dark],
+body[data-themes*="dark"],
+body.theme--dark {
+	--cck-danger-fill: color-mix(in srgb, var(--color-element-error, var(--color-error-text, var(--color-error))) 62%, var(--color-main-background));
+}
+
+@media (prefers-contrast: more) {
+	body {
+		--cck-border: color-mix(in srgb, var(--color-main-text) 28%, transparent);
+		--cck-border-strong: color-mix(in srgb, var(--color-main-text) 40%, transparent);
+	}
+}

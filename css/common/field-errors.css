@@ -1,0 +1,18 @@
+/* Inline field errors — rendered by the shared field-errors.js
+   (CheckFieldErrors.markValidationFields) from the server's localized
+   `fields` map (WCAG 3.3.1/3.3.3). Synced from
+   apps/_shared/field-errors/field-errors.css — cck = app prefix. */
+#app-content.cck-app .cck-input[aria-invalid="true"],
+#app-content.cck-app input[aria-invalid="true"],
+#app-content.cck-app select[aria-invalid="true"],
+#app-content.cck-app textarea[aria-invalid="true"] {
+	border-color: var(--color-error-text, var(--cck-danger-ink, var(--color-error)));
+	box-shadow: 0 0 0 1px var(--color-error-text, var(--cck-danger-ink, var(--color-error)));
+}
+#app-content.cck-app .cck-field-error {
+	margin: 0.25rem 0 0;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--color-error-text, var(--cck-danger-ink, var(--color-error)));
+}
