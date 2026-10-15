@@ -31,7 +31,7 @@ class AnchorService
 		$dateStr = $day->format('Y-m-d');
 		$heads = $this->journal->clientHeadHashes();
 		ksort($heads);
-		$digest = hash('sha256', json_encode($heads));
+		$digest = hash('sha256', json_encode($heads, JSON_THROW_ON_ERROR));
 
 		$a = new Anchor();
 		$a->setDate($day);
@@ -68,6 +68,9 @@ class AnchorService
 	private function buildTsq(string $hexDigest): string
 	{
 		$digest = hex2bin($hexDigest);
+		if ($digest === false) {
+			throw new \RuntimeException('invalid hex digest');
+		}
 		// SEQUENCE { INTEGER 1, SEQUENCE { SEQUENCE { OID sha256 }, OCTET STRING digest }, TRUE }
 		$oid = "\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01";
 		$algId = "\x30\x0b" . $oid . "\x05\x00";

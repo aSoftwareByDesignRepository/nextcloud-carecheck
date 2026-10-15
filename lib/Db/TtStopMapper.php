@@ -35,4 +35,12 @@ class TtStopMapper extends QBMapper
 		$qb->select('*')->from($this->getTableName())->orderBy('id', 'ASC');
 		return $this->findEntities($qb);
 	}
+
+	public function deleteForTemplate(int $templateId): void
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->getTableName())
+			->where($qb->expr()->eq('template_id', $qb->createNamedParameter($templateId)));
+		$qb->executeStatement();
+	}
 }

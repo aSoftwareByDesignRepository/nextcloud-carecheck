@@ -15,7 +15,7 @@ Ambulatory care documentation on your own Nextcloud: recurring tour templates th
 
 **Free AGPL web app.** The native companion (worker & paired-member modes) is licensed separately (`CCK2`). The web is never paywalled.
 	]]></description>
-	<version>0.4.0</version>
+	<version>0.4.1</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Software by Design GbR</author>
 	<namespace>CareCheck</namespace>
@@ -58,12 +58,7 @@ Ambulatory care documentation on your own Nextcloud: recurring tour templates th
 			<step>OCA\CareCheck\Repair\UninstallDropTables</step>
 		</uninstall>
 	</repair-steps>
-	<navigations>
-		<navigation>
-			<name>CareCheck</name>
-			<route>carecheck.page.index</route>
-			<icon>app.svg</icon>
-			<order>10</order>
-		</navigation>
-	</navigations>
+	<!-- No <navigation> here: the menu entry is registered conditionally via
+	     NavGate (hasAppAccess) — a static entry would advertise the app to
+	     excluded users when access_mode=restricted. -->
 </info>

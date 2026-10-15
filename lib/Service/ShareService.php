@@ -27,6 +27,7 @@ class ShareService
 		private AclService $acl,
 		private TourService $tours,
 		private \OCP\IDBConnection $db,
+		private ?\OCP\IURLGenerator $urlGenerator = null,
 	) {
 	}
 
@@ -52,10 +53,13 @@ class ShareService
 		$s->setCreatedBy($actorRef);
 		$s->setCreatedAt(new \DateTime());
 		$s = $this->shares->insert($s);
+		// Share links leave the instance (mail to relatives) — emit the absolute
+		// route URL so subdir and index.php installs produce a working link.
+		$urlGenerator = $this->urlGenerator ?? \OCP\Server::get(\OCP\IURLGenerator::class);
 		return [
 			'id' => (int)$s->getId(),
 			'token' => $token,
-			'url' => '/apps/carecheck/share/' . $token,
+			'url' => $urlGenerator->linkToRouteAbsolute('carecheck.page.shareView', ['token' => $token]),
 		];
 	}
 

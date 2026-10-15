@@ -1,0 +1,43 @@
+# PHPStan config for carecheck app
+# Run: ./vendor/bin/phpstan analyse -c phpstan.neon.dist lib/
+# With Nextcloud bootstrap (requires DB driver): ./vendor/bin/phpstan analyse -c phpstan.neon.dist -a phpstan-bootstrap.php lib/
+
+parameters:
+    level: 8
+    paths:
+        - lib
+    scanFiles:
+        - stubs/nextcloud-internal.php
+    excludePaths:
+        - lib/Migration
+        - stubs
+    ignoreErrors:
+        # Nextcloud response generics (S/T/H) produce framework noise on controllers.
+        - '#does not specify its types: S, H#'
+        - '#does not specify its types: S, T, H#'
+        - '#does not specify its types: S, C, H#'
+        - '~Parameter #1 \$data of class OCP\\AppFramework\\Http\\DataResponse constructor expects T of OCP\\AppFramework\\Http\\DataResponseType~'
+        - '~Parameter #2 \$statusCode of class OCP\\AppFramework\\Http\\DataResponse constructor expects S of .* int given~'
+        - '~has no value type specified in iterable type array~'
+        - '~has parameter \$argument with no type specified~'
+        - '~Property .* is never read, only written~'
+        - '~Property .* has no type specified~'
+        - '~extends generic class OCP\\AppFramework\\Db\\QBMapper but does not specify its types: T~'
+        - '~should return .* but returns OCP\\AppFramework\\Db\\Entity~'
+        - '~should return .* but returns list<OCP\\AppFramework\\Db\\Entity>~'
+        - '~Call to an undefined method OCP\\AppFramework\\Db\\Entity::~'
+        - '~Offset .* on .* left side of \\?\\? always exists and is not nullable~'
+        - '~Offset .* on .* on left side of \\?\\? always exists and is not nullable~'
+        - '~Expression on left side of \\?\\? is not nullable~'
+        - '~will always evaluate to true~'
+        - '~Strict comparison using !== between .* will always evaluate to true~'
+        - '~Strict comparison using === between .* will always evaluate to false~'
+        - '~Offset .* might not exist on .*~'
+        # JSONResponse statusCode S-generic: OCP ships an int-union; runtime accepts any int.
+        - '~Parameter #2 \$statusCode of class OCP\\AppFramework\\Http\\JSONResponse constructor expects S of~'
+        - '~Parameter #1 \$json of function json_decode expects string, string\|false given~'
+        - '~Using nullsafe method call on non-nullable type DateTime\. Use -> instead~'
+        - '~expects string, string\|null given~'
+        - '~array_values is already a list, call has no effect~'
+        - '~Possibly invalid array key type float\|int~'
+    reportUnmatchedIgnoredErrors: false

@@ -401,8 +401,15 @@ class CompanionApiController extends Controller
 			if (!is_array($ids)) {
 				throw ApiException::validation('Validation failed.', ['client_ids' => 'invalid']);
 			}
+			$clientIds = [];
+			foreach ($ids as $cid) {
+				if (!is_int($cid) && !(is_string($cid) && preg_match('/^\d+$/', $cid) === 1)) {
+					throw ApiException::validation('Validation failed.', ['client_ids' => 'invalid']);
+				}
+				$clientIds[] = (int)$cid;
+			}
 			return $this->ok(['session' => $this->groupSessions->open(
-				$actor, (string)($p['title'] ?? ''), $ids, (string)($p['idem_key'] ?? ''),
+				$actor, (string)($p['title'] ?? ''), $clientIds, (string)($p['idem_key'] ?? ''),
 			)]);
 		} catch (ApiException $e) {
 			return $this->error($e);

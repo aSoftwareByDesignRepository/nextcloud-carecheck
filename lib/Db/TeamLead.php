@@ -6,6 +6,12 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int|null getTeamId()
+ * @method void setTeamId(int|null $teamId)
+ * @method string|null getUid()
+ * @method void setUid(string|null $uid)
+ */
 class TeamLead extends Entity
 {
 	protected $teamId;

@@ -6,6 +6,24 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int|null getClientId()
+ * @method void setClientId(int|null $clientId)
+ * @method int|null getVisitId()
+ * @method void setVisitId(int|null $visitId)
+ * @method string|null getActorRef()
+ * @method void setActorRef(string|null $actorRef)
+ * @method string|null getMime()
+ * @method void setMime(string|null $mime)
+ * @method int|null getByteSize()
+ * @method void setByteSize(int|null $byteSize)
+ * @method string|null getSha256()
+ * @method void setSha256(string|null $sha256)
+ * @method string|null getBlobKey()
+ * @method void setBlobKey(string|null $blobKey)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ */
 class Photo extends Entity
 {
 	protected $clientId;

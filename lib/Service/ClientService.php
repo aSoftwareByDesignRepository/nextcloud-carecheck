@@ -20,7 +20,10 @@ class ClientService
 	) {
 	}
 
-	/** Payload: {name, street, zip, city, contacts[], risks[], accessNote} — all encrypted. */
+/**
+	 * Payload: {name, street, zip, city, contacts[], risks[], accessNote} — all encrypted.
+	 * @param array<string, mixed> $payload
+	 */
 	public function create(string $actorRef, array $payload, ?string $requiresQual = null): Client
 	{
 		$this->acl->assertStaff($actorRef);
@@ -39,7 +42,7 @@ class ClientService
 		}
 		$c = new Client();
 		$c->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName($name)));
-		$c->setPayloadEnc($this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE)));
+		$c->setPayloadEnc($this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)));
 		$c->setRequiresQual($requiresQual);
 		$c->setPrimaryRef($this->refOrNull($payload['primary_ref'] ?? null));
 		$c->setSubRef($this->refOrNull($payload['sub_ref'] ?? null));
@@ -56,7 +59,9 @@ class ClientService
 	{
 		$this->acl->assertStaff($actorRef);
 		$c = $this->clients->find($clientId);
-		if ($c === null) {
+		// already-archived collapses to the same uniform 404 as missing — a
+		// second DELETE must not succeed (repeat-delete contract).
+		if ($c === null || (int)$c->getActive() === 0) {
 			throw ApiException::notFound();
 		}
 		$c->setActive(0);
@@ -75,47 +80,64 @@ class ClientService
 		return $c;
 	}
 
-	/** Update client master data — CAS on revision, refs validated. */
+/**
+	 * Update client master data — CAS on revision, refs validated.
+	 * @param array<string, mixed> $payload
+	 */
 	public function update(string $actorRef, int $clientId, array $payload, ?int $baseRevision): Client
 	{
 		$this->acl->assertStaff($actorRef);
-		$c = $this->clients->find($clientId);
-		if ($c === null || (int)$c->getActive() === 0) {
-			throw ApiException::notFound();
-		}
-		if ($baseRevision === null || (int)$c->getRevision() !== $baseRevision) {
-			throw ApiException::conflict('Client changed — reload.');
-		}
-		if (isset($payload['name']) && trim((string)$payload['name']) === '') {
-			throw ApiException::validation('Validation failed.', ['name' => 'required']);
-		}
-		$existing = json_decode($this->crypto->decrypt((string)$c->getPayloadEnc()), true) ?? [];
-		foreach (array_keys($payload) as $k) {
-			if (str_starts_with((string)$k, '_')) {
-				unset($payload[$k]);
+		// Row lock before the revision check — CAS without it is a lost-update
+		// race (two writers read the same revision, both merge against it, and
+		// the second silently clobbers the first). Same lock order as
+		// JournalService: cck_client row first.
+		$this->db->beginTransaction();
+		try {
+			$lock = $this->db->prepare('SELECT id FROM `*PREFIX*cck_client` WHERE `id` = :id FOR UPDATE');
+			$lock->execute(['id' => $clientId]);
+			$c = $this->clients->find($clientId);
+			if ($c === null || (int)$c->getActive() === 0) {
+				throw ApiException::notFound();
 			}
-		}
-		$merged = array_merge($existing, $payload);
-		if (isset($payload['name'])) {
-			$c->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName((string)$payload['name'])));
-		}
-		$c->setPayloadEnc($this->crypto->encrypt(json_encode($merged, JSON_UNESCAPED_UNICODE)));
-		if (array_key_exists('primary_ref', $payload)) {
-			$c->setPrimaryRef($this->refOrNull($payload['primary_ref']));
-		}
-		if (array_key_exists('sub_ref', $payload)) {
-			$c->setSubRef($this->refOrNull($payload['sub_ref']));
-		}
-		if (isset($payload['requires_qual'])) {
-			$rq = $payload['requires_qual'];
-			if ($rq !== null && $rq !== '' && !in_array($rq, Constants::QUALS, true)) {
-				throw ApiException::validation('Validation failed.', ['requires_qual' => 'invalid']);
+			if ($baseRevision === null || (int)$c->getRevision() !== $baseRevision) {
+				throw ApiException::conflict('Client changed — reload.');
 			}
-			$c->setRequiresQual($rq !== '' ? $rq : null);
+			if (isset($payload['name']) && trim((string)$payload['name']) === '') {
+				throw ApiException::validation('Validation failed.', ['name' => 'required']);
+			}
+			$existing = json_decode($this->crypto->decrypt((string)$c->getPayloadEnc()), true) ?? [];
+			foreach (array_keys($payload) as $k) {
+				if (str_starts_with((string)$k, '_')) {
+					unset($payload[$k]);
+				}
+			}
+			$merged = array_merge($existing, $payload);
+			if (isset($payload['name'])) {
+				$c->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName((string)$payload['name'])));
+			}
+			$c->setPayloadEnc($this->crypto->encrypt(json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)));
+			if (array_key_exists('primary_ref', $payload)) {
+				$c->setPrimaryRef($this->refOrNull($payload['primary_ref']));
+			}
+			if (array_key_exists('sub_ref', $payload)) {
+				$c->setSubRef($this->refOrNull($payload['sub_ref']));
+			}
+			if (isset($payload['requires_qual'])) {
+				$rq = $payload['requires_qual'];
+				if ($rq !== null && $rq !== '' && !in_array($rq, Constants::QUALS, true)) {
+					throw ApiException::validation('Validation failed.', ['requires_qual' => 'invalid']);
+				}
+				$c->setRequiresQual($rq !== '' ? $rq : null);
+			}
+			$c->setRevision((int)$c->getRevision() + 1);
+			$c->setUpdatedAt(new \DateTime());
+			$c = $this->clients->update($c);
+			$this->db->commit();
+			return $c;
+		} catch (\Throwable $th) {
+			$this->db->rollBack();
+			throw $th;
 		}
-		$c->setRevision((int)$c->getRevision() + 1);
-		$c->setUpdatedAt(new \DateTime());
-		return $this->clients->update($c);
 	}
 
 	/** Typed staff refs only — uid:{uid} or member:{id}, never a bare id. */
@@ -136,6 +158,9 @@ class ClientService
 	}
 
 	/** @return array{id:int,requiresQual:?string,payload:array} */
+	/**
+	 * @return array{id:int,requiresQual:?string,primaryRef:?string,subRef:?string,isDemo:bool,teamId:?int,revision:int,payload:array<string,mixed>}
+	 */
 	public function hydrated(Client $c): array
 	{
 		return [

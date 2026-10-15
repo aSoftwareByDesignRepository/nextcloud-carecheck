@@ -6,6 +6,32 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int|null getTourId()
+ * @method void setTourId(int|null $tourId)
+ * @method int|null getClientId()
+ * @method void setClientId(int|null $clientId)
+ * @method int|null getOrderHint()
+ * @method void setOrderHint(int|null $orderHint)
+ * @method int|null getWinStart()
+ * @method void setWinStart(int|null $winStart)
+ * @method int|null getWinEnd()
+ * @method void setWinEnd(int|null $winEnd)
+ * @method string|null getKind()
+ * @method void setKind(string|null $kind)
+ * @method string|null getExecutorRef()
+ * @method void setExecutorRef(string|null $executorRef)
+ * @method string|null getStatus()
+ * @method void setStatus(string|null $status)
+ * @method string|null getSkipReasonCode()
+ * @method void setSkipReasonCode(string|null $skipReasonCode)
+ * @method string|null getTimeKind()
+ * @method void setTimeKind(string|null $timeKind)
+ * @method int|null getToleranceMin()
+ * @method void setToleranceMin(int|null $toleranceMin)
+ * @method string|null getLocText()
+ * @method void setLocText(string|null $locText)
+ */
 class TourStop extends Entity
 {
 	protected $tourId;

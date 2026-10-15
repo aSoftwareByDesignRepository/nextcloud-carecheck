@@ -67,6 +67,10 @@ class ClientImportService
 				$key = $this->dupKey($r['name'], $r['street']);
 				if (isset($existing[$key])) {
 					$row['status'] = 'duplicate';
+				} else {
+					// commit() creates the first occurrence and skips later
+					// same-key rows — preview must predict that identically
+					$existing[$key] = true;
 				}
 			}
 			$out[] = $row;
@@ -93,7 +97,8 @@ class ClientImportService
 		foreach ($parsed['rows'] as $i => $r) {
 			$rowNo = $i + 2;
 			if (mb_strlen($r['name']) > 190 || mb_strlen($r['street']) > 190
-				|| mb_strlen($r['zip']) > 20 || mb_strlen($r['city']) > 100) {
+				|| mb_strlen($r['zip']) > 20 || mb_strlen($r['city']) > 100
+				|| mb_strlen($r['accessNote']) > 1000) {
 				$errors[] = $rowNo;
 				continue;
 			}
@@ -134,6 +139,9 @@ class ClientImportService
 			return ['error' => 'empty'];
 		}
 		$fh = fopen('php://temp', 'r+');
+		if ($fh === false) {
+			return ['error' => 'io'];
+		}
 		fwrite($fh, $csv);
 		rewind($fh);
 		$header = fgetcsv($fh, 0, ';', '"', '');
@@ -143,7 +151,7 @@ class ClientImportService
 			$header = fgetcsv($fh, 0, ',', '"', '');
 			$delim = ',';
 		}
-		if ($header === false || count($header) < 1) {
+		if ($header === false) {
 			fclose($fh);
 			return ['error' => 'no_header'];
 		}

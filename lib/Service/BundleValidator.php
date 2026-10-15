@@ -13,6 +13,9 @@ use OCA\CareCheck\Exception\ApiException;
  */
 final class BundleValidator
 {
+	/**
+	 * @param array<string, mixed> $in
+	 */
 	public static function idemKey(array $in): string
 	{
 		$k = (string)($in['idem_key'] ?? '');
@@ -22,6 +25,9 @@ final class BundleValidator
 		return $k;
 	}
 
+	/**
+	 * @param array<string, mixed> $in
+	 */
 	public static function strictId(array $in, string $field): ?int
 	{
 		$raw = $in[$field] ?? null;
@@ -34,7 +40,10 @@ final class BundleValidator
 		return (int)$raw;
 	}
 
-	/** Validate task rows: status enum + reason_code for refused/not_done. */
+/**
+	 * Validate task rows: status enum + reason_code for refused/not_done.
+	 * @param array<string, mixed> $fields
+	 */
 	public static function tasks(mixed $raw, array &$fields): array
 	{
 		$tasks = is_array($raw) ? $raw : [];
@@ -52,7 +61,11 @@ final class BundleValidator
 		return $tasks;
 	}
 
-	/** Signature state/payload/signer consistency + content sniff + size cap. */
+/**
+	 * Signature state/payload/signer consistency + content sniff + size cap.
+	 * @param array<string, mixed> $in
+	 * @param array<string, mixed> $fields
+	 */
 	public static function signature(array $in, array &$fields): ?string
 	{
 		$state = (string)($in['sig_state'] ?? 'none');
@@ -84,7 +97,10 @@ final class BundleValidator
 		return str_starts_with($raw, "\x89PNG\r\n\x1a\n") || str_starts_with($raw, "\xff\xd8\xff");
 	}
 
-	/** Client-supplied geo is honored only when the provider toggle is on. */
+/**
+	 * Client-supplied geo is honored only when the provider toggle is on.
+	 * @param array<string, mixed> $in
+	 */
 	public static function geo(array $in, bool $allowed): ?array
 	{
 		if (!$allowed || !isset($in['geo']['lat'], $in['geo']['lon'])) {

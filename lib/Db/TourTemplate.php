@@ -6,6 +6,22 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string|null getName()
+ * @method void setName(string|null $name)
+ * @method string|null getWeekdaySet()
+ * @method void setWeekdaySet(string|null $weekdaySet)
+ * @method string|null getLeadRef()
+ * @method void setLeadRef(string|null $leadRef)
+ * @method string|null getStatus()
+ * @method void setStatus(string|null $status)
+ * @method int|null getRevision()
+ * @method void setRevision(int|null $revision)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ * @method \DateTime getUpdatedAt()
+ * @method void setUpdatedAt(\DateTime|null $updatedAt)
+ */
 class TourTemplate extends Entity
 {
 	protected $name;

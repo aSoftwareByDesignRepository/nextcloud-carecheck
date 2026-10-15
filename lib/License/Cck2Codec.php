@@ -65,7 +65,7 @@ final class Cck2Codec
 			return null;
 		}
 
-		if (!self::validatePayloadFields($payload)) {
+		if (!is_array($payload) || !self::validatePayloadFields($payload)) {
 			return null;
 		}
 
@@ -179,6 +179,10 @@ final class Cck2Codec
 			/** @var array<string, mixed>|null $payload */
 			$payload = json_decode($payloadBytes, true, 16, JSON_THROW_ON_ERROR);
 		} catch (\JsonException) {
+			return self::ERROR_INVALID_PAYLOAD;
+		}
+
+		if (!is_array($payload)) {
 			return self::ERROR_INVALID_PAYLOAD;
 		}
 

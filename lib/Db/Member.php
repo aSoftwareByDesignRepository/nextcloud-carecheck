@@ -6,6 +6,18 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string|null getDisplayName()
+ * @method void setDisplayName(string|null $displayName)
+ * @method string|null getQualification()
+ * @method void setQualification(string|null $qualification)
+ * @method int|null getActive()
+ * @method void setActive(int|null $active)
+ * @method int|null getTeamId()
+ * @method void setTeamId(int|null $teamId)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ */
 class Member extends Entity
 {
 	protected $displayName;

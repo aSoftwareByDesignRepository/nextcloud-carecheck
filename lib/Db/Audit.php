@@ -6,6 +6,18 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string|null getActorRef()
+ * @method void setActorRef(string|null $actorRef)
+ * @method int|null getClientId()
+ * @method void setClientId(int|null $clientId)
+ * @method string|null getAction()
+ * @method void setAction(string|null $action)
+ * @method string|null getDetail()
+ * @method void setDetail(string|null $detail)
+ * @method \DateTime getTs()
+ * @method void setTs(\DateTime|null $ts)
+ */
 class Audit extends Entity
 {
 	protected $actorRef;

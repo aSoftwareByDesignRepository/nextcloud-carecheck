@@ -245,7 +245,7 @@ test('spec §7.2 views: catalog, client detail, tours editor, absences, exports,
     page.locator('[data-cck-journal-form] [type="submit"]').click(),
   ])
   await expect(page.locator('[data-cck-journal]')).toContainText(`E2E Protokollnotiz ${TS}`)
-  await expect(page.locator('[data-cck-journal]')).toContainText('manual_note')
+  await expect(page.locator('[data-cck-journal]')).toContainText('Manual note') // localized label — never the raw token
   await axe(page, 'client detail')
 
   // Tours editor: create a template with a deadline stop through the UI

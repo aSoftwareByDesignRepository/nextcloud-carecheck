@@ -6,6 +6,12 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string|null getName()
+ * @method void setName(string|null $name)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ */
 class Team extends Entity
 {
 	protected $name;

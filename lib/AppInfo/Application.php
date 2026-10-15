@@ -6,7 +6,9 @@ namespace OCA\CareCheck\AppInfo;
 
 use OCP\Lock\ILockingProvider;
 use OCP\App\IAppManager;
+use OCA\CareCheck\Service\AclService;
 use OCA\CareCheck\Service\UpgradeBackupService;
+use OCA\CareCheck\Support\NavGate;
 use OCA\CareCheck\Repair\BackupBeforeUpdate;
 use OCP\Files\IRootFolder;
 use OCA\CareCheck\Repair\EnsureCareCheckSchema;
@@ -86,5 +88,16 @@ class Application extends App implements IBootstrap
 
 	public function boot(IBootContext $context): void
 	{
+		$app = $context->getAppContainer();
+		// Menu entry only for users with app access — in restricted mode the
+		// door is a uniform 404, so the entry must not disclose existence.
+		NavGate::register(
+			$app,
+			'carecheck.page.index',
+			'app.svg',
+			'CareCheck',
+			10,
+			static fn(string $uid): bool => $app->get(AclService::class)->hasAppAccess($uid),
+		);
 	}
 }

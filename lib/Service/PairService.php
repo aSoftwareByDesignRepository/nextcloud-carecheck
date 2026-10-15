@@ -53,12 +53,13 @@ class PairService
 		$p->setMemberId($memberId);
 		$p->setKind('member');
 		$p->setCodeHash(hash('sha256', $code));
-		$p->setCodeExpires((new \DateTime())->modify('+' . max(1, $this->settings->getInt('pair_code_ttl_min')) . ' minutes'));
+		$codeExpires = (new \DateTime())->modify('+' . max(1, $this->settings->getInt('pair_code_ttl_min')) . ' minutes');
+		$p->setCodeExpires($codeExpires);
 		$p->setCodeUsed(0);
 		$p->setRevoked(0);
 		$p->setCreatedAt(new \DateTime());
 		$p = $this->pairs->insert($p);
-		return ['code' => $code, 'expiresAt' => $p->getCodeExpires()->format(\DateTimeInterface::ATOM)];
+		return ['code' => $code, 'expiresAt' => $codeExpires->format(\DateTimeInterface::ATOM)];
 	}
 
 	/**

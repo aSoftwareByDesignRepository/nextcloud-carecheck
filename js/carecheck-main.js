@@ -22,6 +22,45 @@
 		untyped: function () { return tr('Use member:ID or uid:NAME.'); },
 	};
 
+	// Machine tokens must never reach the UI — every enum the API returns
+	// has a localized label; unknown tokens fall back to the raw string.
+	var NOTICE_KIND = {
+		incident: 'Incident', supply_needed: 'Supply needed',
+		plan_change_proposal: 'Plan change proposal', info: 'Info',
+	};
+	var ABSENCE_KIND = { sick: 'Sick', vacation: 'Vacation', other: 'Other' };
+	var JOURNAL_TYPE = {
+		manual_note: 'Manual note', visit_done: 'Visit completed', visit_rejected: 'Visit rejected',
+		visit_corrected: 'Visit corrected', briefing_shown: 'Briefing shown', checkin: 'Check-in',
+		stop_skipped: 'Stop skipped', group_session_open: 'Group session started',
+		group_session_close: 'Group session ended', digest: 'Digest sent', export: 'Export created',
+		photo_add: 'Photo added', photo_del: 'Photo deleted', voicenote_add: 'Voice note added',
+		voicenote_transcribed: 'Voice note transcribed',
+	};
+	function tokenLabel(map, k) { return map[k] !== undefined ? tr(map[k]) : k; }
+
+	// Shared styled confirm — destructive actions ask once via a real
+	// <dialog> (localized buttons, Escape-safe), never window.confirm.
+	function confirmAsk(text, okLabel) {
+		var dlg = document.querySelector('[data-cck-confirm-dialog]');
+		// ds-allow-native-fallback: <dialog> element absent on this page
+		if (!dlg) { return Promise.resolve(window.confirm(text)); }
+		dlg.querySelector('[data-cck-confirm-text]').textContent = text;
+		var ok = dlg.querySelector('[data-cck-confirm-ok]');
+		ok.textContent = okLabel || tr('Confirm');
+		return new Promise(function (resolve) {
+			var settled = false;
+			var done = function (v) { if (settled) { return; } settled = true; dlg.close(); resolve(v); };
+			dlg.querySelector('[data-cck-confirm-cancel]').onclick = function () { done(false); };
+			ok.onclick = function () { done(true); };
+			dlg.onkeydown = function (ev) { if (ev.key === 'Escape') { ev.preventDefault(); done(false); } };
+			dlg.onclose = function () { done(false); };
+			dlg._invoker = document.activeElement;
+			dlg.showModal();
+			ok.focus();
+		});
+	}
+
 	// Canonical shared renderer (DS-7): server sends stable codes in `fields`,
 	// we map them to localized text, CheckFieldErrors paints aria-invalid +
 	// inline .cck-field-error + focuses the first offender + clears on edit.
@@ -248,7 +287,10 @@
 		if (!rm) { return; }
 		var parts = rm.dataset.cckTeamRm.split(':');
 		api('/api/teams/' + parts[0] + '/lead/' + encodeURIComponent(parts[1]), { method: 'DELETE' })
-			.then(function (r) { if (r.success) { loadTeams(); } });
+			.then(function (r) {
+				if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+				loadTeams();
+			});
 	});
 	document.addEventListener('submit', function (e) {
 		if (!e.target.matches('[data-cck-team-form]')) { return; }
@@ -288,6 +330,8 @@
 		if (!slot.firstElementChild) {
 			slot.appendChild(tpl.content.cloneNode(true));
 			slot.querySelectorAll('[data-cck-refpick]').forEach(buildRefPick);
+			// gate until the first hydrate lands — see gateSettingsForms
+			if (!settingsReady) { slot.querySelectorAll('[data-cck-settings-form] [type="submit"]').forEach(function (b) { b.disabled = true; }); }
 			mountedSettings[sec] = true;
 		}
 	}
@@ -327,25 +371,46 @@
 
 	// ---------------- coverage board ----------------
 	var templateNames = null;
+	var boardDate = today();
+	function isoShift(days) {
+		var p = boardDate.split('-');
+		var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+		d.setDate(d.getDate() + days);
+		return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+	}
 	function tourLabel(t) {
 		var name = (templateNames && t.templateId && templateNames[t.templateId]) || null;
 		var exec = t.executorRef || tr('Unassigned');
 		return name ? name + ' — ' + exec : exec;
 	}
+	var STOP_STATUS = {
+		pending: ['cck-badge--info', 'planned'],
+		in_progress: ['cck-badge--warning', 'in progress'],
+		done: ['cck-badge--success', 'done'],
+		skipped: ['cck-badge--warning', 'skipped'],
+		uncovered: ['cck-badge--danger', 'uncovered'],
+	};
+	function stopBadge(status) {
+		var s = STOP_STATUS[status] || ['cck-badge--info', status || 'planned'];
+		return '<span class="cck-badge ' + s[0] + '"><span class="cck-badge__dot" aria-hidden="true"></span>' + esc(tr(s[1])) + '</span>';
+	}
+	function stopUncovered(s) { return s.status === 'uncovered' || !s.executorRef; }
 	function loadBoard() {
-		document.querySelector('[data-cck-today]').textContent = today();
+		var dateInput = document.querySelector('[data-cck-board-date]');
+		if (dateInput && dateInput.value !== boardDate) { dateInput.value = boardDate; }
 		var namesReady = templateNames
 			? Promise.resolve()
 			: api('/api/tour-templates').then(function (r) {
 				templateNames = {};
 				if (r.success) { ((r.data && r.data.templates) || []).forEach(function (t) { templateNames[t.id] = t.name; }); }
 			});
-		Promise.all([namesReady, api('/api/coverage/' + today())]).then(function (res) {
+		Promise.all([namesReady, api('/api/coverage/' + boardDate)]).then(function (res) {
 			var r = res[1];
 			var el = document.querySelector('[data-cck-board]');
 			var uncoveredEl = document.querySelector('[data-cck-uncovered]');
 			var uncoveredList = document.querySelector('[data-cck-uncovered-list]');
-			if (!r.success) { el.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; return; }
+			var statsEl = document.querySelector('[data-cck-stats]');
+			if (!r.success) { el.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; if (statsEl) { statsEl.hidden = true; } return; }
 			var tours = r.data.tours || [];
 			var cronBanner = document.querySelector('[data-cck-cron-banner]');
 			if (cronBanner) { cronBanner.hidden = !r.data.cronStale; }
@@ -358,29 +423,51 @@
 
 			// uncovered queue (spec: never invisible)
 			var uncovered = [];
+			var counts = { total: 0, uncovered: 0, active: 0, done: 0 };
 			tours.forEach(function (t) {
 				t.stops.forEach(function (s) {
-					if (s.status === 'uncovered' || !s.executorRef) { uncovered.push(s); }
+					counts.total++;
+					var isUncovered = stopUncovered(s);
+					if (isUncovered) { uncovered.push(s); counts.uncovered++; }
+					else if (s.status === 'done' || s.status === 'skipped') { counts.done++; }
+					else { counts.active++; }
 				});
 			});
+			if (statsEl) {
+				statsEl.hidden = counts.total === 0 && uncovered.length === 0;
+				['total', 'uncovered', 'active', 'done'].forEach(function (k) {
+					var n = statsEl.querySelector('[data-cck-stat="' + k + '"]');
+					if (n) { n.textContent = String(counts[k]); }
+				});
+			}
 			uncoveredEl.hidden = uncovered.length === 0;
 			uncoveredList.innerHTML = uncovered.map(function (s) {
+				var who = s.clientId
+					? '<a class="cck-link" href="#/client/' + s.clientId + '">' + esc(s.clientName || ('#' + s.clientId)) + '</a>'
+					: '<span>' + esc(s.locText || '') + '</span>';
 				return '<li class="cck-stop cck-stop--uncovered"><span class="cck-stop-time">' + fmtMin(s.winStart) + '</span>' +
-					'<span>' + esc(s.clientName || s.locText || ('#' + (s.clientId || ''))) + '</span>' +
+					who +
 					'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-assign="' + s.id + '">' + esc(tr('Assign…')) + '</button></li>';
 			}).join('');
 
-			el.innerHTML = tours.length === 0 ? '<p class="cck-empty">' + esc(tr('No tours today.')) + '</p>' : tours.map(function (t) {
-				return '<section class="cck-tour"><h2>' + esc(tourLabel(t)) + '</h2><ul>' +
+			el.innerHTML = tours.length === 0 ? '<div class="cck-empty-state cck-empty"><p class="cck-empty-state__title">' + esc(tr('No tours on this day.')) + '</p>' +
+				'<p class="cck-empty-state__text">' + esc(tr('Pick another day above, or generate tours from published templates.')) + '</p></div>'
+				: tours.map(function (t) {
+				var tDone = t.stops.filter(function (s) { return s.status === 'done' || s.status === 'skipped'; }).length;
+				return '<section class="cck-tour"><header class="cck-tour__head"><h2>' + esc(tourLabel(t)) + '</h2>' +
+					'<span class="cck-tour__progress">' + tDone + '/' + t.stops.length + ' ' + esc(tr('done')) + '</span></header><ul>' +
 					t.stops.map(function (s) {
 						var badge = s.timeKind === 'deadline' ? tr('by') + ' ' + fmtMin(s.winEnd)
 							: s.timeKind === 'fixed' ? tr('at') + ' ' + fmtMin(s.winStart)
 							: fmtMin(s.winStart) + '–' + fmtMin(s.winEnd);
+						var who = s.clientId
+							? '<a class="cck-stop__who cck-link" href="#/client/' + s.clientId + '">' + esc(s.clientName || ('#' + s.clientId)) + '</a>'
+							: '<span class="cck-stop__who">' + esc(s.locText || '') + '</span>';
 						return '<li class="cck-stop cck-stop--' + esc(s.status) + '">' +
 							'<span class="cck-stop-time">' + esc(badge) + '</span>' +
-							'<span>' + esc(s.clientName || s.locText || ('#' + (s.clientId || ''))) + '</span>' +
+							who +
 							(s.isDemo ? ' <em class="cck-demo">' + esc(tr('Practice')) + '</em>' : '') +
-							'<span class="cck-chip">' + esc(s.status) + '</span>' +
+							stopBadge(s.status) +
 							((s.status === 'uncovered' || !s.executorRef) ? ' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-assign="' + s.id + '">' + esc(tr('Assign…')) + '</button>' : '') +
 							'</li>';
 					}).join('') + '</ul></section>';
@@ -391,6 +478,18 @@
 			});
 		});
 	}
+	// date navigation — prev/next/today + direct pick; shared pattern, board only
+	(function () {
+		var input = document.querySelector('[data-cck-board-date]');
+		if (!input) { return; }
+		input.value = boardDate;
+		document.querySelector('[data-cck-prev-day]').addEventListener('click', function () { boardDate = isoShift(-1); loadBoard(); });
+		document.querySelector('[data-cck-next-day]').addEventListener('click', function () { boardDate = isoShift(1); loadBoard(); });
+		document.querySelector('[data-cck-today-btn]').addEventListener('click', function () { boardDate = today(); loadBoard(); });
+		input.addEventListener('change', function () {
+			if (/^\d{4}-\d{2}-\d{2}$/.test(input.value)) { boardDate = input.value; loadBoard(); }
+		});
+	})();
 
 	// ---------------- assign dialog (DS-4: picker, never raw ref typing) --
 	var assignStopId = null;
@@ -401,6 +500,7 @@
 		pick._refpick.clear();
 		var btn = dlg.querySelector('[data-cck-assign-confirm]');
 		btn.disabled = true;
+		dlg._invoker = document.activeElement;
 		dlg.showModal();
 		var search = pick.querySelector('.cck-refpick__input');
 		if (search) { search.focus(); }
@@ -414,6 +514,7 @@
 		var note = resolveDlg.querySelector('[data-cck-resolve-note]');
 		note.value = '';
 		note.removeAttribute('aria-invalid');
+		resolveDlg._invoker = document.activeElement;
 		resolveDlg.showModal();
 		note.focus();
 	}
@@ -439,10 +540,16 @@
 	}
 
 	// dialogs close on Escape at the dialog level — never trap focus
-	// or swallow the key inside a child control.
+	// or swallow the key inside a child control. WCAG 2.4.3: close
+	// returns focus to the invoking control.
 	document.querySelectorAll('dialog.cck-dialog').forEach(function (dlg) {
 		dlg.addEventListener('keydown', function (ev) {
 			if (ev.key === 'Escape') { ev.preventDefault(); dlg.close(); }
+		});
+		dlg.addEventListener('close', function () {
+			var back = dlg._invoker;
+			dlg._invoker = null;
+			if (back && document.contains(back) && typeof back.focus === 'function') { back.focus(); }
 		});
 	});
 
@@ -476,20 +583,55 @@
 	});
 
 	// ---------------- clients ----------------
+	var QUAL_LABEL = { hilfskraft: 'Care assistant', betreuer: 'Caregiver', fachkraft: 'Qualified caregiver' };
+	function qualLabel(q) { return QUAL_LABEL[q] ? tr(QUAL_LABEL[q]) : (q ? esc(q) : tr('Any')); }
+	var clientsCache = [];
+	var clientsFilter = { q: '', qual: '' };
+	function renderClients() {
+		var tb = document.querySelector('[data-cck-clients] tbody');
+		var count = document.querySelector('[data-cck-clients-count]');
+		var q = (clientsFilter.q || '').toLowerCase();
+		var rows = clientsCache.filter(function (c) {
+			if (clientsFilter.qual && c.requiresQual !== clientsFilter.qual) { return false; }
+			if (q && (c.name || '').toLowerCase().indexOf(q) < 0 && (c.street || '').toLowerCase().indexOf(q) < 0) { return false; }
+			return true;
+		});
+		if (count) {
+			count.textContent = rows.length === clientsCache.length
+				? rows.length + ' ' + tr('clients')
+				: rows.length + ' / ' + clientsCache.length + ' ' + tr('clients');
+		}
+		tb.innerHTML = rows.map(function (c) {
+			return '<tr><td data-cell="' + esc(tr('Name')) + '"><a href="#/client/' + c.id + '">' + esc(c.name) + '</a></td>' +
+				'<td data-cell="' + esc(tr('Street')) + '">' + esc(c.street) + '</td>' +
+				'<td data-cell="' + esc(tr('Qualification')) + '">' + qualLabel(c.requiresQual) + '</td>' +
+				'<td><button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-archive="' + c.id + '">' + esc(tr('Archive')) + '</button></td></tr>';
+		}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(clientsCache.length ? tr('No clients match the filter.') : tr('No clients yet — add the first one below.')) + '</td></tr>';
+		tb.querySelectorAll('[data-cck-archive]').forEach(function (b) {
+			b.onclick = function () {
+				confirmAsk(tr('Archive this client? Active tours and records stay readable, but no new stops are planned.'), tr('Archive'))
+					.then(function (yes) {
+						if (!yes) { return; }
+						api('/api/clients/' + b.dataset.cckArchive, { method: 'DELETE' }).then(function (r) {
+							if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+							loadClients();
+						});
+					});
+			};
+		});
+	}
 	function loadClients() {
 		api('/api/clients').then(function (r) {
 			var tb = document.querySelector('[data-cck-clients] tbody');
 			if (!r.success) { tb.innerHTML = '<tr><td colspan="4" class="cck-empty">' + esc(r.message || tr('No access.')) + '</td></tr>'; return; }
-			tb.innerHTML = ((r.data && r.data.clients) || []).map(function (c) {
-				return '<tr><td><a href="#/client/' + c.id + '">' + esc(c.name) + '</a></td><td>' + esc(c.street) + '</td><td>' + esc(c.requiresQual || '—') + '</td>' +
-					'<td><button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-archive="' + c.id + '">' + esc(tr('Archive')) + '</button></td></tr>';
-			}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(tr('No clients yet — add the first one above.')) + '</td></tr>';
-			tb.querySelectorAll('[data-cck-archive]').forEach(function (b) {
-				b.onclick = function () {
-					if (!window.confirm(tr('Archive this client? Active tours and records stay readable, but no new stops are planned.'))) { return; }
-					api('/api/clients/' + b.dataset.cckArchive, { method: 'DELETE' }).then(loadClients);
-				};
-			});
+			clientsCache = (r.data && r.data.clients) || [];
+			renderClients();
+		});
+	}
+	if (window.CheckViewComponents) {
+		CheckViewComponents.bindListFilter(document.querySelector('[data-cck-clients-filter]'), function (v) {
+			clientsFilter = { q: v.q || '', qual: v.qual || '' };
+			renderClients();
 		});
 	}
 	document.querySelector('[data-cck-client-form]').addEventListener('submit', function (e) {
@@ -507,6 +649,9 @@
 	// ---------------- client detail ----------------
 	function loadClientDetail(id) {
 		currentClient = id;
+		// stale-data guard: while the fetch runs the previous client's record
+		// must not sit under the new URL.
+		document.querySelector('[data-cck-client-name]').textContent = tr('Loading…');
 		api('/api/clients/' + id).then(function (r) {
 			if (!r.success) { notify(r.message || tr('Not found.'), true); location.hash = '#/clients'; return; }
 			var c = r.data.client;
@@ -535,6 +680,19 @@
 		});
 	}
 	document.querySelector('[data-cck-client-back]').addEventListener('click', function () { location.hash = '#/clients'; });
+	// in-page section chips — long detail page gets a mini-IA instead of a wall
+	document.querySelectorAll('[data-cck-section]').forEach(function (chip) {
+		chip.addEventListener('click', function () {
+			var target = document.getElementById('cck-sec-' + chip.dataset.cckSection);
+			if (!target) { return; }
+			target.scrollIntoView({ block: 'start' });
+			target.focus({ preventScroll: true });
+			document.querySelectorAll('[data-cck-section]').forEach(function (c) {
+				c.classList.toggle('active', c === chip);
+				if (c === chip) { c.setAttribute('aria-current', 'true'); } else { c.removeAttribute('aria-current'); }
+			});
+		});
+	});
 	document.querySelector('[data-cck-client-edit]').addEventListener('submit', function (e) {
 		e.preventDefault();
 		var f = e.target;
@@ -591,7 +749,7 @@
 			var el = document.querySelector('[data-cck-journal]');
 			if (!r.success) { el.innerHTML = '<li class="cck-empty">' + esc(r.message || tr('No access.')) + '</li>'; return; }
 			el.innerHTML = ((r.data && r.data.entries) || []).map(function (en) {
-				return '<li><strong>' + esc(en.type) + '</strong> — ' + esc(en.actorRef) + ' <em>' + esc(en.ts.slice(0, 16).replace('T', ' ')) + '</em>' +
+				return '<li><strong>' + esc(tokenLabel(JOURNAL_TYPE, en.type)) + '</strong> — ' + esc(en.actorRef) + ' <em>' + esc(en.ts.slice(0, 16).replace('T', ' ')) + '</em>' +
 					(en.text ? ' — ' + esc(en.text) : '') + '</li>';
 			}).join('') || '<li class="cck-empty">' + esc(tr('No entries yet.')) + '</li>';
 		});
@@ -656,7 +814,7 @@
 			api('/api/clients/' + currentClient + '/photos', { method: 'POST', body: JSON.stringify({ mime: file.type, data_b64: b64 }) })
 				.then(function (r) {
 					if (r.success) { notify(tr('Photo stored.')); loadPhotos(currentClient, true); }
-					else { reportForm(e.target.closest('label'), r); }
+					else { notify(r.message || tr('Upload failed.'), true); }
 				});
 			e.target.value = '';
 		};
@@ -665,22 +823,85 @@
 	document.querySelector('[data-cck-photos]').addEventListener('click', function (e) {
 		var btn = e.target.closest('[data-cck-photo-del]');
 		if (!btn) { return; }
-		if (!window.confirm(tr('Delete this photo permanently? It is removed from the encrypted store.'))) { return; }
-		api('/api/clients/' + currentClient + '/photos/' + btn.dataset.cckPhotoDel, { method: 'DELETE' })
-			.then(function (r) {
-				if (r.success) { notify(tr('Photo deleted.')); loadPhotos(currentClient, true); }
-				else { notify(r.message || tr('Delete failed.'), true); }
+		confirmAsk(tr('Delete this photo permanently? It is removed from the encrypted store.'), tr('Delete'))
+			.then(function (yes) {
+				if (!yes) { return; }
+				api('/api/clients/' + currentClient + '/photos/' + btn.dataset.cckPhotoDel, { method: 'DELETE' })
+					.then(function (r) {
+						if (r.success) { notify(tr('Photo deleted.')); loadPhotos(currentClient, true); }
+						else { notify(r.message || tr('Delete failed.'), true); }
+					});
 			});
 	});
 
 	// ---------------- tours ----------------
+	var templatesCache = [];
+	var tourStatusFilter = 'all';
+	function weekdayChips(set) {
+		var abbr = [tr('Mon'), tr('Tue'), tr('Wed'), tr('Thu'), tr('Fri'), tr('Sat'), tr('Sun')];
+		var days = String(set || '').split(',').map(function (x) { return parseInt(x.trim(), 10); })
+			.filter(function (d) { return d >= 1 && d <= 7; });
+		if (!days.length) { return esc(String(set || '—')); }
+		return days.map(function (d) {
+			return '<span class="cck-chip">' + esc(abbr[d - 1]) + '</span>';
+		}).join(' ');
+	}
+	function renderTours() {
+		var tb = document.querySelector('[data-cck-templates] tbody');
+		var count = document.querySelector('[data-cck-tours-count]');
+		var rows = templatesCache.filter(function (t) {
+			return tourStatusFilter === 'all' || t.status === tourStatusFilter;
+		});
+		if (count) {
+			count.textContent = rows.length === templatesCache.length
+				? rows.length + ' ' + tr('templates')
+				: rows.length + ' / ' + templatesCache.length + ' ' + tr('templates');
+		}
+		tb.innerHTML = rows.map(function (t) {
+			var statusBadge = t.status === 'published'
+				? '<span class="cck-badge cck-badge--success"><span class="cck-badge__dot" aria-hidden="true"></span>' + esc(tr('Published')) + '</span>'
+				: '<span class="cck-badge cck-badge--info"><span class="cck-badge__dot" aria-hidden="true"></span>' + esc(tr('Draft')) + '</span>';
+			return '<tr><td data-cell="' + esc(tr('Name')) + '"><strong>' + esc(t.name) + '</strong></td>' +
+				'<td data-cell="' + esc(tr('Weekdays')) + '">' + weekdayChips(t.weekdaySet) + '</td>' +
+				'<td data-cell="' + esc(tr('Status')) + '">' + statusBadge + '</td>' +
+				'<td><button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-tpl-edit="' + t.id + '">' + esc(tr('Edit')) + '</button> ' +
+				'<button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-tpl-del="' + t.id + '">' + esc(tr('Delete')) + '</button></td></tr>';
+		}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(templatesCache.length ? tr('No templates match the filter.') : tr('No tour templates yet — create the first one below.')) + '</td></tr>';
+		tb.querySelectorAll('[data-cck-tpl-edit]').forEach(function (b) {
+			b.onclick = function () { editTemplate(parseInt(b.dataset.cckTplEdit, 10)); };
+		});
+		tb.querySelectorAll('[data-cck-tpl-del]').forEach(function (b) {
+			b.onclick = function () {
+				confirmAsk(tr('Delete this tour template? Already generated tours for today and tomorrow stay unchanged.'), tr('Delete'))
+					.then(function (yes) {
+						if (!yes) { return; }
+						api('/api/tour-templates/' + b.dataset.cckTplDel, { method: 'DELETE' }).then(function (r) {
+							if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+							notify(tr('Template deleted.'));
+							resetTourForm();
+							loadTours();
+						});
+					});
+			};
+		});
+	}
+	if (window.CheckViewComponents) {
+		CheckViewComponents.pillGroup(document.querySelector('[data-cck-tour-filters]'), function (v) {
+			tourStatusFilter = v;
+			renderTours();
+		});
+	}
 	function loadTours() {
 		api('/api/tour-templates').then(function (r) {
 			var tb = document.querySelector('[data-cck-templates] tbody');
 			if (!r.success) { tb.innerHTML = '<tr><td colspan="3" class="cck-empty">' + esc(r.message || tr('No access.')) + '</td></tr>'; return; }
-			tb.innerHTML = ((r.data && r.data.templates) || []).map(function (t) {
-				return '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.weekdaySet) + '</td><td>' + esc(t.status) + '</td></tr>';
-			}).join('') || '<tr><td colspan="3" class="cck-empty">' + esc(tr('No tour templates yet — create the first one above.')) + '</td></tr>';
+			templatesCache = (r.data && r.data.templates) || [];
+			// keep the board's template-name cache fresh — it is built once
+			// from this same endpoint and would otherwise go stale after
+			// creating or renaming a template in this session.
+			templateNames = {};
+			templatesCache.forEach(function (t) { templateNames[t.id] = t.name; });
+			renderTours();
 		});
 	}
 	var PRESETS = null; // §7.2 Tageszeit presets — provider-configured via settings
@@ -705,7 +926,10 @@
 		}
 		return clientChoices;
 	}
-	document.querySelector('[data-cck-tour-add-stop]').addEventListener('click', function () {
+	// One stop row per click; every row carries a remove button so a stray
+	// "Add stop" never forces a full form reset. addStopRow(stop) also seeds
+	// rows when editing an existing template.
+	function addStopRow(stop) {
 		var box = document.querySelector('[data-cck-tour-stops]');
 		var row = document.createElement('div');
 		row.className = 'cck-tstop';
@@ -724,8 +948,10 @@
 			'<input name="ts_from" type="time" aria-label="' + esc(tr('From')) + '" hidden>' +
 			'<input name="ts_to" type="time" aria-label="' + esc(tr('To / deadline')) + '" hidden>' +
 			'<input name="ts_tol" type="number" min="0" max="240" placeholder="' + esc(tr('Tolerance min')) + '" inputmode="numeric" hidden aria-label="' + esc(tr('Tolerance minutes')) + '">' +
-			'<input name="ts_loc" maxlength="190" placeholder="' + esc(tr('Location (external)')) + '" hidden aria-label="' + esc(tr('Location')) + '">';
+			'<input name="ts_loc" maxlength="190" placeholder="' + esc(tr('Location (external)')) + '" hidden aria-label="' + esc(tr('Location')) + '">' +
+			'<button type="button" class="cck-btn cck-btn--ghost cck-btn--sm cck-tstop__rm" aria-label="' + esc(tr('Remove stop')) + '">×</button>';
 		box.appendChild(row);
+		row.querySelector('.cck-tstop__rm').onclick = function () { row.remove(); };
 		// Preset → fills the window; "custom" reveals explicit times + rule.
 		var presetSel = row.querySelector('[name=ts_preset]');
 		var applyPreset = function () {
@@ -743,6 +969,28 @@
 				});
 			}
 		};
+		var applyStop = function () {
+			if (!stop) { applyPreset(); return; }
+			presetSel.value = 'custom';
+			row.querySelector('[name=ts_timekind]').hidden = false;
+			row.querySelector('[name=ts_from]').hidden = false;
+			row.querySelector('[name=ts_to]').hidden = false;
+			row.querySelector('[name=ts_tol]').hidden = false;
+			row.querySelector('[name=ts_timekind]').value = stop.timeKind || 'window';
+			row.querySelector('[name=ts_from]').value = fmtMin(stop.winStart || 0);
+			row.querySelector('[name=ts_to]').value = fmtMin(stop.winEnd || 0);
+			row.querySelector('[name=ts_tol]').value = stop.toleranceMin === null || stop.toleranceMin === undefined ? '' : String(stop.toleranceMin);
+		};
+		var kindSel = row.querySelector('[name=ts_kind]');
+		var applyKind = function () {
+			var ext = kindSel.value === 'external';
+			row.querySelector('[name=ts_client]').closest('label').hidden = ext;
+			row.querySelector('[name=ts_loc]').hidden = !ext;
+		};
+		if (stop) {
+			kindSel.value = stop.kind === 'external' ? 'external' : 'client';
+			row.querySelector('[name=ts_loc]').value = stop.locText || '';
+		}
 		clientOptions().then(function (clients) {
 			var sel = row.querySelector('[name=ts_client]');
 			clients.forEach(function (c) {
@@ -752,17 +1000,48 @@
 				sel.appendChild(o);
 			});
 			if (clients.length === 0) { sel.options[0].textContent = tr('Add clients first.'); }
+			if (stop && stop.clientId) { sel.value = String(stop.clientId); }
 		});
 		presetSel.addEventListener('change', applyPreset);
-		var kindSel = row.querySelector('[name=ts_kind]');
-		var applyKind = function () {
-			var ext = kindSel.value === 'external';
-			row.querySelector('[name=ts_client]').closest('label').hidden = ext;
-			row.querySelector('[name=ts_loc]').hidden = !ext;
-		};
 		kindSel.addEventListener('change', applyKind);
-		applyPreset(); applyKind();
-	});
+		applyStop(); applyKind();
+	}
+	document.querySelector('[data-cck-tour-add-stop]').addEventListener('click', function () { addStopRow(null); });
+	// Edit mode: edit_id carries the template id + base revision for CAS.
+	var editingTemplate = null;
+	function resetTourForm() {
+		editingTemplate = null;
+		var f = document.querySelector('[data-cck-tour-form]');
+		f.elements.edit_id.value = '';
+		f.reset();
+		clearFormErrors(f);
+		document.querySelector('[data-cck-tour-stops]').innerHTML = '';
+		document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.clear();
+		document.querySelector('[data-cck-tour-submit]').textContent = tr('Save tour template');
+		document.querySelector('[data-cck-tour-form-title]').textContent = tr('New tour template');
+		document.querySelector('[data-cck-tour-cancel]').hidden = true;
+	}
+	function editTemplate(id) {
+		var t = templatesCache.find(function (x) { return x.id === id; });
+		if (!t) { return; }
+		resetTourForm();
+		editingTemplate = t;
+		var f = document.querySelector('[data-cck-tour-form]');
+		f.elements.edit_id.value = String(t.id);
+		f.elements.name.value = t.name || '';
+		String(t.weekdaySet || '').split(',').forEach(function (d) {
+			var cb = f.querySelector('input[name=wd][value="' + d.trim() + '"]');
+			if (cb) { cb.checked = true; }
+		});
+		document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.set(t.leadRef || '', t.leadRef || '');
+		f.elements.status.value = t.status || 'draft';
+		(t.stops || []).forEach(function (s) { addStopRow(s); });
+		document.querySelector('[data-cck-tour-submit]').textContent = tr('Update tour template');
+		document.querySelector('[data-cck-tour-form-title]').textContent = tr('Edit tour template');
+		document.querySelector('[data-cck-tour-cancel]').hidden = false;
+		f.scrollIntoView({ block: 'start' });
+	}
+	document.querySelector('[data-cck-tour-cancel]').addEventListener('click', resetTourForm);
 	document.querySelector('[data-cck-tour-form]').addEventListener('submit', function (e) {
 		e.preventDefault();
 		var f = e.target;
@@ -781,13 +1060,20 @@
 			};
 		});
 		var weekdays = Array.prototype.slice.call(f.querySelectorAll('input[name=wd]:checked')).map(function (el) { return parseInt(el.value, 10); });
+		var editId = f.elements.edit_id.value;
+		var body = {
+			name: f.elements.name.value, weekday_set: weekdays,
+			lead_ref: document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.value || null,
+			status: f.elements.status.value, stops: stops,
+		};
+		var url = '/api/tour-templates';
+		if (editId !== '') {
+			url += '/' + encodeURIComponent(editId);
+			body.base_revision = editingTemplate ? editingTemplate.revision : 0;
+		}
 		withBusy(submitBtn(f), function () {
-			return api('/api/tour-templates', { method: 'POST', body: JSON.stringify({
-				name: f.elements.name.value, weekday_set: weekdays,
-				lead_ref: document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.value || null,
-				status: f.elements.status.value, stops: stops,
-			}) }).then(function (r) {
-				if (r.success) { f.reset(); document.querySelector('[data-cck-tour-stops]').innerHTML = ''; notify(tr('Tour saved.')); loadTours(); }
+			return api(url, { method: editId === '' ? 'POST' : 'PUT', body: JSON.stringify(body) }).then(function (r) {
+				if (r.success) { resetTourForm(); notify(tr('Tour saved.')); loadTours(); }
 				else { reportForm(f, r); }
 			});
 		});
@@ -813,46 +1099,112 @@
 	document.querySelector('[data-cck-paircard-done]').addEventListener('click', function () {
 		document.querySelector('[data-cck-paircard]').hidden = true;
 	});
+	var membersCache = [];
+	var membersFilter = { q: '', qual: '' };
+	function renderMembers() {
+		var tb = document.querySelector('[data-cck-members] tbody');
+		var count = document.querySelector('[data-cck-members-count]');
+		var q = (membersFilter.q || '').toLowerCase();
+		var rows = membersCache.filter(function (m) {
+			if (membersFilter.qual && m.qualification !== membersFilter.qual) { return false; }
+			if (q && (m.displayName || '').toLowerCase().indexOf(q) < 0) { return false; }
+			return true;
+		});
+		if (count) {
+			count.textContent = rows.length === membersCache.length
+				? rows.length + ' ' + tr('members')
+				: rows.length + ' / ' + membersCache.length + ' ' + tr('members');
+		}
+		tb.innerHTML = rows.map(function (m) {
+			var nameCell = '<td data-cell="' + esc(tr('Name')) + '"><strong>' + esc(m.displayName) + '</strong>' +
+				(m.active ? '' : ' <span class="cck-badge cck-badge--info">' + esc(tr('Inactive')) + '</span>') + '</td>';
+			var actions = m.active
+				? '<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-member-edit="' + m.id + '">' + esc(tr('Edit')) + '</button> ' +
+				'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-pair="' + m.id + '">' + esc(tr('Pair code')) + '</button> ' +
+				'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-practice="' + m.id + '">' + esc(tr('Practice tour')) + '</button> ' +
+				'<button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-deact="' + m.id + '">' + esc(tr('Deactivate')) + '</button>'
+				: '';
+			return '<tr>' + nameCell +
+				'<td data-cell="' + esc(tr('Qualification')) + '">' + qualLabel(m.qualification) + '</td>' +
+				'<td data-cell="' + esc(tr('Team')) + '"><select class="cck-team-sel" data-cck-member-team="' + m.id + '" aria-label="' + esc(tr('Team')) + '">' + teamOptions(m.teamId) + '</select></td>' +
+				'<td>' + actions + '</td></tr>';
+		}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(membersCache.length ? tr('No members match the filter.') : tr('No members yet — add the first one below.')) + '</td></tr>';
+		tb.querySelectorAll('[data-cck-member-team]').forEach(function (sel) {
+			bindTeamSelect(sel, 'members', parseInt(sel.dataset.cckMemberTeam, 10));
+		});
+		tb.querySelectorAll('[data-cck-member-edit]').forEach(function (b) {
+			b.onclick = function () { editMember(parseInt(b.dataset.cckMemberEdit, 10)); };
+		});
+		tb.querySelectorAll('[data-cck-pair]').forEach(function (b) {
+			b.onclick = function () {
+				withBusy(b, function () {
+					return api('/api/members/' + b.dataset.cckPair + '/pair-code', { method: 'POST' }).then(function (r) {
+						if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+						showPairCard(r.data.code);
+					});
+				});
+			};
+		});
+		tb.querySelectorAll('[data-cck-practice]').forEach(function (b) {
+			b.onclick = function () {
+				withBusy(b, function () {
+					return api('/api/practice-tour', { method: 'POST', body: JSON.stringify({ member_id: b.dataset.cckPractice }) }).then(function (r) {
+						notify(r.success ? tr('Practice tour created.') : (r.message || tr('Invalid value.')), !r.success);
+					});
+				});
+			};
+		});
+		tb.querySelectorAll('[data-cck-deact]').forEach(function (b) {
+			b.onclick = function () {
+				confirmAsk(tr('Deactivate this member? Their device is unpaired and they keep no access.'), tr('Deactivate'))
+					.then(function (yes) {
+						if (!yes) { return; }
+						api('/api/members/' + b.dataset.cckDeact + '/deactivate', { method: 'POST' }).then(function (r) {
+							if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+							loadMembers();
+						});
+					});
+			};
+		});
+	}
+	var editingMemberId = null;
+	function resetMemberForm() {
+		editingMemberId = null;
+		var f = document.querySelector('[data-cck-member-form]');
+		f.elements.edit_id.value = '';
+		f.reset();
+		clearFormErrors(f);
+		document.querySelector('[data-cck-member-submit]').textContent = tr('Add member');
+		document.querySelector('[data-cck-member-form-title]').textContent = tr('Add member');
+		document.querySelector('[data-cck-member-cancel]').hidden = true;
+	}
+	function editMember(id) {
+		var m = membersCache.find(function (x) { return x.id === id; });
+		if (!m) { return; }
+		resetMemberForm();
+		editingMemberId = id;
+		var f = document.querySelector('[data-cck-member-form]');
+		f.elements.edit_id.value = String(id);
+		f.elements.display_name.value = m.displayName || '';
+		f.elements.qualification.value = m.qualification || 'hilfskraft';
+		document.querySelector('[data-cck-member-submit]').textContent = tr('Save changes');
+		document.querySelector('[data-cck-member-form-title]').textContent = tr('Edit member');
+		document.querySelector('[data-cck-member-cancel]').hidden = false;
+		f.scrollIntoView({ block: 'start' });
+		f.elements.display_name.focus();
+	}
+	if (window.CheckViewComponents) {
+		CheckViewComponents.bindListFilter(document.querySelector('[data-cck-members-filter]'), function (v) {
+			membersFilter = { q: v.q || '', qual: v.qual || '' };
+			renderMembers();
+		});
+	}
 	function loadMembers() {
 		api('/api/members').then(function (r) {
 			var tb = document.querySelector('[data-cck-members] tbody');
-			if (!r.success) { tb.innerHTML = '<tr><td colspan="3" class="cck-empty">' + esc(r.message || tr('No access.')) + '</td></tr>'; return; }
-			loadTeams().then(function () {
-			tb.innerHTML = ((r.data && r.data.members) || []).map(function (m) {
-				return '<tr><td>' + esc(m.displayName) + '</td><td>' + esc(m.qualification) + '</td>' +
-					'<td><select class="cck-team-sel" data-cck-member-team="' + m.id + '" aria-label="' + esc(tr('Team')) + '">' + teamOptions(m.teamId) + '</select></td>' +
-					'<td><button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-pair="' + m.id + '">' + esc(tr('Pair code')) + '</button> ' +
-					'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-practice="' + m.id + '">' + esc(tr('Practice tour')) + '</button> ' +
-					'<button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-deact="' + m.id + '">' + esc(tr('Deactivate')) + '</button></td></tr>';
-			}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(tr('No members yet — add the first one above.')) + '</td></tr>';
-			tb.querySelectorAll('[data-cck-member-team]').forEach(function (sel) {
-				bindTeamSelect(sel, 'members', parseInt(sel.dataset.cckMemberTeam, 10));
-			});
-			tb.querySelectorAll('[data-cck-pair]').forEach(function (b) {
-				b.onclick = function () {
-					withBusy(b, function () {
-						return api('/api/members/' + b.dataset.cckPair + '/pair-code', { method: 'POST' }).then(function (r) {
-							showPairCard(r.data.code);
-						});
-					});
-				};
-			});
-			tb.querySelectorAll('[data-cck-practice]').forEach(function (b) {
-				b.onclick = function () {
-					withBusy(b, function () {
-						return api('/api/practice-tour', { method: 'POST', body: JSON.stringify({ member_id: b.dataset.cckPractice }) }).then(function (r) {
-							notify(r.success ? tr('Practice tour created.') : (r.message || tr('Invalid value.')), !r.success);
-						});
-					});
-				};
-			});
-			tb.querySelectorAll('[data-cck-deact]').forEach(function (b) {
-				b.onclick = function () {
-					if (!window.confirm(tr('Deactivate this member? Their device is unpaired and they keep no access.'))) { return; }
-					api('/api/members/' + b.dataset.cckDeact + '/deactivate', { method: 'POST' }).then(loadMembers);
-				};
-			});
-			});
+			if (!r.success) { tb.innerHTML = '<tr><td colspan="4" class="cck-empty">' + esc(r.message || tr('No access.')) + '</td></tr>'; return; }
+			membersCache = (r.data && r.data.members) || [];
+			loadTeams().then(renderMembers);
 		});
 		loadAbsences();
 	}
@@ -861,17 +1213,33 @@
 			var el = document.querySelector('[data-cck-absences]');
 			if (!r.success) { el.innerHTML = '<li class="cck-empty">' + esc(r.message || tr('No access.')) + '</li>'; return; }
 			el.innerHTML = ((r.data && r.data.absences) || []).map(function (a) {
-				return '<li><strong>' + esc(a.staffRef) + '</strong> ' + esc(a.from) + ' → ' + esc(a.until) + ' (' + esc(a.kind) + ')' +
+				return '<li><strong>' + esc(a.staffRef) + '</strong> ' + esc(a.from) + ' → ' + esc(a.until) + ' (' + esc(tokenLabel(ABSENCE_KIND, a.kind)) + ')' +
 					' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-absc="' + a.id + '">' + esc(tr('Cancel')) + '</button></li>';
 			}).join('') || '<li class="cck-empty">' + esc(tr('No absences marked.')) + '</li>';
 			el.querySelectorAll('[data-cck-absc]').forEach(function (b) {
 				b.onclick = function () {
-					if (!window.confirm(tr('Cancel this absence?'))) { return; }
-					api('/api/absences/' + b.dataset.cckAbsc, { method: 'DELETE' }).then(loadAbsences);
+					confirmAsk(tr('Cancel this absence?'), tr('Cancel'))
+						.then(function (yes) {
+							if (!yes) { return; }
+							api('/api/absences/' + b.dataset.cckAbsc, { method: 'DELETE' }).then(function (r) {
+								if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+								loadAbsences();
+							});
+						});
 				};
 			});
 		});
 	}
+	// Forgiving default: same-day absence is the common case — picking
+	// "From" fills "Until" so a single-day sick note is one date, not two.
+	(function () {
+		var af = document.querySelector('[data-cck-absence-form]');
+		var from = af.querySelector('[name=from]');
+		var until = af.querySelector('[name=until]');
+		from.addEventListener('change', function () {
+			if (from.value && !until.value) { until.value = from.value; }
+		});
+	})();
 	document.querySelector('[data-cck-absence-form]').addEventListener('submit', function (e) {
 		e.preventDefault();
 		var f = new FormData(e.target);
@@ -883,36 +1251,109 @@
 				});
 		});
 	});
+	document.querySelector('[data-cck-member-cancel]').addEventListener('click', resetMemberForm);
 	document.querySelector('[data-cck-member-form]').addEventListener('submit', function (e) {
 		e.preventDefault();
-		var f = new FormData(e.target);
-		withBusy(submitBtn(e.target), function () {
-			return api('/api/members', { method: 'POST', body: JSON.stringify({ display_name: f.get('display_name'), qualification: f.get('qualification') }) })
+		var form = e.target;
+		var f = new FormData(form);
+		var editId = form.elements.edit_id.value;
+		var body = JSON.stringify({ display_name: f.get('display_name'), qualification: f.get('qualification') });
+		withBusy(submitBtn(form), function () {
+			return api(editId === '' ? '/api/members' : '/api/members/' + encodeURIComponent(editId),
+				{ method: editId === '' ? 'POST' : 'PUT', body: body })
 				.then(function (r) {
-					if (r.success) { e.target.reset(); clearFormErrors(e.target); loadMembers(); }
-					else { reportForm(e.target, r); }
+					if (r.success) { resetMemberForm(); notify(editId === '' ? tr('Member added.') : tr('Saved.')); loadMembers(); }
+					else { reportForm(form, r); }
 				});
 		});
 	});
 
 	// ---------------- catalog ----------------
+	var catalogCache = [];
+	var catalogFilter = { q: '', qual: '' };
+	function renderCatalog() {
+		var tb = document.querySelector('[data-cck-catalog] tbody');
+		var count = document.querySelector('[data-cck-catalog-count]');
+		var q = (catalogFilter.q || '').toLowerCase();
+		var rows = catalogCache.filter(function (t) {
+			if (catalogFilter.qual && t.requiresQual !== catalogFilter.qual) { return false; }
+			if (q && (t.code || '').toLowerCase().indexOf(q) < 0 && (t.label || '').toLowerCase().indexOf(q) < 0) { return false; }
+			return true;
+		});
+		if (count) {
+			count.textContent = rows.length === catalogCache.length
+				? rows.length + ' ' + tr('tasks')
+				: rows.length + ' / ' + catalogCache.length + ' ' + tr('tasks');
+		}
+		tb.innerHTML = rows.map(function (t) {
+			return '<tr><td data-cell="' + esc(tr('Code')) + '"><code>' + esc(t.code) + '</code></td>' +
+				'<td data-cell="' + esc(tr('Label')) + '">' + esc(t.icon ? t.icon + ' ' : '') + esc(t.label) + '</td>' +
+				'<td data-cell="' + esc(tr('Qualification')) + '">' + qualLabel(t.requiresQual) + '</td>' +
+				'<td><button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-cat-edit="' + t.id + '">' + esc(tr('Edit')) + '</button></td></tr>';
+		}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(catalogCache.length ? tr('No tasks match the filter.') : tr('No catalog tasks yet — add the first one below.')) + '</td></tr>';
+		tb.querySelectorAll('[data-cck-cat-edit]').forEach(function (b) {
+			b.onclick = function () { editCatalogTask(parseInt(b.dataset.cckCatEdit, 10)); };
+		});
+	}
+	var editingCatalogId = null;
+	function resetCatalogForm() {
+		editingCatalogId = null;
+		var f = document.querySelector('[data-cck-catalog-form]');
+		f.elements.edit_id.value = '';
+		f.reset();
+		clearFormErrors(f);
+		f.elements.code.disabled = false;
+		document.querySelector('[data-cck-catalog-submit]').textContent = tr('Add task');
+		document.querySelector('[data-cck-catalog-form-title]').textContent = tr('Add task');
+		document.querySelector('[data-cck-catalog-cancel]').hidden = true;
+	}
+	function editCatalogTask(id) {
+		var t = catalogCache.find(function (x) { return x.id === id; });
+		if (!t) { return; }
+		resetCatalogForm();
+		editingCatalogId = id;
+		var f = document.querySelector('[data-cck-catalog-form]');
+		f.elements.edit_id.value = String(id);
+		f.elements.code.value = t.code || '';
+		// code is the plan reference — immutable once created.
+		f.elements.code.disabled = true;
+		f.elements.label.value = t.label || '';
+		f.elements.icon.value = t.icon || '';
+		f.elements.requires_qual.value = t.requiresQual || '';
+		document.querySelector('[data-cck-catalog-submit]').textContent = tr('Save changes');
+		document.querySelector('[data-cck-catalog-form-title]').textContent = tr('Edit task');
+		document.querySelector('[data-cck-catalog-cancel]').hidden = false;
+		f.scrollIntoView({ block: 'start' });
+		f.elements.label.focus();
+	}
+	if (window.CheckViewComponents) {
+		CheckViewComponents.bindListFilter(document.querySelector('[data-cck-catalog-filter]'), function (v) {
+			catalogFilter = { q: v.q || '', qual: v.qual || '' };
+			renderCatalog();
+		});
+	}
 	function loadCatalog() {
 		api('/api/catalog').then(function (r) {
 			var tb = document.querySelector('[data-cck-catalog] tbody');
 			if (!r.success) { tb.innerHTML = '<tr><td colspan="3" class="cck-empty">' + esc(r.message || tr('No access.')) + '</td></tr>'; return; }
-			tb.innerHTML = ((r.data && r.data.tasks) || []).map(function (t) {
-				return '<tr><td>' + esc(t.code) + '</td><td>' + esc(t.icon ? t.icon + ' ' : '') + esc(t.label) + '</td><td>' + esc(t.requiresQual || '—') + '</td></tr>';
-			}).join('') || '<tr><td colspan="3" class="cck-empty">' + esc(tr('No catalog tasks yet — add the first one above.')) + '</td></tr>';
+			catalogCache = (r.data && r.data.tasks) || [];
+			renderCatalog();
 		});
 	}
+	document.querySelector('[data-cck-catalog-cancel]').addEventListener('click', resetCatalogForm);
 	document.querySelector('[data-cck-catalog-form]').addEventListener('submit', function (e) {
 		e.preventDefault();
-		var f = new FormData(e.target);
-		withBusy(submitBtn(e.target), function () {
-			return api('/api/catalog', { method: 'POST', body: JSON.stringify({ code: f.get('code'), label: f.get('label'), icon: f.get('icon') || null, requires_qual: f.get('requires_qual') || null }) })
+		var form = e.target;
+		var f = new FormData(form);
+		var editId = form.elements.edit_id.value;
+		var body = { label: f.get('label'), icon: f.get('icon') || null, requires_qual: f.get('requires_qual') || null };
+		if (editId === '') { body.code = f.get('code'); }
+		withBusy(submitBtn(form), function () {
+			return api(editId === '' ? '/api/catalog' : '/api/catalog/' + encodeURIComponent(editId),
+				{ method: editId === '' ? 'POST' : 'PUT', body: JSON.stringify(body) })
 				.then(function (r) {
-					if (r.success) { e.target.reset(); clearFormErrors(e.target); loadCatalog(); }
-					else { reportForm(e.target, r); }
+					if (r.success) { resetCatalogForm(); notify(editId === '' ? tr('Task added.') : tr('Saved.')); loadCatalog(); }
+					else { reportForm(form, r); }
 				});
 		});
 	});
@@ -941,34 +1382,54 @@
 			});
 		});
 	}
-	function loadInbox() {
-		loadReviews();
-		api('/api/notices').then(function (r) {
-			var el = document.querySelector('[data-cck-notices]');
-			var badge = document.querySelector('[data-cck-inbox-badge]');
-			if (!r.success) { el.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; return; }
-			var notices = (r.data && r.data.notices) || [];
-			var open = notices.filter(function (n) { return n.state === 'open' || n.state === 'escalated'; }).length;
-			if (badge) { badge.hidden = open === 0; badge.textContent = String(open); }
-			el.innerHTML = notices.map(function (n) {
+	var noticesCache = [];
+	var noticeFilter = 'all';
+	function renderNotices() {
+		var el = document.querySelector('[data-cck-notices]');
+		var badge = document.querySelector('[data-cck-inbox-badge]');
+		var notices = noticesCache.filter(function (n) {
+			if (noticeFilter === 'open') { return n.state === 'open' || n.state === 'escalated'; }
+			if (noticeFilter === 'ack') { return n.state === 'acked'; }
+			return true;
+		});
+		var open = noticesCache.filter(function (n) { return n.state === 'open' || n.state === 'escalated'; }).length;
+		if (badge) { badge.hidden = open === 0; badge.textContent = String(open); }
+		el.innerHTML = notices.map(function (n) {
 				var chips = '';
 				if (n.state === 'open' || n.state === 'escalated') { chips += '<span class="cck-chip cck-chip--open">' + esc(tr('open')) + '</span> '; }
 				if (n.escalated) { chips += '<span class="cck-chip cck-chip--escalated">' + esc(tr('escalated')) + '</span> '; }
 				if (n.resolution === 'error') { chips += '<span class="cck-chip">' + esc(tr('sent in error')) + '</span> '; }
 				if (n.state === 'acked' && n.resolution !== 'error') { chips += '<span class="cck-chip">' + esc(tr('acknowledged')) + '</span> '; }
-				return '<div class="cck-notice cck-notice--' + esc(n.priority) + '"><strong>' + esc(n.kind) + '</strong> ' +
+				return '<div class="cck-notice cck-notice--' + esc(n.priority) + '"><strong>' + esc(tokenLabel(NOTICE_KIND, n.kind)) + '</strong> ' +
 					'<span>' + esc(n.actorRef) + '</span> ' + chips +
 					(n.note ? ' <p class="cck-notice__text">' + esc(n.note) + '</p>' : '') +
 					(n.state === 'open' || n.state === 'escalated' ? ' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-ack="' + n.id + '">' + esc(tr('Acknowledge')) + '</button>' : '') +
 					'</div>';
-			}).join('') || '<p class="cck-empty">' + esc(tr('Inbox is empty.')) + '</p>';
-			el.querySelectorAll('[data-cck-ack]').forEach(function (b) {
-				b.onclick = function () {
-					withBusy(b, function () {
-						return api('/api/notices/' + b.dataset.cckAck + '/ack', { method: 'POST' }).then(loadInbox);
+		}).join('') || '<p class="cck-empty">' + esc(noticesCache.length ? tr('No notices match the filter.') : tr('Inbox is empty.')) + '</p>';
+		el.querySelectorAll('[data-cck-ack]').forEach(function (b) {
+			b.onclick = function () {
+				withBusy(b, function () {
+					return api('/api/notices/' + b.dataset.cckAck + '/ack', { method: 'POST' }).then(function (r) {
+						if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+						loadInbox();
 					});
-				};
-			});
+				});
+			};
+		});
+	}
+	if (window.CheckViewComponents) {
+		CheckViewComponents.pillGroup(document.querySelector('[data-cck-notice-filters]'), function (v) {
+			noticeFilter = v;
+			renderNotices();
+		});
+	}
+	function loadInbox() {
+		loadReviews();
+		api('/api/notices').then(function (r) {
+			var el = document.querySelector('[data-cck-notices]');
+			if (!r.success) { el.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; return; }
+			noticesCache = (r.data && r.data.notices) || [];
+			renderNotices();
 		});
 	}
 	// inbox poll ≤60s — incidents surface near-realtime without websockets (spec §9)
@@ -1016,11 +1477,14 @@
 	document.addEventListener('click', function (e) {
 		var b = e.target && e.target.closest ? e.target.closest('[data-cck-license-clear]') : null;
 		if (b) {
-			if (!window.confirm(tr('Remove the license? The companion app locks for everyone.'))) { return; }
-			api('/api/license', { method: 'DELETE' }).then(function (r) {
-				notify(r.success ? tr('License removed.') : (r.message || tr('Invalid value.')), !r.success);
-				loadLicense();
-			});
+			confirmAsk(tr('Remove the license? The companion app locks for everyone.'), tr('Remove license'))
+				.then(function (yes) {
+					if (!yes) { return; }
+					api('/api/license', { method: 'DELETE' }).then(function (r) {
+						notify(r.success ? tr('License removed.') : (r.message || tr('Invalid value.')), !r.success);
+						loadLicense();
+					});
+				});
 		}
 	});
 	function loadDiagnostics() {
@@ -1039,16 +1503,38 @@
 			]);
 		});
 	}
+	// Submitting a settings form before the first hydrate POSTs blank fields —
+	// the server rightly rejects with "Validation failed." (mobile e2e flake).
+	// Settings submits stay disabled until hydration lands, then enable.
+	var settingsHydrated = null;
+	var settingsReady = false;
+	// Settings UI speaks HH:MM-HH:MM, the API stores minutes ("540-720") —
+	// convert at both boundaries so admins never touch minute math.
+	function presetToUi(v) {
+		var m = /^(\d{1,4})-(\d{1,4})$/.exec(v || '');
+		return m ? fmtMin(parseInt(m[1], 10)) + '-' + fmtMin(parseInt(m[2], 10)) : v;
+	}
+	function presetToApi(v) {
+		var m = /^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/.exec(v || '');
+		if (!m) { return v; }
+		return String(parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) + '-' +
+			String(parseInt(m[3], 10) * 60 + parseInt(m[4], 10));
+	}
+	function ungateSettingsForms() {
+		settingsReady = true;
+		document.querySelectorAll('[data-cck-settings-form] [type="submit"]').forEach(function (b) { b.disabled = false; });
+	}
 	function loadSettings() {
 		PRESETS = null; // keep the tour editor presets in sync after edits
 		if (mountedSettings.companion) { loadLicense(); loadDiagnostics(); }
-		api('/api/settings').then(function (r) {
+		var p = api('/api/settings').then(function (r) {
 			if (!r.success) { return; }
 			document.querySelectorAll('[data-cck-settings-form]').forEach(function (f) {
 				Object.keys(r.data.settings).forEach(function (k) {
 					var el = f.elements[k];
 					if (!el) { return; }
-					if (el.type === 'checkbox') { el.checked = r.data.settings[k] === '1'; } else { el.value = r.data.settings[k]; }
+					if (el.type === 'checkbox') { el.checked = r.data.settings[k] === '1'; }
+					else { el.value = k.indexOf('preset_') === 0 ? presetToUi(r.data.settings[k]) : r.data.settings[k]; }
 				});
 			});
 			// DS-2 access door — admin-only section (server enforces too).
@@ -1068,7 +1554,11 @@
 				var box = document.querySelector('[data-cck-refpick="' + k + '"]');
 				if (box && box._refpick) { box._refpick.setList(r.data.settings[k] || []); }
 			});
+			ungateSettingsForms();
+			return r;
 		});
+		if (!settingsHydrated) { settingsHydrated = p.finally(ungateSettingsForms); }
+		return p;
 	}
 	document.addEventListener('submit', function (e) {
 		var f = e.target;
@@ -1077,7 +1567,7 @@
 		var body = {};
 		['seat_limit', 'provider_tz', 'device_rate_per_min', 'sla_minutes', 'tsa_url', 'retention_years', 'breakglass_hours_max', 'min_companion_version',
 		 'preset_early', 'preset_morning', 'preset_noon', 'preset_afternoon', 'preset_evening'].forEach(function (k) {
-			if (f.elements[k]) { body[k] = f.elements[k].value; }
+			if (f.elements[k]) { body[k] = k.indexOf('preset_') === 0 ? presetToApi(f.elements[k].value) : f.elements[k].value; }
 		});
 		if (f.elements.gps_enabled) {
 			body.gps_enabled = f.elements.gps_enabled.checked ? '1' : '0';
@@ -1092,13 +1582,16 @@
 				if (box && box._refpick) { body[k] = box._refpick.value; }
 			});
 		}
-		withBusy(submitBtn(f), function () {
-			return api('/api/settings', { method: 'POST', body: JSON.stringify(body) })
-				.then(function (r) {
-					if (r.success) { clearFormErrors(f); notify(tr('Saved.')); }
-					else { reportForm(f, r); }
-				});
-		});
+		var send = function () {
+			withBusy(submitBtn(f), function () {
+				return api('/api/settings', { method: 'POST', body: JSON.stringify(body) })
+					.then(function (r) {
+						if (r.success) { clearFormErrors(f); notify(tr('Saved.')); }
+						else { reportForm(f, r); }
+					});
+			});
+		};
+		send();
 	});
 
 	window.addEventListener('hashchange', function () { route(); });

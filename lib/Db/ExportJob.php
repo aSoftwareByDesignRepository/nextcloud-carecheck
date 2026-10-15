@@ -6,6 +6,18 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method string|null getKind()
+ * @method void setKind(string|null $kind)
+ * @method string|null getScopeJson()
+ * @method void setScopeJson(string|null $scopeJson)
+ * @method string|null getActorRef()
+ * @method void setActorRef(string|null $actorRef)
+ * @method string|null getHash()
+ * @method void setHash(string|null $hash)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ */
 class ExportJob extends Entity
 {
 	protected $kind;

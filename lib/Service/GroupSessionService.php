@@ -194,6 +194,9 @@ class GroupSessionService
 	{
 		$sess = $this->list($actorRef, $sessionId);
 		$out = fopen('php://temp', 'r+');
+		if ($out === false) {
+			throw new \RuntimeException('temp stream failed');
+		}
 		fputcsv($out, ['session', 'title', 'client_id', 'name', 'attended', 'by', 'started', 'closed'], ';', '"', '');
 		foreach ($sess['participants'] as $p) {
 			fputcsv($out, [

@@ -219,7 +219,10 @@ class ExportService
 		];
 	}
 
-	/** Deterministic XML serialization of the billing doc — escaped, stable order. */
+/**
+	 * Deterministic XML serialization of the billing doc — escaped, stable order.
+	 * @param array<string, mixed> $doc
+	 */
 	private function toXml(array $doc): string
 	{
 		$e = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -307,10 +310,16 @@ class ExportService
 		return $row === false ? null : $row;
 	}
 
-	/** RFC-4180 CSV with formula-injection escaping on every cell. */
+/**
+	 * RFC-4180 CSV with formula-injection escaping on every cell.
+	 * @param array<string, mixed> $rows
+	 */
 	private function toCsv(array $rows): string
 	{
 		$out = fopen('php://temp', 'r+');
+		if ($out === false) {
+			throw new \RuntimeException('temp stream failed');
+		}
 		fputcsv($out, self::CSV_FIELDS, ';', '"', '');
 		foreach ($rows as $r) {
 			fputcsv($out, array_map(fn (string $k) => $this->csvSafe($r[$k] ?? ''), self::CSV_FIELDS), ';', '"', '');
@@ -335,7 +344,7 @@ class ExportService
 		try {
 			$e = new ExportJob();
 			$e->setKind($kind);
-			$e->setScopeJson(json_encode(['client' => $clientId, 'scope' => $scope], JSON_UNESCAPED_UNICODE));
+			$e->setScopeJson(json_encode(['client' => $clientId, 'scope' => $scope], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
 			$e->setActorRef($actorRef);
 			$e->setHash($hash);
 			$e->setCreatedAt(new \DateTime());

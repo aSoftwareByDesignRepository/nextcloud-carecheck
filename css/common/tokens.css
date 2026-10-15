@@ -16,6 +16,7 @@
 	--cck-radius-sm: 6px;
 	--cck-radius-md: 12px;
 	--cck-radius-lg: 16px;
+	--cck-radius-pill: 999px;
 
 	--cck-fs-xs: 0.75rem;
 	--cck-fs-sm: 0.875rem;
@@ -51,6 +52,7 @@ body {
 	--cck-overlay-top: var(--header-height, 50px);
 	--cck-overlay-height: calc(100dvh - var(--header-height, 50px));
 
+	--cck-bg: var(--color-main-background);
 	--cck-bg-soft: color-mix(in srgb, var(--color-main-background) 96%, var(--color-main-text) 4%);
 	--cck-bg-card: var(--color-main-background);
 	--cck-text: var(--color-main-text);
@@ -82,16 +84,21 @@ body {
 	   If a theme lacks it, error-text (dark ink, e.g. #8A0000) is a safer
 	   fill than the pale --color-error tint (#FFE7E7) under white text. */
 	--cck-danger-fill: var(--color-element-error, var(--color-error-text, var(--color-error)));
-	--cck-danger-on-fill: #ffffff;
+	/* On-fill ink must follow the theme (family convention: arbeitszeitcheck).
+	   primary-element-text is the theme-tuned ink for solid accent fills. */
+	--cck-danger-on-fill: var(--color-primary-element-text, var(--color-primary-text));
 	--cck-danger-ink: var(--color-error-text, var(--color-error));
 }
 
 /* Dark themes turn --color-element-error into a bright accent — darken the
- * solid CTA fill so white ink stays >= 4.5:1 (design-system §3.1). */
+ * solid CTA fill so ink stays >= 4.5:1 (design-system §3.1).
+ * primary-element-text is often dark (for light CTAs) — unusable on red;
+ * main-text is the near-white ink in dark themes. */
 body[data-theme-dark],
 body[data-themes*="dark"],
 body.theme--dark {
-	--cck-danger-fill: color-mix(in srgb, var(--color-element-error, var(--color-error-text, var(--color-error))) 62%, var(--color-main-background));
+	--cck-danger-fill: color-mix(in srgb, var(--color-element-error, var(--color-error-text, var(--color-error))) 40%, var(--color-main-background));
+	--cck-danger-on-fill: var(--color-main-text);
 }
 
 @media (prefers-contrast: more) {

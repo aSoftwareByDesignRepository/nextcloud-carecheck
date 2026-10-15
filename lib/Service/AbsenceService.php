@@ -47,10 +47,10 @@ class AbsenceService
 		if ($du === false || $du->format('Y-m-d') !== $until) {
 			$fields['until'] = 'invalid';
 		}
-		if ($fields === [] && $du < $df) {
+		if ($fields === [] && $du !== false && $df !== false && $du < $df) {
 			$fields['until'] = 'invalid';
 		}
-		if ($fields !== []) {
+		if ($fields !== [] || $df === false || $du === false) {
 			throw ApiException::validation('Validation failed.', $fields);
 		}
 		$a = new Absence();
@@ -77,7 +77,7 @@ class AbsenceService
 		$this->absences->delete($a);
 	}
 
-	/** @return list<array{id:int,staffRef:string,from:string,until:string,kind:string}> */
+	/** @return list<array{id:int,staffRef:?string,from:string,until:string,kind:?string}> */
 	public function list(string $actorRef): array
 	{
 		$this->acl->assertStaff($actorRef);

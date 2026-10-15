@@ -174,34 +174,126 @@ class ApiController extends Controller
 				throw ApiException::validation('Validation failed.', ['tasks' => 'required']);
 			}
 			// CAS: expected revision guards concurrent edits
-			if (!isset($p['base_revision'])) {
+			if (!isset($p['base_revision']) || !preg_match('/^\d+$/', (string)$p['base_revision'])) {
 				throw ApiException::conflict('Reload before publishing.');
 			}
-			$existing = null;
-			foreach ($this->plans->findAll() as $pv) {
-				if ((int)$pv->getClientId() === $id && $pv->getStatus() === 'published') {
-					$existing = $pv;
+			// Serialize on the client row — same lock order as JournalService,
+			// so concurrent publishes queue instead of racing the CAS check.
+			$this->db->beginTransaction();
+			try {
+				$lock = $this->db->prepare('SELECT id FROM `*PREFIX*cck_client` WHERE `id` = :id FOR UPDATE');
+				$lock->execute(['id' => $id]);
+				$existing = null;
+				foreach ($this->plans->findAll() as $pv) {
+					if ((int)$pv->getClientId() === $id && $pv->getStatus() === 'published') {
+						$existing = $pv;
+					}
 				}
+				if ($existing !== null && (int)$existing->getRevision() !== (int)$p['base_revision']) {
+					throw ApiException::conflict('Plan changed — reload.');
+				}
+				if ($existing !== null) {
+					$existing->setStatus('draft');
+					$this->plans->update($existing);
+				}
+				$pv = new PlanVersion();
+				$pv->setClientId($id);
+				$pv->setSnapshotEnc($this->crypto->encrypt(json_encode(['tasks' => $tasks], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)));
+				$pv->setStatus('published');
+				$pv->setPublishedBy($actor);
+				$pv->setPublishedAt(new \DateTime());
+				$pv->setRevision(($existing !== null ? (int)$existing->getRevision() : 0) + 1);
+				$pv->setCreatedAt(new \DateTime());
+				$pv = $this->plans->insert($pv);
+				$this->db->commit();
+			} catch (ApiException $e) {
+				$this->db->rollBack();
+				throw $e;
+			} catch (\Throwable $th) {
+				$this->db->rollBack();
+				if ($th instanceof \OCP\DB\Exception
+					&& $th->getReason() === \OCP\DB\Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+					throw ApiException::conflict('Plan changed — reload.');
+				}
+				throw $th;
 			}
-			if ($existing !== null && (int)$existing->getRevision() !== (int)$p['base_revision']) {
-				throw ApiException::conflict('Plan changed — reload.');
-			}
-			if ($existing !== null) {
-				$existing->setStatus('draft');
-				$this->plans->update($existing);
-			}
-			$pv = new PlanVersion();
-			$pv->setClientId($id);
-			$pv->setSnapshotEnc($this->crypto->encrypt(json_encode(['tasks' => $tasks], JSON_UNESCAPED_UNICODE)));
-			$pv->setStatus('published');
-			$pv->setPublishedBy($actor);
-			$pv->setPublishedAt(new \DateTime());
-			$pv->setRevision(($existing !== null ? (int)$existing->getRevision() : 0) + 1);
-			$pv->setCreatedAt(new \DateTime());
-			$pv = $this->plans->insert($pv);
 			return $this->ok(['id' => (int)$pv->getId(), 'revision' => (int)$pv->getRevision()], 201);
 		} catch (ApiException $e) {
 			return $this->error($e);
+		}
+	}
+
+	/**
+	 * Normalize + validate template params — shared by create and update so a
+	 * template edit can never be laxer than a template create. Throws
+	 * ApiException::validation on failure; returns the normalized payload.
+	 * @param array<string, mixed> $p
+	 * @return array{name:string, weekdaysCsv:string, status:string, leadRef:?string, stops:list<array<string, mixed>>}
+	 */
+	private function templateParams(array $p): array
+	{
+		$name = trim((string)($p['name'] ?? ''));
+		$weekdays = array_values(array_filter(array_map('intval', (array)($p['weekday_set'] ?? [])), fn (int $d) => $d >= 1 && $d <= 7));
+		$stops = array_values((array)($p['stops'] ?? []));
+		$status = (string)($p['status'] ?? 'draft');
+		$fields = [];
+		if ($name === '') { $fields['name'] = 'required'; }
+		if ($weekdays === []) { $fields['weekday_set'] = 'required'; }
+		if (!in_array($status, Constants::TPL_STATUSES, true)) { $fields['status'] = 'invalid'; }
+		$leadRef = trim((string)($p['lead_ref'] ?? ''));
+		if ($leadRef !== '' && !$this->acl->validRef($leadRef)) { $fields['lead_ref'] = 'invalid'; }
+		// per-stop: strict ids + referenced entities must exist — no FKs to
+		// save us (api-security §7), and window bounds must be sane
+		foreach ($stops as $s) {
+			$skind = $s['kind'] ?? 'client';
+			if ($skind === 'external') {
+				if (trim((string)($s['loc_text'] ?? '')) === '') { $fields['stops'] = 'invalid'; }
+			} else {
+				$cid = (string)($s['client_id'] ?? '');
+				if (preg_match('/^\d+$/', $cid) !== 1) { $fields['stops'] = 'invalid'; continue; }
+				$cl = $this->clientMapper->find((int)$cid);
+				if ($cl === null || (int)$cl->getActive() !== 1) { $fields['stops'] = 'invalid'; }
+			}
+			$ws = $s['win_start'] ?? null; $we = $s['win_end'] ?? null;
+			if (!is_numeric($ws) || !is_numeric($we)
+				|| (int)$ws < 0 || (int)$ws > 1439 || (int)$we < 0 || (int)$we > 1439
+				|| (int)$ws >= (int)$we) {
+				$fields['stops'] = 'invalid';
+			}
+			$eref = trim((string)($s['executor_ref'] ?? ''));
+			if ($eref !== '' && !$this->acl->validRef($eref)) { $fields['stops'] = 'invalid'; }
+		}
+		if ($fields !== []) {
+			throw ApiException::validation('Validation failed.', $fields);
+		}
+		return [
+			'name' => $name,
+			'weekdaysCsv' => implode(',', $weekdays),
+			'status' => $status,
+			'leadRef' => $leadRef !== '' ? $leadRef : null,
+			'stops' => $stops,
+		];
+	}
+
+	/** @param list<array<string, mixed>> $stops */
+	private function insertTemplateStops(int $templateId, array $stops): void
+	{
+		foreach ($stops as $i => $s) {
+			$ts = new TtStop();
+			$ts->setTemplateId($templateId);
+			$skind = in_array($s['kind'] ?? '', Constants::STOP_KINDS, true) ? $s['kind'] : 'client';
+			$tkind = in_array($s['time_kind'] ?? '', Constants::TIME_KINDS, true) ? $s['time_kind'] : 'window';
+			$ts->setKind($skind);
+			$ts->setTimeKind($tkind);
+			$ts->setClientId($skind === 'external' ? null : (int)$s['client_id']);
+			$ts->setLocText($skind === 'external' ? mb_substr(trim((string)($s['loc_text'] ?? '')), 0, 190) : null);
+			$ts->setWinStart((int)($s['win_start'] ?? 0));
+			$ts->setWinEnd((int)($s['win_end'] ?? 0));
+			$ts->setToleranceMin(isset($s['tolerance_min']) && is_numeric($s['tolerance_min']) ? max(0, (int)$s['tolerance_min']) : null);
+			$ts->setOrderHint((int)($s['order_hint'] ?? $i));
+			$eref = trim((string)($s['executor_ref'] ?? ''));
+			$ts->setExecutorRef($eref !== '' ? $eref : null);
+			$this->ttStops->insert($ts);
 		}
 	}
 
@@ -209,48 +301,13 @@ class ApiController extends Controller
 	public function saveTourTemplate(): JSONResponse
 	{
 		try {
-			$actor = $this->actor();
-			$this->acl->assertStaff($actor);
-			$p = $this->request->getParams();
-			$name = trim((string)($p['name'] ?? ''));
-			$weekdays = array_values(array_filter(array_map('intval', (array)($p['weekday_set'] ?? [])), fn (int $d) => $d >= 1 && $d <= 7));
-			$stops = (array)($p['stops'] ?? []);
-			$status = (string)($p['status'] ?? 'draft');
-			$fields = [];
-			if ($name === '') { $fields['name'] = 'required'; }
-			if ($weekdays === []) { $fields['weekday_set'] = 'required'; }
-			if (!in_array($status, Constants::TPL_STATUSES, true)) { $fields['status'] = 'invalid'; }
-			$leadRef = trim((string)($p['lead_ref'] ?? ''));
-			if ($leadRef !== '' && !$this->acl->validRef($leadRef)) { $fields['lead_ref'] = 'invalid'; }
-			// per-stop: strict ids + referenced entities must exist — no FKs to
-			// save us (api-security §7), and window bounds must be sane
-			foreach ($stops as $s) {
-				$skind = $s['kind'] ?? 'client';
-				if ($skind === 'external') {
-					if (trim((string)($s['loc_text'] ?? '')) === '') { $fields['stops'] = 'invalid'; }
-				} else {
-					$cid = (string)($s['client_id'] ?? '');
-					if (preg_match('/^\d+$/', $cid) !== 1) { $fields['stops'] = 'invalid'; continue; }
-					$cl = $this->clientMapper->find((int)$cid);
-					if ($cl === null || (int)$cl->getActive() !== 1) { $fields['stops'] = 'invalid'; }
-				}
-				$ws = $s['win_start'] ?? null; $we = $s['win_end'] ?? null;
-				if (!is_numeric($ws) || !is_numeric($we)
-					|| (int)$ws < 0 || (int)$ws > 1439 || (int)$we < 0 || (int)$we > 1439
-					|| (int)$ws >= (int)$we) {
-					$fields['stops'] = 'invalid';
-				}
-				$eref = trim((string)($s['executor_ref'] ?? ''));
-				if ($eref !== '' && !$this->acl->validRef($eref)) { $fields['stops'] = 'invalid'; }
-			}
-			if ($fields !== []) {
-				throw ApiException::validation('Validation failed.', $fields);
-			}
+			$this->acl->assertStaff($this->actor());
+			$n = $this->templateParams($this->request->getParams());
 			$t = new TourTemplate();
-			$t->setName($name);
-			$t->setWeekdaySet(implode(',', $weekdays));
-			$t->setLeadRef($leadRef !== '' ? $leadRef : null);
-			$t->setStatus($status);
+			$t->setName($n['name']);
+			$t->setWeekdaySet($n['weekdaysCsv']);
+			$t->setLeadRef($n['leadRef']);
+			$t->setStatus($n['status']);
 			$t->setRevision(1);
 			$now = new \DateTime();
 			$t->setCreatedAt($now);
@@ -258,30 +315,89 @@ class ApiController extends Controller
 			// template + all stops commit atomically — never a half-written tour
 			$this->db->beginTransaction();
 			try {
-			$t = $this->templates->insert($t);
-			foreach ($stops as $i => $s) {
-				$ts = new TtStop();
-				$ts->setTemplateId((int)$t->getId());
-				$skind = in_array($s['kind'] ?? '', Constants::STOP_KINDS, true) ? $s['kind'] : 'client';
-				$tkind = in_array($s['time_kind'] ?? '', Constants::TIME_KINDS, true) ? $s['time_kind'] : 'window';
-				$ts->setKind($skind);
-				$ts->setTimeKind($tkind);
-				$ts->setClientId($skind === 'external' ? null : (int)$s['client_id']);
-				$ts->setLocText($skind === 'external' ? mb_substr(trim((string)($s['loc_text'] ?? '')), 0, 190) : null);
-				$ts->setWinStart((int)($s['win_start'] ?? 0));
-				$ts->setWinEnd((int)($s['win_end'] ?? 0));
-				$ts->setToleranceMin(isset($s['tolerance_min']) && is_numeric($s['tolerance_min']) ? max(0, (int)$s['tolerance_min']) : null);
-				$ts->setOrderHint((int)($s['order_hint'] ?? $i));
-				$eref = trim((string)($s['executor_ref'] ?? ''));
-				$ts->setExecutorRef($eref !== '' ? $eref : null);
-				$this->ttStops->insert($ts);
-			}
-			$this->db->commit();
+				$t = $this->templates->insert($t);
+				$this->insertTemplateStops((int)$t->getId(), $n['stops']);
+				$this->db->commit();
 			} catch (\Throwable $th) {
 				$this->db->rollBack();
 				throw $th;
 			}
 			return $this->ok(['id' => (int)$t->getId()], 201);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	#[NoAdminRequired]
+	public function updateTourTemplate(int $id): JSONResponse
+	{
+		try {
+			$this->acl->assertStaff($this->actor());
+			$n = $this->templateParams($this->request->getParams());
+			$p = $this->request->getParams();
+			// CAS: expected revision guards concurrent edits — fail closed on
+			// missing/non-integer tokens, never silently merge (api-security §3).
+			if (!isset($p['base_revision']) || !preg_match('/^\d+$/', (string)$p['base_revision'])) {
+				throw ApiException::conflict('Reload before saving.');
+			}
+			$this->db->beginTransaction();
+			try {
+				// Serialize on the template row so concurrent edits queue on the
+				// lock instead of racing the CAS check (lost-update class).
+				$lock = $this->db->prepare('SELECT id FROM `*PREFIX*cck_tour_tpl` WHERE `id` = :id FOR UPDATE');
+				$lock->execute(['id' => $id]);
+				$t = $this->templates->find($id);
+				if ($t === null) {
+					throw ApiException::notFound();
+				}
+				if ((int)$t->getRevision() !== (int)$p['base_revision']) {
+					throw ApiException::conflict('Template changed — reload.');
+				}
+				$t->setName($n['name']);
+				$t->setWeekdaySet($n['weekdaysCsv']);
+				$t->setLeadRef($n['leadRef']);
+				$t->setStatus($n['status']);
+				$t->setRevision((int)$t->getRevision() + 1);
+				$t->setUpdatedAt(new \DateTime());
+				$this->templates->update($t);
+				// Replace stops atomically inside the same transaction — a
+				// half-written stop set must never reach generate().
+				$this->ttStops->deleteForTemplate($id);
+				$this->insertTemplateStops($id, $n['stops']);
+				$this->db->commit();
+			} catch (\Throwable $th) {
+				$this->db->rollBack();
+				throw $th;
+			}
+			return $this->ok(['id' => $id, 'revision' => (int)$t->getRevision()]);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	#[NoAdminRequired]
+	public function deleteTourTemplate(int $id): JSONResponse
+	{
+		try {
+			$this->acl->assertStaff($this->actor());
+			$this->db->beginTransaction();
+			try {
+				$lock = $this->db->prepare('SELECT id FROM `*PREFIX*cck_tour_tpl` WHERE `id` = :id FOR UPDATE');
+				$lock->execute(['id' => $id]);
+				$t = $this->templates->find($id);
+				if ($t === null) {
+					throw ApiException::notFound();
+				}
+				// Generated day tours are materialized snapshots — they stay
+				// valid; deleting only stops future generation.
+				$this->ttStops->deleteForTemplate($id);
+				$this->templates->delete($t);
+				$this->db->commit();
+			} catch (\Throwable $th) {
+				$this->db->rollBack();
+				throw $th;
+			}
+			return $this->ok(['id' => $id]);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
@@ -394,6 +510,34 @@ class ApiController extends Controller
 			$m->setCreatedAt(new \DateTime());
 			$m = $this->members->insert($m);
 			return $this->ok(['id' => (int)$m->getId()], 201);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	#[NoAdminRequired]
+	public function updateMember(int $id): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			$this->acl->assertStaff($actor);
+			$p = $this->request->getParams();
+			$name = trim((string)($p['display_name'] ?? ''));
+			$qual = (string)($p['qualification'] ?? Constants::QUAL_HILF);
+			$fields = [];
+			if ($name === '') { $fields['display_name'] = 'required'; }
+			if (!in_array($qual, Constants::QUALS, true)) { $fields['qualification'] = 'invalid'; }
+			if ($fields !== []) {
+				throw ApiException::validation('Validation failed.', $fields);
+			}
+			$m = $this->members->find($id);
+			if ($m === null || (int)$m->getActive() !== 1) {
+				throw ApiException::notFound();
+			}
+			$m->setDisplayName($name);
+			$m->setQualification($qual);
+			$this->members->update($m);
+			return $this->ok(['id' => (int)$m->getId()]);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
@@ -820,16 +964,26 @@ class ApiController extends Controller
 	public function openGroupSession(): JSONResponse
 	{
 		try {
+			// authz BEFORE payload validation — a role-less caller must get the
+			// uniform 404, never a 400 that proves the endpoint parses input.
+			$this->acl->assertStaff($this->actor());
 			$p = $this->request->getParams();
 			$ids = $p['client_ids'] ?? [];
 			if (!is_array($ids)) {
 				throw ApiException::validation('Validation failed.', ['client_ids' => 'invalid']);
 			}
+			$clientIds = [];
+			foreach ($ids as $cid) {
+				if (!is_int($cid) && !(is_string($cid) && preg_match('/^\d+$/', $cid) === 1)) {
+					throw ApiException::validation('Validation failed.', ['client_ids' => 'invalid']);
+				}
+				$clientIds[] = (int)$cid;
+			}
 			$idm = (string)($p['idem_key'] ?? '');
 			if ($idm === '') {
 				$idm = bin2hex(random_bytes(16)); // web flow mints one
 			}
-			return $this->ok(['session' => $this->groupSessions->open($this->actor(), (string)($p['title'] ?? ''), $ids, $idm)]);
+			return $this->ok(['session' => $this->groupSessions->open($this->actor(), (string)($p['title'] ?? ''), $clientIds, $idm)]);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
@@ -1020,6 +1174,35 @@ class ApiController extends Controller
 			$t->setRequiresQual($rq !== '' ? $rq : null);
 			$t = $this->catalog->insert($t);
 			return $this->ok(['id' => (int)$t->getId()], 201);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	#[NoAdminRequired]
+	public function updateCatalogTask(int $id): JSONResponse
+	{
+		try {
+			$this->acl->assertStaff($this->actor());
+			$p = $this->request->getParams();
+			$t = $this->catalog->find($id);
+			if ($t === null) {
+				throw ApiException::notFound();
+			}
+			$label = trim((string)($p['label'] ?? ''));
+			$fields = [];
+			if ($label === '') { $fields['label'] = 'required'; }
+			$rq = $p['requires_qual'] ?? null;
+			if ($rq !== null && $rq !== '' && !in_array($rq, Constants::QUALS, true)) { $fields['requires_qual'] = 'invalid'; }
+			if ($fields !== []) {
+				throw ApiException::validation('Validation failed.', $fields);
+			}
+			// code is immutable — published plans reference it (no FK, §7).
+			$t->setLabel(mb_substr($label, 0, 190));
+			$t->setIcon(mb_substr((string)($p['icon'] ?? ''), 0, 48) ?: null);
+			$t->setRequiresQual($rq !== '' ? $rq : null);
+			$this->catalog->update($t);
+			return $this->ok(['id' => (int)$t->getId()]);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}

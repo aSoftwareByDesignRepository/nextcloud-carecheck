@@ -212,7 +212,10 @@ class TourService
 		return $out;
 	}
 
-	/** Shared stop serializer for coverage + companion pulls. */
+/**
+	 * Shared stop serializer for coverage + companion pulls.
+	 * @param array<string, mixed> $row
+	 */
 	private function serializeStopRow(array $row): array
 	{
 		$cid = $row['client_id'] !== null ? (int)$row['client_id'] : null;
@@ -238,6 +241,7 @@ class TourService
 	/**
 	 * UX-13 flag: stops whose visit bundle sits in the rejected_review
 	 * quarantine queue. Shared by coverage() and actorOpenStops().
+	 * @param array<array-key, array<string, mixed>> $tours
 	 */
 	private function markReviewPending(array $tours): array
 	{
@@ -431,7 +435,7 @@ class TourService
 				$payload = ['name' => 'Übungsklientin', 'street' => '—'];
 				$demo = new Client();
 				$demo->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName('Übungsklientin')));
-				$demo->setPayloadEnc($this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE)));
+				$demo->setPayloadEnc($this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)));
 				$demo->setIsDemo(1); // server-owned flag — never client-settable
 				$demo->setActive(1);
 				$demo->setRevision(1);

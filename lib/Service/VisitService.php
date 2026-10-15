@@ -53,7 +53,10 @@ class VisitService
 		return $rows === [] ? null : Visit::fromRow($rows[0]);
 	}
 
-	/** Idempotent check-in: creates the visit row in `in_progress`. */
+/**
+	 * Idempotent check-in: creates the visit row in `in_progress`.
+	 * @param array<string, mixed> $in
+	 */
 	public function checkin(string $actorRef, array $in): array
 	{
 		$idem = BundleValidator::idemKey($in);
@@ -127,6 +130,7 @@ class VisitService
 	/**
 	 * Final bundle: tasks + note + signature + checkout — ONE transaction
 	 * with the journal append and stop status flip.
+	 * @param array<string, mixed> $in
 	 */
 	public function submitBundle(string $actorRef, array $in): array
 	{
@@ -215,7 +219,7 @@ class VisitService
 				$vt->setTaskCode(mb_substr((string)($t['task_code'] ?? ''), 0, 48));
 				$vt->setStatus((string)$t['status']);
 				$vt->setReasonCode($t['reason_code'] ?? null);
-				$vt->setValueEnc(isset($t['value']) ? $this->crypto->encrypt(json_encode($t['value'])) : null);
+				$vt->setValueEnc(isset($t['value']) ? $this->crypto->encrypt(json_encode($t['value'], JSON_THROW_ON_ERROR)) : null);
 				$this->tasks->insert($vt);
 			}
 			$this->markStop($v->getTstopId(), 'done');
@@ -244,7 +248,10 @@ class VisitService
 		return $this->serialize($v);
 	}
 
-	/** Break-glass: audited, bounded grant for an out-of-scope client. */
+/**
+	 * Break-glass: audited, bounded grant for an out-of-scope client.
+	 * @param array<string, mixed> $in
+	 */
 	public function requestBreakGlass(string $actorRef, array $in): array
 	{
 		$clientId = $this->clientId($in);
@@ -271,6 +278,9 @@ class VisitService
 		return ['id' => (int)$g->getId(), 'expiresAt' => $g->getExpiresAt()->format(\DateTimeInterface::ATOM), 'qualMismatch' => (int)$g->getQualMismatch() === 1];
 	}
 
+	/**
+	 * @param array<string, mixed> $in
+	 */
 	public function submitNotice(string $actorRef, array $in): array
 	{
 		$kind = (string)($in['kind'] ?? '');
@@ -360,6 +370,8 @@ class VisitService
 	 * with the same idem key updates the stored reason instead of inserting a
 	 * second row; a corrected payload passes validation on the next call and
 	 * the row proceeds through the normal write path.
+	 * @param array<string, mixed> $in
+	 * @param array<string, mixed> $fields
 	 */
 	private function quarantine(string $actorRef, array $in, int $clientId, string $idem, array $fields, ?Visit $existing): void
 	{
@@ -511,7 +523,10 @@ class VisitService
 		return $this->settings->getBool('gps_enabled');
 	}
 
-	/** Strict digits — is_numeric accepts "2.9"/"2e3"/" 5" (api-security §7). */
+/**
+	 * Strict digits — is_numeric accepts "2.9"/"2e3"/" 5" (api-security §7).
+	 * @param array<string, mixed> $in
+	 */
 	private function tstopId(array $in): ?int
 	{
 		$raw = (string)($in['tstop_id'] ?? '');
@@ -550,6 +565,9 @@ class VisitService
 		throw ApiException::notFound();
 	}
 
+	/**
+	 * @param array<string, mixed> $in
+	 */
 	private function clientId(array $in): int
 	{
 		$raw = (string)($in['client_id'] ?? '');

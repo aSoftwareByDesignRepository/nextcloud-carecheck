@@ -6,6 +6,18 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method \DateTime getDate()
+ * @method void setDate(\DateTime|null $date)
+ * @method string|null getHeadsDigest()
+ * @method void setHeadsDigest(string|null $headsDigest)
+ * @method string|null getAnchorToken()
+ * @method void setAnchorToken(string|null $anchorToken)
+ * @method string|null getStatus()
+ * @method void setStatus(string|null $status)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ */
 class Anchor extends Entity
 {
 	protected $date;

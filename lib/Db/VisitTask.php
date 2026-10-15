@@ -6,6 +6,20 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int|null getVisitId()
+ * @method void setVisitId(int|null $visitId)
+ * @method string|null getTaskCode()
+ * @method void setTaskCode(string|null $taskCode)
+ * @method string|null getStatus()
+ * @method void setStatus(string|null $status)
+ * @method string|null getReasonCode()
+ * @method void setReasonCode(string|null $reasonCode)
+ * @method string|null getValueEnc()
+ * @method void setValueEnc(string|null $valueEnc)
+ * @method string|null getCommentEnc()
+ * @method void setCommentEnc(string|null $commentEnc)
+ */
 class VisitTask extends Entity
 {
 	protected $visitId;

@@ -23,7 +23,8 @@ final class UpgradeBackupCatalog
 
 	/** @var list<string> App-data folder names (under appdata_<instance>/carecheck/) to include in snapshots. */
 	public const APPDATA_FOLDERS = [
-
+		'photos',
+		'voicenotes',
 	];
 
 	public const CONFIG_MAX_SNAPSHOTS = 'upgrade_backup_max_snapshots';
@@ -43,26 +44,26 @@ final class UpgradeBackupCatalog
 		'cck_client',
 		'cck_clientdoc',
 		'cck_export',
+		'cck_gpart',
+		'cck_gsession',
 		'cck_journal',
 		'cck_license',
 		'cck_member',
 		'cck_notice',
 		'cck_pair',
-		'cck_gpart',
-		'cck_gsession',
 		'cck_photo',
-		'cck_vnote',
 		'cck_plan_v',
 		'cck_rate',
+		'cck_share',
 		'cck_task_cat',
 		'cck_team',
 		'cck_tlead',
 		'cck_tour',
-		'cck_share',
 		'cck_tour_tpl',
 		'cck_tstop',
 		'cck_ttstop',
 		'cck_visit',
+		'cck_vnote',
 		'cck_vtask',
 	];
 
@@ -75,26 +76,26 @@ final class UpgradeBackupCatalog
 		'cck_client',
 		'cck_clientdoc',
 		'cck_export',
+		'cck_gpart',
+		'cck_gsession',
 		'cck_journal',
 		'cck_license',
 		'cck_member',
 		'cck_notice',
 		'cck_pair',
-		'cck_gpart',
-		'cck_gsession',
 		'cck_photo',
-		'cck_vnote',
 		'cck_plan_v',
 		'cck_rate',
+		'cck_share',
 		'cck_task_cat',
 		'cck_team',
 		'cck_tlead',
 		'cck_tour',
-		'cck_share',
 		'cck_tour_tpl',
 		'cck_tstop',
 		'cck_ttstop',
 		'cck_visit',
+		'cck_vnote',
 		'cck_vtask',
 	];
 
@@ -124,6 +125,7 @@ final class UpgradeBackupCatalog
 	}
 
 	/**
+	 * @param list<string> $presentTables
 	 * @return list<string>
 	 */
 	public static function sortedRestoreTables(array $presentTables): array

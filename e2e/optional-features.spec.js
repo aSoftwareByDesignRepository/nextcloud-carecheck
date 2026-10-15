@@ -63,9 +63,11 @@ test('photo consent gates upload; consented upload lists + deletes', async ({ pa
   const fig = page.locator('[data-cck-photos] figure')
   await expect(fig.first()).toBeVisible({ timeout: 10_000 })
 
-  // delete → confirm guard, then row disappears
-  page.once('dialog', (d) => d.accept())
+  // delete → styled confirm guard, then row disappears
   await fig.first().locator('[data-cck-photo-del]').click()
+  const dlg = page.locator('[data-cck-confirm-dialog]')
+  await expect(dlg).toBeVisible()
+  await dlg.locator('[data-cck-confirm-ok]').click()
   await expect(page.locator('[data-cck-photos] figure')).toHaveCount(0)
 })
 

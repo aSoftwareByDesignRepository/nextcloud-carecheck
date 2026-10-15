@@ -6,6 +6,32 @@ namespace OCA\CareCheck\Db;
 
 use OCP\AppFramework\Db\Entity;
 
+/**
+ * @method int|null getMemberId()
+ * @method void setMemberId(int|null $memberId)
+ * @method string|null getCodeHash()
+ * @method void setCodeHash(string|null $codeHash)
+ * @method \DateTime|null getCodeExpires()
+ * @method void setCodeExpires(\DateTime|null $codeExpires)
+ * @method int|null getCodeUsed()
+ * @method void setCodeUsed(int|null $codeUsed)
+ * @method string|null getTokenHash()
+ * @method void setTokenHash(string|null $tokenHash)
+ * @method string|null getDeviceLabel()
+ * @method void setDeviceLabel(string|null $deviceLabel)
+ * @method \DateTime|null getRedeemedAt()
+ * @method void setRedeemedAt(\DateTime|null $redeemedAt)
+ * @method int|null getRevoked()
+ * @method void setRevoked(int|null $revoked)
+ * @method \DateTime getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
+ * @method string|null getUid()
+ * @method void setUid(string|null $uid)
+ * @method string|null getKind()
+ * @method void setKind(string|null $kind)
+ * @method \DateTime|null getLastSeen()
+ * @method void setLastSeen(\DateTime|null $lastSeen)
+ */
 class Pair extends Entity
 {
 	protected $memberId;

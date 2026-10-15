@@ -35,6 +35,7 @@ final class VendorPublicKey
 		return getenv('CCK_ALLOW_VENDOR_KEY_OVERRIDE') === '1';
 	}
 
+	/** @return non-empty-string */
 	public static function bytes(): string
 	{
 		$decoded = self::base64urlDecode(self::publicKeyB64());

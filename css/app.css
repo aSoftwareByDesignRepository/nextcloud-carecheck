@@ -411,6 +411,56 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 .cck-uncovered ul { list-style: none; padding: 0; margin: 0; }
 .cck-uncovered li { padding: var(--cck-space-2) 0; }
 
+/* ---------- board date navigation ---------- */
+.cck-board-bar {
+	display: flex; justify-content: flex-end; flex-wrap: wrap;
+	margin: 0 0 var(--cck-space-4);
+}
+.cck-date-nav {
+	display: inline-flex; align-items: center; gap: var(--cck-space-2);
+	flex-wrap: wrap;
+}
+#app-content .cck-date-nav input[type='date'] {
+	min-height: var(--cck-touch);
+	border: 1px solid var(--cck-form-border);
+	border-radius: var(--cck-radius-sm);
+	background: var(--cck-bg-card); color: var(--cck-text);
+	padding: var(--cck-space-1) var(--cck-space-2);
+	font-variant-numeric: var(--cck-tab-num);
+}
+#app-content .cck-btn--icon {
+	display: inline-flex; align-items: center; justify-content: center;
+	min-width: var(--cck-touch); padding: var(--cck-space-1) var(--cck-space-2);
+}
+.cck-btn--icon .cck-icon { width: 20px; height: 20px; }
+
+/* ---------- board tours as cards ---------- */
+.cck-board.cck-card-grid { align-items: start; }
+.cck-board .cck-tour {
+	margin: 0;
+	background: var(--cck-bg-card);
+	border: 1px solid var(--cck-border);
+	border-radius: var(--cck-radius-md);
+	box-shadow: var(--cck-shadow-sm);
+	padding: var(--cck-space-4);
+}
+.cck-tour__head {
+	display: flex; align-items: baseline; justify-content: space-between;
+	gap: var(--cck-space-3); margin-bottom: var(--cck-space-3);
+}
+.cck-tour__head h2 { margin: 0; font-size: var(--cck-fs-lg); font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.cck-tour__progress {
+	flex: none; white-space: nowrap;
+	font-size: var(--cck-fs-sm); font-weight: 600;
+	color: var(--cck-muted); font-variant-numeric: var(--cck-tab-num);
+}
+.cck-stop { flex-wrap: wrap; }
+.cck-stop__who { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.cck-stop .cck-badge { margin-inline-start: auto; }
+
+/* section subnav chips on the client detail page */
+.cck-chipbar--sections { position: sticky; top: 0; z-index: 10; background: var(--cck-bg, var(--color-main-background)); padding-block: var(--cck-space-2); }
+
 /* ---------- empty / loading (§3.8) ---------- */
 .cck-empty { color: var(--cck-muted); padding: var(--cck-space-7) var(--cck-space-4); text-align: center; }
 .cck-empty-state { text-align: center; padding: var(--cck-space-7) var(--cck-space-4); }
@@ -653,6 +703,7 @@ dialog.cck-dialog[open] {
 /* ---------- print (§3.21) ---------- */
 @media print {
 	#app-navigation, .cck-topbar, .cck-form, .cck-board-actions,
+	.cck-board-bar, .cck-filter-panel, .cck-quick-filters,
 	.cck-skip-link, button, dialog, .cck-chipbar { display: none !important; }
 	.cck-view[hidden] { display: none !important; }
 	.cck-view { padding: 0; }

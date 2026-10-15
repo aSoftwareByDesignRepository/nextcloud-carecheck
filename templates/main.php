@@ -63,7 +63,20 @@ $settingsNav = static function () use ($l): string {
 
 		<div class="cck-view" data-cck-view="board" hidden>
 			<?php print_unescaped($viewHead('layout-grid', $l->t('Coverage board'), $l->t('Today at a glance — every stop, every caregiver.'))); ?>
-			<p class="cck-hint" data-cck-today></p>
+			<div class="cck-board-bar">
+				<div class="cck-date-nav" role="group" aria-label="<?php p($l->t('Choose day')); ?>">
+					<button type="button" class="cck-btn cck-btn--secondary cck-btn--icon" data-cck-prev-day
+						aria-label="<?php p($l->t('Previous day')); ?>">
+						<?php print_unescaped(IconCatalog::render('chevron-left', 'cck-icon')); ?>
+					</button>
+					<input type="date" data-cck-board-date aria-label="<?php p($l->t('Board date')); ?>">
+					<button type="button" class="cck-btn cck-btn--secondary cck-btn--icon" data-cck-next-day
+						aria-label="<?php p($l->t('Next day')); ?>">
+						<?php print_unescaped(IconCatalog::render('chevron-right', 'cck-icon')); ?>
+					</button>
+					<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-today-btn><?php p($l->t('Today')); ?></button>
+				</div>
+			</div>
 			<div data-cck-cron-banner class="cck-banner cck-banner--error" role="alert" hidden>
 				<?php p($l->t('Background jobs are not running — generated tours may be missing. Check the instance cron setup.')); ?>
 			</div>
@@ -76,11 +89,29 @@ $settingsNav = static function () use ($l): string {
 					<li data-cck-step="tours"><a href="#/tours"><?php p($l->t('Create first tour')); ?></a></li>
 				</ol>
 			</div>
-			<div data-cck-uncovered class="cck-uncovered" hidden>
-				<h2><?php p($l->t('Unassigned stops')); ?></h2>
+			<section class="cck-stat-strip" data-cck-stats aria-label="<?php p($l->t('Day overview')); ?>" hidden>
+				<div class="cck-stat-tile cck-stat-tile--primary">
+					<span class="cck-stat-tile__label"><?php p($l->t('Stops planned')); ?></span>
+					<span class="cck-stat-tile__value" data-cck-stat="total">0</span>
+				</div>
+				<div class="cck-stat-tile cck-stat-tile--danger">
+					<span class="cck-stat-tile__label"><?php p($l->t('Uncovered')); ?></span>
+					<span class="cck-stat-tile__value" data-cck-stat="uncovered">0</span>
+				</div>
+				<div class="cck-stat-tile cck-stat-tile--primary">
+					<span class="cck-stat-tile__label"><?php p($l->t('In progress')); ?></span>
+					<span class="cck-stat-tile__value" data-cck-stat="active">0</span>
+				</div>
+				<div class="cck-stat-tile cck-stat-tile--success">
+					<span class="cck-stat-tile__label"><?php p($l->t('Done')); ?></span>
+					<span class="cck-stat-tile__value" data-cck-stat="done">0</span>
+				</div>
+			</section>
+			<div data-cck-uncovered class="cck-callout cck-callout--warning cck-uncovered" role="alert" hidden>
+				<h2 class="cck-callout__title"><?php p($l->t('Unassigned stops')); ?></h2>
 				<ul data-cck-uncovered-list></ul>
 			</div>
-			<div data-cck-board class="cck-board"></div>
+			<div data-cck-board class="cck-board cck-card-grid"></div>
 			<div class="cck-board-actions">
 				<button type="button" data-cck-generate class="cck-btn cck-btn--primary"><?php p($l->t('Generate tours now')); ?></button>
 			</div>
@@ -88,25 +119,60 @@ $settingsNav = static function () use ($l): string {
 
 		<div class="cck-view" data-cck-view="clients" hidden>
 			<?php print_unescaped($viewHead('user-round', $l->t('Clients'), $l->t('People receiving care — records stay encrypted.'))); ?>
-			<form data-cck-client-form class="cck-form">
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Name')); ?></span>
-					<input type="text" name="name" required maxlength="190" placeholder="<?php p($l->t('e.g. Johanna Meier')); ?>"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Street')); ?></span>
-					<input type="text" name="street" maxlength="190"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Required qualification')); ?></span>
-					<select name="requires_qual">
-						<option value=""><?php p($l->t('Any qualification')); ?></option>
-						<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
-						<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
-						<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
-					</select></label>
-				<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Add client')); ?></button>
-			</form>
+			<section class="cck-filter-panel" aria-labelledby="cck-clients-filter-h">
+				<header class="cck-filter-panel__head">
+					<h2 id="cck-clients-filter-h"><?php p($l->t('Filter')); ?></h2>
+					<p class="cck-filter-panel__intro"><?php p($l->t('Narrow the client list by name, street or qualification.')); ?></p>
+				</header>
+				<div class="cck-filter-panel__body">
+					<form data-cck-clients-filter class="cck-filter-panel__form" role="search" aria-label="<?php p($l->t('Filter clients')); ?>">
+						<div class="cck-filter-grid">
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-cf-q"><?php p($l->t('Search')); ?></label>
+								<div class="cck-filter-field__control"><input id="cck-cf-q" type="search" name="q" maxlength="190" placeholder="<?php p($l->t('Name or street…')); ?>"></div>
+							</div>
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-cf-qual"><?php p($l->t('Required qualification')); ?></label>
+								<div class="cck-filter-field__control"><select id="cck-cf-qual" name="qual">
+									<option value=""><?php p($l->t('All')); ?></option>
+									<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+									<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+									<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+								</select></div>
+							</div>
+							<div class="cck-filter-field cck-filter-field--actions">
+								<button type="reset" class="cck-btn cck-btn--secondary"><?php p($l->t('Clear')); ?></button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</section>
+			<div class="cck-list-head">
+				<h2 class="cck-list-head__title"><?php p($l->t('All clients')); ?></h2>
+				<span class="cck-list-head__count" data-cck-clients-count aria-live="polite"></span>
+			</div>
 			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Client table — scroll horizontally for more columns')); ?>">
-				<table class="cck-table" data-cck-clients><thead><tr>
-					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Street')); ?></th><th><?php p($l->t('Qualification')); ?></th><th></th>
+				<table class="cck-table cck-table--cards" data-cck-clients><thead><tr>
+					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Street')); ?></th><th><?php p($l->t('Qualification')); ?></th><th><?php p($l->t('Actions')); ?></th>
 				</tr></thead><tbody><tr><td colspan="4" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
 			</div>
+			<section class="cck-panel">
+				<h2><?php p($l->t('Add client')); ?></h2>
+				<form data-cck-client-form class="cck-form">
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Name')); ?></span>
+						<input type="text" name="name" required maxlength="190" placeholder="<?php p($l->t('e.g. Johanna Meier')); ?>"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Street')); ?></span>
+						<input type="text" name="street" maxlength="190"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Required qualification')); ?></span>
+						<select name="requires_qual">
+							<option value=""><?php p($l->t('Any qualification')); ?></option>
+							<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+							<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+							<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+						</select></label>
+					<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Add client')); ?></button>
+				</form>
+			</section>
 		</div>
 
 		<div class="cck-view" data-cck-view="client" hidden>
@@ -117,8 +183,15 @@ $settingsNav = static function () use ($l): string {
 				</div>
 				<button type="button" data-cck-client-back class="cck-btn cck-btn--secondary cck-view-head__back"><?php p($l->t('Back to list')); ?></button>
 			</header>
+			<nav class="cck-chipbar cck-chipbar--sections" aria-label="<?php p($l->t('Client sections')); ?>">
+				<button type="button" class="cck-chipbar__chip" data-cck-section="record"><?php p($l->t('Record')); ?></button>
+				<button type="button" class="cck-chipbar__chip" data-cck-section="plan"><?php p($l->t('Care plan')); ?></button>
+				<button type="button" class="cck-chipbar__chip" data-cck-section="journal"><?php p($l->t('Client log')); ?></button>
+				<button type="button" class="cck-chipbar__chip" data-cck-section="photos"><?php p($l->t('Photos')); ?></button>
+				<button type="button" class="cck-chipbar__chip" data-cck-section="exports"><?php p($l->t('Exports')); ?></button>
+			</nav>
 
-			<section class="cck-panel">
+			<section class="cck-panel" id="cck-sec-record" tabindex="-1">
 				<h2><?php p($l->t('Client record')); ?></h2>
 				<form data-cck-client-edit class="cck-form-col">
 					<input type="hidden" name="base_revision">
@@ -139,7 +212,7 @@ $settingsNav = static function () use ($l): string {
 				</form>
 			</section>
 
-			<section class="cck-panel">
+			<section class="cck-panel" id="cck-sec-plan" tabindex="-1">
 				<h2><?php p($l->t('Care plan')); ?></h2>
 				<form data-cck-plan-form class="cck-form-col">
 					<input type="hidden" name="base_revision">
@@ -148,7 +221,7 @@ $settingsNav = static function () use ($l): string {
 				</form>
 			</section>
 
-			<section class="cck-panel">
+			<section class="cck-panel" id="cck-sec-journal" tabindex="-1">
 				<h2><?php p($l->t('Client log')); ?></h2>
 				<form data-cck-journal-form class="cck-form">
 					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Log entry')); ?></span>
@@ -158,7 +231,7 @@ $settingsNav = static function () use ($l): string {
 				<ol data-cck-journal class="cck-journal" reversed></ol>
 			</section>
 
-			<section class="cck-panel" data-cck-photo-panel>
+			<section class="cck-panel" id="cck-sec-photos" tabindex="-1" data-cck-photo-panel>
 				<h2><?php p($l->t('Photos')); ?></h2>
 				<p class="cck-muted" data-cck-photo-hint hidden><?php p($l->t('Photo documentation requires the client\'s consent — enable it in the client record above.')); ?></p>
 				<div class="cck-form" data-cck-photo-controls hidden>
@@ -168,7 +241,7 @@ $settingsNav = static function () use ($l): string {
 				<div class="cck-photo-grid" data-cck-photos></div>
 			</section>
 
-			<section class="cck-panel">
+			<section class="cck-panel" id="cck-sec-exports" tabindex="-1">
 				<h2><?php p($l->t('Exports')); ?></h2>
 				<label><?php p($l->t('Month')); ?> <input type="month" name="export_period" data-cck-export-period></label>
 				<div class="cck-form">
@@ -182,7 +255,27 @@ $settingsNav = static function () use ($l): string {
 
 		<div class="cck-view" data-cck-view="tours" hidden>
 			<?php print_unescaped($viewHead('route', $l->t('Tours'), $l->t('Weekly templates — stops materialize into daily tours.'))); ?>
-			<form data-cck-tour-form class="cck-form-col">
+			<div class="cck-quick-filters" aria-label="<?php p($l->t('Filter tours by status')); ?>">
+				<span class="cck-quick-filters__label"><?php p($l->t('Show')); ?></span>
+				<div class="cck-filter-bar" data-cck-tour-filters>
+					<button type="button" class="cck-filter" data-value="all" aria-pressed="true"><?php p($l->t('All')); ?></button>
+					<button type="button" class="cck-filter" data-value="published" aria-pressed="false"><?php p($l->t('Published')); ?></button>
+					<button type="button" class="cck-filter" data-value="draft" aria-pressed="false"><?php p($l->t('Draft')); ?></button>
+				</div>
+			</div>
+			<div class="cck-list-head">
+				<h2 class="cck-list-head__title"><?php p($l->t('Templates')); ?></h2>
+				<span class="cck-list-head__count" data-cck-tours-count aria-live="polite"></span>
+			</div>
+			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Tour template table — scroll horizontally for more columns')); ?>">
+				<table class="cck-table cck-table--cards" data-cck-templates><thead><tr>
+					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Weekdays')); ?></th><th><?php p($l->t('Status')); ?></th><th><?php p($l->t('Actions')); ?></th>
+				</tr></thead><tbody><tr><td colspan="4" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
+			</div>
+			<section class="cck-panel">
+				<h2 data-cck-tour-form-title><?php p($l->t('New tour template')); ?></h2>
+				<form data-cck-tour-form class="cck-form-col">
+				<input type="hidden" name="edit_id">
 				<label><?php p($l->t('Tour name')); ?> <input name="name" required maxlength="190"></label>
 				<fieldset class="cck-weekdays"><legend><?php p($l->t('Weekdays')); ?></legend>
 					<label><input type="checkbox" name="wd" value="1"> <?php p($l->t('Mon')); ?></label>
@@ -201,34 +294,68 @@ $settingsNav = static function () use ($l): string {
 				<div data-cck-tour-stops></div>
 				<div class="cck-form">
 					<button type="button" data-cck-tour-add-stop class="cck-btn cck-btn--secondary"><?php p($l->t('Add stop')); ?></button>
-					<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Save tour template')); ?></button>
+					<button type="submit" class="cck-btn cck-btn--primary" data-cck-tour-submit><?php p($l->t('Save tour template')); ?></button>
+					<button type="button" class="cck-btn cck-btn--secondary" data-cck-tour-cancel hidden><?php p($l->t('Cancel edit')); ?></button>
 				</div>
-			</form>
-			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Tour template table — scroll horizontally for more columns')); ?>">
-				<table class="cck-table" data-cck-templates><thead><tr>
-					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Weekdays')); ?></th><th><?php p($l->t('Status')); ?></th>
-				</tr></thead><tbody><tr><td colspan="3" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
-			</div>
+				</form>
+			</section>
 		</div>
 
 		<div class="cck-view" data-cck-view="members" hidden>
 			<?php print_unescaped($viewHead('users', $l->t('Members'), $l->t('Care staff — pair devices and track absences here.'))); ?>
-			<form data-cck-member-form class="cck-form">
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Display name')); ?></span>
-					<input type="text" name="display_name" required maxlength="190"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Qualification')); ?></span>
-					<select name="qualification">
-						<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
-						<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
-						<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
-					</select></label>
-				<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Add member')); ?></button>
-			</form>
-			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Member table — scroll horizontally for more columns')); ?>">
-				<table class="cck-table" data-cck-members><thead><tr>
-					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Qualification')); ?></th><th><?php p($l->t('Team')); ?></th><th></th>
-				</tr></thead><tbody><tr><td colspan="3" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
+			<section class="cck-filter-panel" aria-labelledby="cck-members-filter-h">
+				<header class="cck-filter-panel__head">
+					<h2 id="cck-members-filter-h"><?php p($l->t('Filter')); ?></h2>
+					<p class="cck-filter-panel__intro"><?php p($l->t('Find staff by name or qualification.')); ?></p>
+				</header>
+				<div class="cck-filter-panel__body">
+					<form data-cck-members-filter class="cck-filter-panel__form" role="search" aria-label="<?php p($l->t('Filter members')); ?>">
+						<div class="cck-filter-grid">
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-mf-q"><?php p($l->t('Search')); ?></label>
+								<div class="cck-filter-field__control"><input id="cck-mf-q" type="search" name="q" maxlength="190" placeholder="<?php p($l->t('Name…')); ?>"></div>
+							</div>
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-mf-qual"><?php p($l->t('Qualification')); ?></label>
+								<div class="cck-filter-field__control"><select id="cck-mf-qual" name="qual">
+									<option value=""><?php p($l->t('All')); ?></option>
+									<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+									<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+									<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+								</select></div>
+							</div>
+							<div class="cck-filter-field cck-filter-field--actions">
+								<button type="reset" class="cck-btn cck-btn--secondary"><?php p($l->t('Clear')); ?></button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</section>
+			<div class="cck-list-head">
+				<h2 class="cck-list-head__title"><?php p($l->t('All members')); ?></h2>
+				<span class="cck-list-head__count" data-cck-members-count aria-live="polite"></span>
 			</div>
+			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Member table — scroll horizontally for more columns')); ?>">
+				<table class="cck-table cck-table--cards" data-cck-members><thead><tr>
+					<th><?php p($l->t('Name')); ?></th><th><?php p($l->t('Qualification')); ?></th><th><?php p($l->t('Team')); ?></th><th><?php p($l->t('Actions')); ?></th>
+				</tr></thead><tbody><tr><td colspan="4" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
+			</div>
+			<section class="cck-panel">
+				<h2 data-cck-member-form-title><?php p($l->t('Add member')); ?></h2>
+				<form data-cck-member-form class="cck-form">
+					<input type="hidden" name="edit_id">
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Display name')); ?></span>
+						<input type="text" name="display_name" required maxlength="190"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Qualification')); ?></span>
+						<select name="qualification">
+							<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+							<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+							<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+						</select></label>
+					<button type="submit" class="cck-btn cck-btn--primary" data-cck-member-submit><?php p($l->t('Add member')); ?></button>
+					<button type="button" class="cck-btn cck-btn--secondary" data-cck-member-cancel hidden><?php p($l->t('Cancel edit')); ?></button>
+				</form>
+			</section>
 
 			<div data-cck-paircard class="cck-paircard" hidden>
 				<h2><?php p($l->t('Pairing card')); ?></h2>
@@ -261,27 +388,64 @@ $settingsNav = static function () use ($l): string {
 
 		<div class="cck-view" data-cck-view="catalog" hidden>
 			<?php print_unescaped($viewHead('clipboard-list', $l->t('Catalog'), $l->t('Reusable care tasks for plans and tour stops.'))); ?>
-			<form data-cck-catalog-form class="cck-form">
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Code')); ?></span>
-					<input type="text" name="code" required maxlength="48" placeholder="<?php p($l->t('e.g. body-care')); ?>" pattern="[A-Za-z0-9_.\-]+"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Label')); ?></span>
-					<input type="text" name="label" required maxlength="190" placeholder="<?php p($l->t('e.g. Personal hygiene')); ?>"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Icon (optional)')); ?></span>
-					<input type="text" name="icon" maxlength="48"></label>
-				<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Required qualification')); ?></span>
-					<select name="requires_qual">
-						<option value=""><?php p($l->t('Any qualification')); ?></option>
-						<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
-						<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
-						<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
-					</select></label>
-				<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Add task')); ?></button>
-			</form>
-			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Task catalog table — scroll horizontally for more columns')); ?>">
-				<table class="cck-table" data-cck-catalog><thead><tr>
-					<th><?php p($l->t('Code')); ?></th><th><?php p($l->t('Label')); ?></th><th><?php p($l->t('Qualification')); ?></th>
-				</tr></thead><tbody><tr><td colspan="3" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
+			<section class="cck-filter-panel" aria-labelledby="cck-catalog-filter-h">
+				<header class="cck-filter-panel__head">
+					<h2 id="cck-catalog-filter-h"><?php p($l->t('Filter')); ?></h2>
+					<p class="cck-filter-panel__intro"><?php p($l->t('Find tasks by code, label or required qualification.')); ?></p>
+				</header>
+				<div class="cck-filter-panel__body">
+					<form data-cck-catalog-filter class="cck-filter-panel__form" role="search" aria-label="<?php p($l->t('Filter catalog')); ?>">
+						<div class="cck-filter-grid">
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-kf-q"><?php p($l->t('Search')); ?></label>
+								<div class="cck-filter-field__control"><input id="cck-kf-q" type="search" name="q" maxlength="190" placeholder="<?php p($l->t('Code or label…')); ?>"></div>
+							</div>
+							<div class="cck-filter-field">
+								<label class="cck-filter-field__label" for="cck-kf-qual"><?php p($l->t('Required qualification')); ?></label>
+								<div class="cck-filter-field__control"><select id="cck-kf-qual" name="qual">
+									<option value=""><?php p($l->t('All')); ?></option>
+									<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+									<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+									<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+								</select></div>
+							</div>
+							<div class="cck-filter-field cck-filter-field--actions">
+								<button type="reset" class="cck-btn cck-btn--secondary"><?php p($l->t('Clear')); ?></button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</section>
+			<div class="cck-list-head">
+				<h2 class="cck-list-head__title"><?php p($l->t('All tasks')); ?></h2>
+				<span class="cck-list-head__count" data-cck-catalog-count aria-live="polite"></span>
 			</div>
+			<div class="cck-table-wrap" tabindex="0" role="region" aria-label="<?php p($l->t('Task catalog table — scroll horizontally for more columns')); ?>">
+				<table class="cck-table cck-table--cards" data-cck-catalog><thead><tr>
+					<th><?php p($l->t('Code')); ?></th><th><?php p($l->t('Label')); ?></th><th><?php p($l->t('Qualification')); ?></th><th><?php p($l->t('Actions')); ?></th>
+				</tr></thead><tbody><tr><td colspan="4" class="cck-empty"><?php p($l->t('Loading…')); ?></td></tr></tbody></table>
+			</div>
+			<section class="cck-panel">
+				<h2 data-cck-catalog-form-title><?php p($l->t('Add task')); ?></h2>
+				<form data-cck-catalog-form class="cck-form">
+					<input type="hidden" name="edit_id">
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Code')); ?></span>
+						<input type="text" name="code" required maxlength="48" placeholder="<?php p($l->t('e.g. body-care')); ?>" pattern="[A-Za-z0-9_.\-]+"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Label')); ?></span>
+						<input type="text" name="label" required maxlength="190" placeholder="<?php p($l->t('e.g. Personal hygiene')); ?>"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Icon (optional)')); ?></span>
+						<input type="text" name="icon" maxlength="48"></label>
+					<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Required qualification')); ?></span>
+						<select name="requires_qual">
+							<option value=""><?php p($l->t('Any qualification')); ?></option>
+							<option value="hilfskraft"><?php p($l->t('Care assistant')); ?></option>
+							<option value="betreuer"><?php p($l->t('Caregiver')); ?></option>
+							<option value="fachkraft"><?php p($l->t('Qualified caregiver')); ?></option>
+						</select></label>
+					<button type="submit" class="cck-btn cck-btn--primary" data-cck-catalog-submit><?php p($l->t('Add task')); ?></button>
+					<button type="button" class="cck-btn cck-btn--secondary" data-cck-catalog-cancel hidden><?php p($l->t('Cancel edit')); ?></button>
+				</form>
+			</section>
 		</div>
 
 		<div class="cck-view" data-cck-view="inbox" hidden>
@@ -291,6 +455,14 @@ $settingsNav = static function () use ($l): string {
 				<p class="cck-hint"><?php p($l->t('Rejected visit bundles wait here — check the client log, correct if needed, then resolve.')); ?></p>
 				<div data-cck-reviews></div>
 			</section>
+			<div class="cck-quick-filters" aria-label="<?php p($l->t('Filter notices')); ?>">
+				<span class="cck-quick-filters__label"><?php p($l->t('Show')); ?></span>
+				<div class="cck-filter-bar" data-cck-notice-filters>
+					<button type="button" class="cck-filter" data-value="all" aria-pressed="true"><?php p($l->t('All')); ?></button>
+					<button type="button" class="cck-filter" data-value="open" aria-pressed="false"><?php p($l->t('Needs action')); ?></button>
+					<button type="button" class="cck-filter" data-value="ack" aria-pressed="false"><?php p($l->t('Acknowledged')); ?></button>
+				</div>
+			</div>
 			<section class="cck-panel">
 				<h2><?php p($l->t('Notices')); ?></h2>
 				<div data-cck-notices></div>
@@ -353,11 +525,12 @@ $settingsNav = static function () use ($l): string {
 		<label><?php p($l->t('Break-glass max hours')); ?> <input type="number" name="breakglass_hours_max" min="1" max="72"></label>
 		<fieldset>
 			<legend><?php p($l->t('Time-of-day presets')); ?></legend>
-			<label><?php p($l->t('early morning (min)')); ?> <input name="preset_early" pattern="\d{1,4}-\d{1,4}" placeholder="360-540"></label>
-			<label><?php p($l->t('morning (min)')); ?> <input name="preset_morning" pattern="\d{1,4}-\d{1,4}" placeholder="540-720"></label>
-			<label><?php p($l->t('midday (min)')); ?> <input name="preset_noon" pattern="\d{1,4}-\d{1,4}" placeholder="720-840"></label>
-			<label><?php p($l->t('afternoon (min)')); ?> <input name="preset_afternoon" pattern="\d{1,4}-\d{1,4}" placeholder="840-1020"></label>
-			<label><?php p($l->t('evening (min)')); ?> <input name="preset_evening" pattern="\d{1,4}-\d{1,4}" placeholder="1020-1200"></label>
+			<p class="cck-hint"><?php p($l->t('Use 24-hour times, e.g. 09:00-12:00.')); ?></p>
+			<label><?php p($l->t('early morning')); ?> <input name="preset_early" pattern="\d{2}:\d{2}-\d{2}:\d{2}" placeholder="06:00-09:00" inputmode="numeric"></label>
+			<label><?php p($l->t('morning')); ?> <input name="preset_morning" pattern="\d{2}:\d{2}-\d{2}:\d{2}" placeholder="09:00-12:00" inputmode="numeric"></label>
+			<label><?php p($l->t('midday')); ?> <input name="preset_noon" pattern="\d{2}:\d{2}-\d{2}:\d{2}" placeholder="12:00-14:00" inputmode="numeric"></label>
+			<label><?php p($l->t('afternoon')); ?> <input name="preset_afternoon" pattern="\d{2}:\d{2}-\d{2}:\d{2}" placeholder="14:00-17:00" inputmode="numeric"></label>
+			<label><?php p($l->t('evening')); ?> <input name="preset_evening" pattern="\d{2}:\d{2}-\d{2}:\d{2}" placeholder="17:00-20:00" inputmode="numeric"></label>
 		</fieldset>
 		<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Save')); ?></button>
 	</form>
@@ -427,7 +600,8 @@ $settingsNav = static function () use ($l): string {
 </template>
 <template data-cck-settings-tpl="support">
 	<?php
-		$supportUsLinks = new SupportUsLinks('CareCheck', true, '/apps/carecheck#/settings/companion');
+		$supportUsLinks = new SupportUsLinks('CareCheck', true,
+			\OCP\Server::get(\OCP\IURLGenerator::class)->linkToRoute('carecheck.page.index') . '#/settings/companion');
 		$supportUsCssPrefix = 'cck';
 		$supportUsShellPrefix = 'cck';
 		$supportUsBtnPrimaryClass = 'cck-btn cck-btn--primary';
@@ -444,6 +618,15 @@ $settingsNav = static function () use ($l): string {
 	<div class="cck-dialog__actions">
 		<button type="button" data-cck-assign-cancel class="cck-btn cck-btn--secondary"><?php p($l->t('Cancel')); ?></button>
 		<button type="button" class="cck-btn cck-btn--primary" data-cck-assign-confirm disabled><?php p($l->t('Assign')); ?></button>
+	</div>
+</dialog>
+
+<dialog class="cck-dialog" data-cck-confirm-dialog aria-labelledby="cck-confirm-title">
+	<h2 id="cck-confirm-title"><?php p($l->t('Please confirm')); ?></h2>
+	<p class="cck-dialog__hint" data-cck-confirm-text></p>
+	<div class="cck-dialog__actions">
+		<button type="button" data-cck-confirm-cancel class="cck-btn cck-btn--secondary"><?php p($l->t('Cancel')); ?></button>
+		<button type="button" class="cck-btn cck-btn--danger" data-cck-confirm-ok><?php p($l->t('Confirm')); ?></button>
 	</div>
 </dialog>
 

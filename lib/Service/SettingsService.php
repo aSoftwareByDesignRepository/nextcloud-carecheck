@@ -48,7 +48,7 @@ class SettingsService
 	/** @param list<string> $values */
 	public function setList(string $key, array $values): void
 	{
-		$this->config->setValueString(Constants::APP_ID, $key, json_encode(array_values($values)));
+		$this->config->setValueString(Constants::APP_ID, $key, json_encode(array_values($values), JSON_THROW_ON_ERROR));
 	}
 
 	/** Cron liveness: jobs touch their key on every run; the board flags starvation. */

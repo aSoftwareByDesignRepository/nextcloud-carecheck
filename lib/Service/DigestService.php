@@ -88,7 +88,8 @@ class DigestService
 		);
 		$task = $this->tasks->runTask($task);
 		$out = $task->getOutput();
-		$text = is_array($out) ? trim((string)($out['output'] ?? '')) : '';
+		$rawOut = is_array($out) ? ($out['output'] ?? '') : '';
+		$text = is_string($rawOut) ? trim($rawOut) : '';
 		if ($text === '') {
 			throw new ApiException('UNAVAILABLE', 'The AI backend returned no summary.', [], 503);
 		}

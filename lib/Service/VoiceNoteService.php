@@ -7,6 +7,7 @@ namespace OCA\CareCheck\Service;
 use OCA\CareCheck\Db\VoiceNote;
 use OCA\CareCheck\Db\VoiceNoteMapper;
 use OCA\CareCheck\Exception\ApiException;
+use OCP\Files\Folder;
 use OCP\Files\IAppData;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
@@ -176,6 +177,9 @@ class VoiceNoteService
 		} catch (NotFoundException) {
 			$dir = $folder->newFolder('.carecheck-stt');
 		}
+		if (!$dir instanceof Folder) {
+			throw new \RuntimeException('temp dir is not a folder');
+		}
 		$ext = str_contains((string)$n->getMime(), '/') ? substr((string)$n->getMime(), strpos((string)$n->getMime(), '/') + 1) : 'bin';
 		$file = $dir->newFile('vnote-' . (int)$n->getId() . '.' . preg_replace('/[^a-z0-9]/i', '', $ext));
 		$file->putContent($bytes);
@@ -209,7 +213,8 @@ class VoiceNoteService
 			}
 			$st = $task->getStatus();
 			if ($st === Task::STATUS_SUCCESSFUL) {
-				$text = (string)($task->getOutput()['output'] ?? '');
+				$rawOut = $task->getOutput()['output'] ?? '';
+				$text = is_string($rawOut) ? $rawOut : '';
 				$this->db->beginTransaction();
 				try {
 					$n->setTranscriptEnc($this->crypto->encrypt($text));
@@ -275,6 +280,9 @@ class VoiceNoteService
 		}
 		try {
 			$dir = $this->rootFolder->getUserFolder($uid)->get('.carecheck-stt');
+			if (!$dir instanceof Folder) {
+				return;
+			}
 			foreach ($dir->getDirectoryListing() as $f) {
 				if (str_starts_with($f->getName(), 'vnote-' . (int)$n->getId() . '.')) {
 					$f->delete();

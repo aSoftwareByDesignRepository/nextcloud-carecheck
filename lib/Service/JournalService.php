@@ -31,6 +31,7 @@ class JournalService
 	 * Append an entry. MUST be called inside $this->db->beginTransaction().
 	 * The caller controls the atomic boundary (visit + tasks + stop + journal
 	 * commit together — spec invariant).
+	 * @param array<string, mixed> $payload
 	 */
 	public function append(int $clientId, string $type, string $actorRef, array $payload): JournalEntry
 	{
@@ -54,7 +55,7 @@ class JournalService
 		$seq = $head === false ? 1 : ((int)$head['seq'] + 1);
 		$prevHash = $head === false ? hash('sha256', self::GENESIS . ':' . $clientId) : (string)$head['payload_hash'];
 
-		$enc = $this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE));
+		$enc = $this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
 		$payloadHash = hash('sha256', $prevHash . '|' . $enc);
 
 		$e = new JournalEntry();

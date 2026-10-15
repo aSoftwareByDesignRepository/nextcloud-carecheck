@@ -1,0 +1,23 @@
+{
+	"prefix": "cck",
+	"outDir": "craft/web",
+	"viewports": [
+		{ "name": "mobile", "width": 320, "height": 800 },
+		{ "name": "tablet", "width": 768, "height": 800 },
+		{ "name": "desktop", "width": 1280, "height": 800 }
+	],
+	"surfaces": [
+		{ "id": "board", "hash": "#/board", "states": ["populated", "empty"], "dark": true },
+		{ "id": "clients", "hash": "#/clients", "states": ["populated", "empty"], "dark": true },
+		{ "id": "tours", "hash": "#/tours", "states": ["populated"] },
+		{ "id": "members", "hash": "#/members", "states": ["populated", "empty"] },
+		{ "id": "catalog", "hash": "#/catalog", "states": ["populated", "empty"] },
+		{ "id": "inbox", "hash": "#/inbox", "states": ["current"], "dark": true },
+		{ "id": "client", "hash": "#/client/{clientId}", "states": ["populated"], "needsClient": true },
+		{ "id": "settings-general", "hash": "#/settings/general", "states": ["current"], "dark": true },
+		{ "id": "settings-companion", "hash": "#/settings/companion", "states": ["current"] },
+		{ "id": "settings-access", "hash": "#/settings/access", "states": ["current"] },
+		{ "id": "settings-support", "hash": "#/settings/support", "states": ["current"] },
+		{ "id": "getapp", "hash": "#/getapp", "states": ["current"] }
+	]
+}

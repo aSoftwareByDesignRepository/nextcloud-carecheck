@@ -4,7 +4,9 @@
   "description": "CareCheck Nextcloud app — Playwright journey / a11y gauntlet",
   "scripts": {
     "e2e": "playwright test",
-    "e2e:install": "playwright install chromium"
+    "e2e:install": "playwright install chromium",
+    "verify:ui": "php scripts/check-l10n-parity.php && php scripts/check-l10n-runtime.php && php scripts/check-l10n-placeholders.php",
+    "l10n:regen": "php scripts/regenerate-l10n-js.php"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

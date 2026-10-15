@@ -323,6 +323,40 @@ class NhFeaturesTest extends TestCase
 		$this->assertSame(['Anna A', 'Bert B'], $created);
 	}
 
+	public function testImportPreviewCommitParity(): void
+	{
+		$crypto = $this->createMock(CryptoService::class);
+		$crypto->method('normalizeName')->willReturnCallback(
+			static fn (string $n) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', $n)))
+		);
+		$clients = $this->createMock(ClientService::class);
+		$clients->method('create')->willReturn(new \OCA\CareCheck\Db\Client());
+		$svc = new ClientImportService($this->emptyDb(), $clients, $crypto, $this->aclMock());
+		// fixture exercises every cell class: ok, intra-file dup, field_too_long
+		$csv = "name;street;zip;city;accessnote\n"
+			. "Anna A;Weg 1;1;A;ok\n"
+			. "Anna A;Weg 1;1;A;ok\n"
+			. str_repeat('x', 191) . ";Weg 2;1;B;x\n"
+			. "Bert B;Weg 3;1;C;" . str_repeat('y', 1001) . "\n"
+			. "Clara C;Weg 4;1;D;fine\n";
+		$prev = $svc->preview('uid:staff', $csv);
+		$predicted = ['ok' => 0, 'duplicate' => 0, 'error' => []];
+		foreach ($prev['rows'] as $r) {
+			if ($r['status'] === 'error') {
+				$predicted['error'][] = $r['row'];
+			} else {
+				$predicted[$r['status']]++;
+			}
+		}
+		$out = $svc->commit('uid:staff', $csv);
+		$this->assertSame($predicted['ok'], $out['created']);
+		$this->assertSame($predicted['duplicate'], $out['skipped']);
+		$this->assertSame($predicted['error'], $out['errors']);
+		$this->assertSame(2, $out['created']);
+		$this->assertSame(1, $out['skipped']);
+		$this->assertSame([4, 5], $out['errors']);
+	}
+
 	/* ---------- NH-13 AzcAbsenceAdapter — fail closed ---------- */
 
 	public function testAzcImportFailsSoftWhenAppAbsent(): void
@@ -344,5 +378,30 @@ class NhFeaturesTest extends TestCase
 		$out = $svc->import('2026-10-01', '2026-10-31');
 		$this->assertFalse($out['available']);
 		$this->assertSame(0, $out['imported']);
+	}
+
+	/* ---------- archive repeat → uniform 404 ---------- */
+
+	public function testArchiveRepeatIsUniform404(): void
+	{
+		$c = new Client();
+		$c->setId(9);
+		$c->setActive(0); // already archived
+		$clients = $this->createMock(ClientMapper::class);
+		$clients->method('find')->willReturn($c);
+		$clients->expects($this->never())->method('update');
+		$svc = new ClientService(
+			$this->createMock(IDBConnection::class),
+			$clients,
+			$this->createMock(CryptoService::class),
+			$this->aclMock(),
+		);
+		try {
+			$svc->archive('uid:staff', 9);
+			$this->fail('second archive must throw');
+		} catch (ApiException $e) {
+			$this->assertSame('NOT_FOUND', $e->getErrorCode());
+			$this->assertSame(404, $e->getHttpStatus());
+		}
 	}
 }

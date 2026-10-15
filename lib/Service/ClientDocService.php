@@ -42,7 +42,7 @@ class ClientDocService
 	) {
 	}
 
-	/** @return list<array{id:int,label:string,expiresOn:?string}> */
+	/** @return list<array{id:int,label:?string,expiresOn:?string}> */
 	public function list(string $actorRef, int $clientId): array
 	{
 		$this->acl->assertClientScope($actorRef, $clientId);
@@ -70,6 +70,7 @@ class ClientDocService
 		if ($expiresOn !== null && $expiresOn !== '') {
 			$exp = \DateTime::createFromFormat('Y-m-d', $expiresOn);
 			if ($exp === false || $exp->format('Y-m-d') !== $expiresOn) {
+				$exp = null;
 				$fields['expires_on'] = 'invalid';
 			}
 		}
