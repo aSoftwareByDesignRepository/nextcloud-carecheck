@@ -16,8 +16,11 @@ const CREDS = { username: 'cck_smoke', password: 'CckSmoke!2026' };
 
 test.describe('LOCALE_RESILIENCE', () => {
 	test('de locale: real text rendered, no pan, no clipped controls @320/768', async ({ page }) => {
+		const forcedLanguage = occ('config:system:get force_language');
+		test.skip(forcedLanguage !== '' && !forcedLanguage.startsWith('de'), `Nextcloud force_language=${forcedLanguage}`);
 		occ('user:setting cck_smoke core lang de');
 		try {
+			await page.context().setExtraHTTPHeaders({ 'Accept-Language': 'de-DE,de;q=0.9' });
 			await login(page, CREDS);
 			for (const width of [320, 768]) {
 				await page.setViewportSize({ width, height: 900 });

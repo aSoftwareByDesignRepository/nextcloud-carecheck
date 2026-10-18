@@ -68,15 +68,15 @@ class AnchorService
 	private function buildTsq(string $hexDigest): string
 	{
 		$digest = hex2bin($hexDigest);
-		if ($digest === false) {
-			throw new \RuntimeException('invalid hex digest');
+		if ($digest === false || strlen($digest) !== 32) {
+			throw new \RuntimeException('invalid SHA-256 digest');
 		}
 		// SEQUENCE { INTEGER 1, SEQUENCE { SEQUENCE { OID sha256 }, OCTET STRING digest }, TRUE }
 		$oid = "\x06\x09\x60\x86\x48\x01\x65\x03\x04\x02\x01";
 		$algId = "\x30\x0b" . $oid . "\x05\x00";
-		$msgImprint = "\x30" . chr(strlen($algId) + strlen($digest) + 4) . $algId . "\x04" . chr(strlen($digest)) . $digest;
+		$msgImprint = "\x30" . pack('C', strlen($algId) + strlen($digest) + 4) . $algId . "\x04" . pack('C', strlen($digest)) . $digest;
 		$body = "\x02\x01\x01" . $msgImprint . "\x01\x01\xff";
-		return "\x30" . chr(strlen($body)) . $body;
+		return "\x30" . pack('C', strlen($body)) . $body;
 	}
 
 	public function latestStatus(): array

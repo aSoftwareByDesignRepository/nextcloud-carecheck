@@ -12,7 +12,8 @@ release_exclude = \
 	--exclude='.github' \
 	--exclude='build' \
 	--exclude='node_modules' \
-	--exclude='vendor' \
+	--exclude='/vendor' \
+	--exclude='Makefile' \
 	--exclude='tests' \
 	--exclude='e2e' \
 	--exclude='docs' \
@@ -46,11 +47,13 @@ verify-ui:
 
 release: clean
 	@mkdir -p $(release_dir)
-	@tar -czf $(release_dir)/$(app_name).tar.gz \
-		$(release_exclude) \
-		--exclude='Makefile' \
-		--transform 's,^\.,$(app_name),' \
-		.
+	@staging=$$(mktemp -d) && \
+		mkdir -p "$$staging/$(app_name)" && \
+		rsync -a $(release_exclude) ./ "$$staging/$(app_name)/" && \
+		composer install --no-dev --optimize-autoloader --ignore-platform-reqs --quiet \
+			--working-dir="$$staging/$(app_name)" && \
+		tar -czf $(release_dir)/$(app_name).tar.gz -C "$$staging" $(app_name) && \
+		rm -rf "$$staging"
 	@echo "Created $(release_dir)/$(app_name).tar.gz"
 	@echo "Add appinfo/signature.json with: make sign"
 

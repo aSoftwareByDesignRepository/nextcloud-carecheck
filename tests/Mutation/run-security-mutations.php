@@ -173,7 +173,7 @@ function targets(string $appRoot): array {
 				],
 				'iv_static' => [
 					'from' => '$iv = random_bytes(12);',
-					'to' => "$iv = str_repeat(\"\\x00\", 12);",
+					'to' => '$iv = str_repeat("\\x00", 12);',
 				],
 			],
 		],

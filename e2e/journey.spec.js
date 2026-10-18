@@ -13,6 +13,7 @@ const CREDS = { username: 'cck_smoke', password: 'CckSmoke!2026' }
 const TS = Date.now()
 const MEMBER_NAME = `E2E Pfleger ${TS}`
 const CLIENT_NAME = `E2E Klient ${TS}`
+const TASK_CODE = `e2e_meds_${TS}`.slice(0, 20)
 const XSS = `<script>alert(1)</script> E2E Vorfall ${TS}`
 let rt = ''
 let deviceToken = ''
@@ -54,6 +55,11 @@ test.beforeAll(async ({ browser }) => {
   const memberRef = `member:${m.data.id}`
 
   // client + published plan
+  const task = await api(request, '/api/catalog', {
+    method: 'POST',
+    data: { code: TASK_CODE, label: 'Medikamente' },
+  })
+  expect(task.success).toBe(true)
   const c = await api(request, '/api/clients', {
     method: 'POST',
     data: { name: CLIENT_NAME, street: 'E2E Weg 1', zip: '10115', city: 'Berlin' },
@@ -61,7 +67,7 @@ test.beforeAll(async ({ browser }) => {
   expect(c.success).toBe(true)
   const plan = await api(request, `/api/clients/${c.data.id}/plan/publish`, {
     method: 'POST',
-    data: { base_revision: 1, tasks: [{ task_code: 'meds', label: 'Medikamente', value_required: false }] },
+    data: { base_revision: 1, tasks: [{ task_code: TASK_CODE, label: 'Medikamente', value_required: false }] },
   })
   expect(plan.success).toBe(true)
 
@@ -97,7 +103,7 @@ test.beforeAll(async ({ browser }) => {
     method: 'POST', headers: dev,
     data: {
       tstop_id: stop.id, client_id: c.data.id, idem_key: `e2e-bundle-${TS}`, sig_state: 'unable',
-      tasks: [{ task_code: 'meds', status: 'done' }],
+      tasks: [{ task_code: TASK_CODE, status: 'done' }],
     },
   }).then((r) => r.json())
   expect(bundle.success).toBe(true)
@@ -181,12 +187,13 @@ test('zentrale journey: board → clients → members → inbox → settings', a
   await page.goto('/apps/carecheck/#/settings/general', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('[data-cck-settings-form="general"] [name="sla_minutes"]')).toHaveValue('45')
 
-  // Field-level error contract on the companion section: an empty seat_limit
-  // passes client-side (no `required`) but the server rejects non-digits →
+  // Field-level error contract on the companion section: bypass native form
+  // validation so an empty seat_limit reaches the server and is rejected →
   // aria-invalid + inline error + role=alert status. Valid resubmit clears it.
   await page.goto('/apps/carecheck/#/settings/companion', { waitUntil: 'domcontentloaded' })
   const seatLimit = page.locator('[data-cck-settings-form="companion"] [name="seat_limit"]')
   await expect(seatLimit).toBeVisible()
+  await seatLimit.evaluate((element) => element.removeAttribute('required'))
   await seatLimit.fill('')
   await Promise.all([
     page.waitForResponse((r) => r.url().includes('/api/settings') && r.request().method() === 'POST'),
@@ -238,7 +245,7 @@ test('spec §7.2 views: catalog, client detail, tours editor, absences, exports,
   await page.goto('/apps/carecheck/#/clients', { waitUntil: 'domcontentloaded' })
   await page.locator('[data-cck-clients]').locator(`text=${CLIENT_NAME}`).click()
   await expect(page.locator('[data-cck-client-name]')).toHaveText(CLIENT_NAME)
-  await expect(page.locator('[data-cck-plan-tasks] input[value="meds"]')).toBeChecked()
+  await expect(page.locator(`[data-cck-plan-tasks] input[value="${TASK_CODE}"]`)).toBeChecked()
   await page.locator('[data-cck-journal-form] [name="text"]').fill(`E2E Protokollnotiz ${TS}`)
   await Promise.all([
     page.waitForResponse((r) => r.url().includes('/journal') && r.request().method() === 'POST'),

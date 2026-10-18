@@ -92,6 +92,12 @@ class CryptoServiceTest extends TestCase
 		$this->assertSame('sensitive äöü data', $c->decrypt($enc));
 	}
 
+	public function testEncryptionUsesFreshIv(): void
+	{
+		$c = $this->crypto();
+		$this->assertNotSame($c->encrypt('same payload'), $c->encrypt('same payload'));
+	}
+
 	public function testNonV1BlobRejected(): void
 	{
 		$this->expectException(\RuntimeException::class);
