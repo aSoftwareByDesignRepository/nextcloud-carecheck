@@ -169,6 +169,10 @@ function targets(string $appRoot): array {
 					'from' => "\$exists = \$k === 'allowed_groups'\n\t\t\t\t\t\t\t? \$this->groups->groupExists(\$item)\n\t\t\t\t\t\t\t: \$this->users->userExists(\$item);",
 					'to' => "\$exists = \$this->users->userExists(\$item);",
 				],
+				'settings_audit_skipped' => [
+					'from' => "if (\$validated !== [] || \$lists !== []) {",
+					'to' => 'if (false) {',
+				],
 			],
 		],
 		[

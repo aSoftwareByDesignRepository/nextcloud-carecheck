@@ -82,6 +82,10 @@ class Application extends App implements IBootstrap
 			);
 		});
 
+		// API routes always answer the JSON envelope — an unhandled exception
+		// must never escape to core's HTML 500 on /api/* surfaces.
+		$context->registerMiddleware(\OCA\CareCheck\Middleware\ApiExceptionMiddleware::class);
+
 		// Suite flange F11 — advertise check:drive-segments to MobilityCheck.
 		$context->registerCapability(\OCA\CareCheck\Capabilities::class);
 	}

@@ -21,11 +21,8 @@ trait ApiControllerTrait
 		if ($e->getErrorCode() === Constants::ERR_NOT_FOUND) {
 			return new JSONResponse(Constants::notFoundPayload(), Http::STATUS_NOT_FOUND);
 		}
-		return new JSONResponse([
-			'success' => false,
-			'error' => $e->getErrorCode(),
-			'message' => $e->getMessage(),
-			'fields' => $e->getFields(),
-		], $e->getHttpStatus());
+		return new JSONResponse(
+			Constants::errorPayload($e->getErrorCode(), $e->getMessage(), $e->getFields()),
+			$e->getHttpStatus());
 	}
 }

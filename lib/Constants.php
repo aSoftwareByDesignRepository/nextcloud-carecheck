@@ -36,7 +36,7 @@ final class Constants
 	public const NOTICE_KINDS = ['incident', 'supply_needed', 'plan_change_proposal', 'info'];
 	public const NOTICE_STATES = ['open', 'acked', 'escalated', 'false_alarm'];
 	public const TPL_STATUSES = ['draft', 'published'];
-	public const AUDIT_ACTIONS = ['read', 'tour_pull', 'list', 'export', 'break_glass', 'search', 'sig_read', 'journal_view', 'license_apply', 'notice_resolve_error', 'photo_add', 'photo_read', 'photo_del', 'voicenote_add', 'voicenote_transcribed', 'team_manage', 'group_session'];
+	public const AUDIT_ACTIONS = ['read', 'tour_pull', 'list', 'export', 'break_glass', 'search', 'sig_read', 'journal_view', 'license_apply', 'notice_resolve_error', 'photo_add', 'photo_read', 'photo_del', 'voicenote_add', 'voicenote_transcribed', 'team_manage', 'group_session', 'settings_save'];
 	public const SKIP_REASONS = ['not_home', 'cancelled', 'refused_entry', 'other'];
 	public const ABSENCE_KINDS = ['sick', 'vacation', 'other'];
 	public const EXPORT_KINDS = ['visit_pdf', 'monthly_csv', 'monthly_pdf'];
@@ -48,5 +48,17 @@ final class Constants
 	public static function notFoundPayload(): array
 	{
 		return ['success' => false, 'error' => self::ERR_NOT_FOUND, 'message' => 'Not found.', 'fields' => []];
+	}
+
+	/**
+	 * Canonical wire shape for every non-2xx API answer — controllers and the
+	 * exception middleware must emit the identical envelope.
+	 *
+	 * @param array<string,string> $fields
+	 * @return array<string,mixed>
+	 */
+	public static function errorPayload(string $code, string $message, array $fields = []): array
+	{
+		return ['success' => false, 'error' => $code, 'message' => $message, 'fields' => $fields];
 	}
 }

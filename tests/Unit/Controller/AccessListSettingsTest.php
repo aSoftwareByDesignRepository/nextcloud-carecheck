@@ -29,6 +29,8 @@ class AccessListSettingsTest extends TestCase
 	private array $userLookups = [];
 	/** @var list<string> every gid handed to groupExists() */
 	private array $groupLookups = [];
+	/** @var list<array{0:string,1:string,2:?int,3:?string}> audit() calls */
+	private array $auditCalls = [];
 
 	/**
 	 * @param array<string, mixed> $params getParam map
@@ -47,6 +49,12 @@ class AccessListSettingsTest extends TestCase
 		$acl->method('assertAppAccess')->willReturn('admin');
 		$acl->method('actorRef')->willReturn('uid:admin');
 		$acl->method('isAppAdmin')->willReturn(true);
+		$this->auditCalls = [];
+		$acl->method('audit')->willReturnCallback(
+			function (string $ref, string $action, ?int $cid = null, ?string $detail = null) {
+				$this->auditCalls[] = [$ref, $action, $cid, $detail];
+			}
+		);
 
 		$this->userLookups = [];
 		$this->groupLookups = [];
@@ -155,6 +163,34 @@ class AccessListSettingsTest extends TestCase
 		$this->assertSame('invalid', $d['fields']['allowed_users']);
 		$this->assertNotContains('', $this->userLookups);
 		$this->assertArrayNotHasKey('allowed_users', $this->savedLists);
+	}
+
+	public function testPolicySaveEmitsAuditRecord(): void
+	{
+		$ctrl = $this->controller(
+			['allowed_users' => '["uid:alex"]', 'seat_limit' => '12'],
+			['alex' => 'Alex'],
+			[],
+		);
+		$r = $ctrl->saveSettings();
+		$this->assertTrue($r->getData()['success'] ?? false);
+		$this->assertCount(1, $this->auditCalls);
+		[$ref, $action, , $detail] = $this->auditCalls[0];
+		$this->assertSame('uid:admin', $ref);
+		$this->assertSame('settings_save', $action);
+		// keys only — never uids/gids of the mutated lists
+		$this->assertSame('seat_limit,allowed_users', $detail);
+	}
+
+	public function testFailedValidationAndNoopSaveEmitNoAudit(): void
+	{
+		$ctrl = $this->controller(['allowed_users' => '["uid:ghost"]'], ['alex' => 'Alex'], []);
+		$this->assertFalse($ctrl->saveSettings()->getData()['success']);
+		$this->assertSame([], $this->auditCalls);
+
+		$ctrl = $this->controller([], ['alex' => 'Alex'], []);
+		$this->assertTrue($ctrl->saveSettings()->getData()['success']);
+		$this->assertSame([], $this->auditCalls);
 	}
 
 	public function testGetSettingsShipsParallelLabelLists(): void

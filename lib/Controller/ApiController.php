@@ -752,6 +752,13 @@ class ApiController extends Controller
 			foreach ($lists as $k => $v) {
 				$this->settings->setList($k, $v);
 			}
+			// Policy mutations get an audit record (api-security §7) — the
+			// access door and admin delegation are security boundaries. Keys
+			// only in detail: values may carry uids/gids.
+			if ($validated !== [] || $lists !== []) {
+				$this->acl->audit($actor, 'settings_save', null,
+					implode(',', [...array_keys($validated), ...array_keys($lists)]));
+			}
 			return $this->getSettings();
 		} catch (ApiException $e) {
 			return $this->error($e);
