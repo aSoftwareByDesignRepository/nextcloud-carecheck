@@ -20,6 +20,7 @@ let rt = ''
 let deviceToken = ''
 let stopId = 0
 let memberId = 0
+let clientId = 0
 
 async function api(request, path, opts = {}) {
   const res = await request.fetch(`/apps/carecheck${path}`, {
@@ -69,6 +70,7 @@ test.beforeAll(async ({ browser }, testInfo) => {
 
   const c = await api(request, '/api/clients', { method: 'POST', data: { name: CLIENT_NAME, street: 'UX Weg 1' } })
   expect(c.success).toBe(true)
+  clientId = c.data.id
   const plan = await api(request, `/api/clients/${c.data.id}/plan/publish`, {
     method: 'POST', data: { base_revision: 1, tasks: [{ task_code: 'meds', label: 'Medikamente', value_required: false }] },
   })
@@ -561,4 +563,145 @@ test('checkboxes sit inline with their label text — never stacked', async ({ p
 	await page.locator('[data-cck-section="plan"]').click()
 	await expect(page.locator(`#cck-sec-plan input[value="${code}"]`)).toBeVisible({ timeout: 10_000 })
 	expect(await probe(), 'client detail checkbox geometry').toEqual([])
+})
+
+test('tour status pill filter toggles which templates render', async ({ page }) => {
+	// a draft this test owns — the beforeAll template is published
+	const t = await papi(page, '/api/tour-templates', {
+		method: 'POST',
+		data: { name: `UX DraftTour ${TS}`, weekday_set: [5], status: 'draft',
+				stops: [{ kind: 'external', loc_text: 'Depot', win_start: 600, win_end: 660, order_hint: 0 }] },
+	})
+	expect(t.success).toBe(true)
+
+	await page.goto('/apps/carecheck/#/tours', { waitUntil: 'domcontentloaded' })
+	const rows = (name) => page.locator('[data-cck-templates] tbody tr', { hasText: name })
+	await expect(rows(`UX Tour ${TS}`)).toBeVisible()
+	const pill = (v) => page.locator(`[data-cck-tour-filters] [data-value="${v}"]`)
+
+	await pill('draft').click()
+	await expect(pill('draft')).toHaveAttribute('aria-pressed', 'true')
+	await expect(pill('all')).toHaveAttribute('aria-pressed', 'false')
+	await expect(rows(`UX DraftTour ${TS}`)).toBeVisible()
+	await expect(rows(`UX Tour ${TS}`)).toHaveCount(0)
+
+	await pill('published').click()
+	await expect(pill('published')).toHaveAttribute('aria-pressed', 'true')
+	await expect(rows(`UX Tour ${TS}`)).toBeVisible()
+	await expect(rows(`UX DraftTour ${TS}`)).toHaveCount(0)
+
+	// radiogroup keyboard travel lands on the same single-select contract
+	await pill('published').focus()
+	await page.keyboard.press('ArrowLeft')
+	await expect(pill('all')).toHaveAttribute('aria-pressed', 'true')
+	await expect(rows(`UX Tour ${TS}`)).toBeVisible()
+	await expect(rows(`UX DraftTour ${TS}`)).toBeVisible()
+})
+
+test('inbox pill filter toggles open vs acknowledged notices', async ({ page }) => {
+	const dev = { 'X-CCK-Device-Token': deviceToken, 'Content-Type': 'application/json' }
+	const open = await page.request.fetch('/apps/carecheck/api/v1/notices', {
+		method: 'POST', headers: dev,
+		data: { kind: 'info', note: `UX filteropen ${TS}`, idem_key: `ux-filteropen-${TS}` },
+	})
+	expect(open.ok()).toBe(true)
+	const acked = await page.request.fetch('/apps/carecheck/api/v1/notices', {
+		method: 'POST', headers: dev,
+		data: { kind: 'supply_needed', note: `UX filterack ${TS}`, idem_key: `ux-filterack-${TS}` },
+	})
+	expect(acked.ok()).toBe(true)
+	const ack = await papi(page, `/api/notices/${(await acked.json()).data.id}/ack`, { method: 'POST' })
+	expect(ack.success).toBe(true)
+
+	await page.goto('/apps/carecheck/#/inbox', { waitUntil: 'domcontentloaded' })
+	const note = (t) => page.locator('[data-cck-notices] .cck-notice', { hasText: t })
+	await expect(note(`UX filteropen ${TS}`)).toBeVisible()
+	await expect(note(`UX filterack ${TS}`)).toBeVisible()
+
+	const pill = (v) => page.locator(`[data-cck-notice-filters] [data-value="${v}"]`)
+	await pill('open').click()
+	await expect(pill('open')).toHaveAttribute('aria-pressed', 'true')
+	await expect(note(`UX filteropen ${TS}`)).toBeVisible()
+	await expect(note(`UX filterack ${TS}`)).toHaveCount(0)
+
+	await pill('ack').click()
+	await expect(pill('ack')).toHaveAttribute('aria-pressed', 'true')
+	await expect(note(`UX filterack ${TS}`)).toBeVisible()
+	await expect(note(`UX filteropen ${TS}`)).toHaveCount(0)
+
+	await pill('all').click()
+	await expect(note(`UX filteropen ${TS}`)).toBeVisible()
+	await expect(note(`UX filterack ${TS}`)).toBeVisible()
+})
+
+test('assign dialog: cancel mutates nothing; confirm assigns and the board reflects it', async ({ page }) => {
+	let assignCalls = 0
+	await page.route('**/apps/carecheck/api/stops/*/assign', (route) => {
+		assignCalls++
+		return route.continue()
+	})
+	await page.goto('/apps/carecheck/#/board', { waitUntil: 'domcontentloaded' })
+	const btn = page.locator('[data-cck-assign]').first()
+	await expect(btn).toBeVisible()
+	const stopAttr = await btn.getAttribute('data-cck-assign')
+
+	// cancel leg — closes, zero requests, the stop stays uncovered
+	await btn.click()
+	const dlg = page.locator('[data-cck-assign-dialog]')
+	await expect(dlg).toBeVisible()
+	await expect(dlg.locator('[data-cck-assign-confirm]')).toBeDisabled()
+	// autofocus opens the result list — dismiss it (tap outside the picker)
+	// before reaching for Cancel; on small viewports the list overlays actions
+	await dlg.locator('#cck-assign-title').click()
+	await dlg.locator('[data-cck-assign-cancel]').click()
+	await expect(dlg).toBeHidden()
+	expect(assignCalls).toBe(0)
+	await expect(page.locator(`[data-cck-assign="${stopAttr}"]`).first()).toBeVisible()
+
+	// confirm leg — pick the seeded member by name; board drops the Assign… affordance
+	await page.locator(`[data-cck-assign="${stopAttr}"]`).first().click()
+	await expect(dlg).toBeVisible()
+	// the directory caps member hits at 25 — prior runs leave 'UX Pfleger'
+	// members behind, so the full unique name is the only reliable query
+	await dlg.locator('.cck-refpick__input').fill(MEMBER_NAME)
+	const opt = dlg.locator('.cck-refpick__opt', { hasText: MEMBER_NAME })
+	await expect(opt).toBeVisible()
+	await opt.click()
+	const confirm = dlg.locator('[data-cck-assign-confirm]')
+	await expect(confirm).toBeEnabled()
+	await confirm.click()
+	await expect(dlg).toBeHidden()
+	await expect.poll(() => assignCalls).toBe(1)
+	await expect(page.locator(`[data-cck-assign="${stopAttr}"]`)).toHaveCount(0)
+})
+
+test('resolve dialog cancel leaves the review queue untouched', async ({ page }) => {
+	// this test seeds its own rejected bundle — the resolve test above consumes
+	// the beforeAll one, so the queue must not be empty when we open the dialog
+	const dev = { 'X-CCK-Device-Token': deviceToken, 'Content-Type': 'application/json' }
+	const rej = await page.request.fetch('/apps/carecheck/api/v1/visits', {
+		method: 'POST', headers: dev,
+		data: { tstop_id: stopId, client_id: clientId, idem_key: `ux-rej-cancel-${TS}`, sig_state: 'unable',
+				plan_version_id: 999999, tasks: [{ task_code: 'meds', status: 'done' }] },
+	})
+	expect(rej.ok()).toBe(false) // rejected → quarantined in the review queue
+
+	let resolveCalls = 0
+	await page.route('**/apps/carecheck/api/visits/*/resolve', (route) => {
+		resolveCalls++
+		return route.continue()
+	})
+	await page.goto('/apps/carecheck/#/inbox', { waitUntil: 'domcontentloaded' })
+	const resolveBtn = page.locator('[data-cck-resolve]').first()
+	await expect(resolveBtn).toBeVisible()
+	await resolveBtn.click()
+
+	const dlg = page.locator('[data-cck-resolve-dialog]')
+	await expect(dlg).toBeVisible()
+	await dlg.locator('[data-cck-resolve-note]').fill('typed but deliberately cancelled')
+	await dlg.locator('[data-cck-resolve-cancel]').click()
+	await expect(dlg).toBeHidden()
+	expect(resolveCalls).toBe(0)
+	// the queue row is still there — cancel is not a silent resolve
+	await expect(page.locator('[data-cck-resolve]').first()).toBeVisible()
 })
