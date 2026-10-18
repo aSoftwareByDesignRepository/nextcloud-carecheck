@@ -16,7 +16,12 @@ const CREDS = { username: 'cck_smoke', password: 'CckSmoke!2026' };
 
 test.describe('LOCALE_RESILIENCE', () => {
 	test('de locale: real text rendered, no pan, no clipped controls @320/768', async ({ page }) => {
-		const forcedLanguage = occ('config:system:get force_language');
+		// occ config:system:get exits non-zero when the key is unset — that is
+		// "not forced", not an error. Tolerate it here only.
+		let forcedLanguage = '';
+		try {
+			forcedLanguage = occ('config:system:get force_language');
+		} catch { /* unset */ }
 		test.skip(forcedLanguage !== '' && !forcedLanguage.startsWith('de'), `Nextcloud force_language=${forcedLanguage}`);
 		occ('user:setting cck_smoke core lang de');
 		try {
