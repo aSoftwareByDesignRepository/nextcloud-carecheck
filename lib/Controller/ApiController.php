@@ -436,7 +436,8 @@ class ApiController extends Controller
 			$out = [];
 			foreach ($this->notices->findAll() as $n) {
 				$out[] = [
-					'id' => (int)$n->getId(), 'clientId' => $n->getClientId(), 'actorRef' => $n->getActorRef(),
+					'id' => (int)$n->getId(), 'clientId' => $n->getClientId(),
+					'actorRef' => $n->getActorRef(), 'actorLabel' => $this->acl->refLabel($n->getActorRef()),
 					'kind' => $n->getKind(), 'priority' => $n->getPriority(), 'state' => $n->getState(),
 					'resolution' => in_array($n->getResolution(), ['acked', 'error'], true) ? $n->getResolution() : '', 'escalated' => (int)$n->getEscalated() === 1,
 					'note' => $n->getNoteEnc() !== null ? $this->crypto->decrypt((string)$n->getNoteEnc()) : null,
@@ -610,13 +611,26 @@ class ApiController extends Controller
 				$out[$k] = $this->settings->get($k);
 			}
 			foreach (SettingsService::LIST_KEYS as $k) {
-				$out[$k] = $this->settings->getList($k);
+				$items = $this->settings->getList($k);
+				$out[$k] = $items;
+				// Display labels ride along — raw uids/gids must never be
+				// the visible text of a chip.
+				$out[$k . '_labels'] = array_map(fn (string $v) => $this->listEntryLabel($k, $v), $items);
 			}
 			$out['is_app_admin'] = $this->acl->isAppAdmin() ? '1' : '0';
 			return $this->ok(['settings' => $out]);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
+	}
+
+	/** Display label for an access-list entry (plain uid or gid). */
+	private function listEntryLabel(string $key, string $id): string
+	{
+		if ($key === 'allowed_groups') {
+			return ($this->groups->get($id)?->getDisplayName()) ?: $id;
+		}
+		return ($this->users->get($id)?->getDisplayName()) ?: $id;
 	}
 
 	#[NoAdminRequired]
@@ -648,9 +662,17 @@ class ApiController extends Controller
 						continue;
 					}
 					// Ghost-proof the lists: every uid/group must still exist.
+					// Pickers submit typed refs (uid:x / group:g) — normalize to
+					// the plain ids these lists store, else every UI save fails.
 					$bad = false;
+					$norm = [];
 					foreach ($items as $item) {
 						if (!is_string($item)) {
+							$bad = true;
+							break;
+						}
+						$item = preg_replace('/^(uid|group):/', '', $item) ?? '';
+						if ($item === '' || str_contains($item, ':')) {
 							$bad = true;
 							break;
 						}
@@ -661,11 +683,12 @@ class ApiController extends Controller
 							$bad = true;
 							break;
 						}
+						$norm[] = $item;
 					}
 					if ($bad) {
 						$fields[$k] = 'invalid';
 					} else {
-						$lists[$k] = array_values($items);
+						$lists[$k] = $norm;
 					}
 					continue;
 				}
@@ -791,6 +814,9 @@ class ApiController extends Controller
 				throw ApiException::notFound();
 			}
 			$h = $this->clients->hydrated($c);
+			// Chips must show names, never raw member:/uid: wire refs.
+			$h['primaryRefLabel'] = $this->acl->refLabel($h['primaryRef']);
+			$h['subRefLabel'] = $this->acl->refLabel($h['subRef']);
 			// published plan rides along — the editor needs revision for CAS
 			// and the current task selection to precheck.
 			$plan = null;
@@ -1057,7 +1083,8 @@ class ApiController extends Controller
 				}
 				usort($stops, fn ($a, $b) => $a['orderHint'] <=> $b['orderHint']);
 				$out[] = ['id' => (int)$t->getId(), 'name' => $t->getName(), 'weekdaySet' => $t->getWeekdaySet(),
-					'leadRef' => $t->getLeadRef(), 'status' => $t->getStatus(), 'revision' => (int)$t->getRevision(), 'stops' => $stops];
+					'leadRef' => $t->getLeadRef(), 'leadRefLabel' => $this->acl->refLabel($t->getLeadRef()),
+					'status' => $t->getStatus(), 'revision' => (int)$t->getRevision(), 'stops' => $stops];
 			}
 			return $this->ok(['templates' => $out]);
 		} catch (ApiException $e) {
@@ -1225,6 +1252,7 @@ class ApiController extends Controller
 			foreach ($this->journal->entriesFor($id) as $e) {
 				$payload = $this->journal->payloadOf($e);
 				$out[] = ['seq' => (int)$e->getSeq(), 'type' => $e->getType(), 'actorRef' => $e->getActorRef(),
+					'actorLabel' => $this->acl->refLabel($e->getActorRef()),
 					'text' => $payload['text'] ?? null,
 					'ts' => $e->getTs()->format(\DateTimeInterface::ATOM)];
 			}
@@ -1660,6 +1688,7 @@ class ApiController extends Controller
 					'clientId' => $cid,
 					'clientName' => $name,
 					'actorRef' => $row['actor_ref'],
+					'actorLabel' => $this->acl->refLabel($row['actor_ref']),
 					'rejectReason' => $row['reject_reason'],
 					'checkinTs' => $row['checkin_ts'],
 					'updatedAt' => $row['updated_at'],

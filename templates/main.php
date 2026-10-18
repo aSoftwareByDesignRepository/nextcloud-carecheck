@@ -214,9 +214,15 @@ $settingsNav = static function () use ($l): string {
 
 			<section class="cck-panel" id="cck-sec-plan" tabindex="-1">
 				<h2><?php p($l->t('Care plan')); ?></h2>
+				<p class="cck-hint"><?php p($l->t('The plan picks from the task catalog.')); ?>
+					<a href="#/catalog" class="cck-link"><?php p($l->t('Manage catalog tasks')); ?></a></p>
 				<form data-cck-plan-form class="cck-form-col">
 					<input type="hidden" name="base_revision">
-					<div data-cck-plan-tasks></div>
+					<label class="cck-field cck-plan-filter" data-cck-plan-filter-wrap hidden>
+						<span class="cck-field__label"><?php p($l->t('Filter tasks')); ?></span>
+						<input type="search" data-cck-plan-filter placeholder="<?php p($l->t('Filter tasks…')); ?>">
+					</label>
+					<div data-cck-plan-tasks class="cck-plan-tasks"></div>
 					<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Publish plan')); ?></button>
 				</form>
 			</section>
@@ -519,7 +525,8 @@ $settingsNav = static function () use ($l): string {
 	<form data-cck-settings-form="general" class="cck-form-col cck-panel">
 		<h2><?php p($l->t('General')); ?></h2>
 		<label><?php p($l->t('Provider timezone')); ?> <input name="provider_tz" maxlength="64" placeholder="Europe/Berlin" pattern="[A-Za-z_/+\-0-9]+"></label>
-		<label><?php p($l->t('GPS check-in evidence')); ?> <input type="checkbox" name="gps_enabled"></label>
+		<label class="cck-check"><input type="checkbox" name="gps_enabled" value="1">
+			<span><?php p($l->t('GPS check-in evidence')); ?></span></label>
 		<label><?php p($l->t('Incident SLA (minutes)')); ?> <input type="number" name="sla_minutes" min="5" max="240"></label>
 		<label><?php p($l->t('Retention (years)')); ?> <input type="number" name="retention_years" min="1" max="99"></label>
 		<label><?php p($l->t('Break-glass max hours')); ?> <input type="number" name="breakglass_hours_max" min="1" max="72"></label>

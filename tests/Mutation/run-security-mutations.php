@@ -148,6 +148,30 @@ function targets(string $appRoot): array {
 			],
 		],
 		[
+			// Ghost-proofed access lists: pickers submit typed refs — the
+			// prefix strip + existence leg must both stay intact.
+			'file' => $appRoot . '/lib/Controller/ApiController.php',
+			'filter' => 'AccessListSettingsTest',
+			'mutations' => [
+				'uid_prefix_not_stripped' => [
+					'from' => "\$item = preg_replace('/^(uid|group):/', '', \$item) ?? '';",
+					'to' => '$item = $item;',
+				],
+				'empty_item_accepted' => [
+					'from' => "if (\$item === '' || str_contains(\$item, ':')) {",
+					'to' => "if (str_contains(\$item, ':')) {",
+				],
+				'existence_check_skipped' => [
+					'from' => "if (!\$exists) {",
+					'to' => 'if (false) {',
+				],
+				'group_check_falls_to_user' => [
+					'from' => "\$exists = \$k === 'allowed_groups'\n\t\t\t\t\t\t\t? \$this->groups->groupExists(\$item)\n\t\t\t\t\t\t\t: \$this->users->userExists(\$item);",
+					'to' => "\$exists = \$this->users->userExists(\$item);",
+				],
+			],
+		],
+		[
 			'file' => $appRoot . '/lib/Service/CryptoService.php',
 			'filter' => 'CryptoServiceTest',
 			'mutations' => [

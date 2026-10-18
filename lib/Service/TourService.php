@@ -151,7 +151,8 @@ class TourService
 		foreach ($qb->executeQuery()->iterateAssociative() as $row) {
 			$tid = (int)$row['tour_id'];
 			if (!isset($tours[$tid])) {
-				$tours[$tid] = ['id' => $tid, 'templateId' => $row['template_id'] !== null ? (int)$row['template_id'] : null, 'executorRef' => $row['tour_exec'], 'stops' => []];
+				$tours[$tid] = ['id' => $tid, 'templateId' => $row['template_id'] !== null ? (int)$row['template_id'] : null,
+					'executorRef' => $row['tour_exec'], 'executorLabel' => $this->acl->refLabel($row['tour_exec']), 'stops' => []];
 			}
 			if ($row['id'] === null) {
 				continue;
@@ -290,7 +291,8 @@ class TourService
 			$tid = (int)$row['tour_id'];
 			if (!isset($tours[$tid])) {
 				$tours[$tid] = ['id' => $tid, 'templateId' => $row['template_id'] !== null ? (int)$row['template_id'] : null,
-					'executorRef' => $row['tour_exec'], 'date' => (string)$row['tour_date'], 'stops' => []];
+					'executorRef' => $row['tour_exec'], 'executorLabel' => $this->acl->refLabel($row['tour_exec']),
+					'date' => (string)$row['tour_date'], 'stops' => []];
 			}
 			$tours[$tid]['stops'][] = $this->serializeStopRow($row);
 		}

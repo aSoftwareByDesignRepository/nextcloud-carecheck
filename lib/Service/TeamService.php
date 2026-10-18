@@ -43,10 +43,13 @@ class TeamService
 		$this->acl->assertStaff($actorRef);
 		$out = [];
 		foreach ($this->teams->findAll() as $t) {
+			$leads = array_map(static fn (TeamLead $l) => (string)$l->getUid(), $this->leads->findByTeam((int)$t->getId()));
 			$out[] = [
 				'id' => (int)$t->getId(),
 				'name' => (string)$t->getName(),
-				'leads' => array_map(static fn (TeamLead $l) => (string)$l->getUid(), $this->leads->findByTeam((int)$t->getId())),
+				'leads' => $leads,
+				// chips must show names, never raw uids — parallel to `leads`
+				'leadLabels' => array_map(fn (string $u) => $this->acl->refLabel('uid:' . $u) ?? $u, $leads),
 				'clients' => $this->countIn('cck_client', (int)$t->getId()),
 				'members' => $this->countIn('cck_member', (int)$t->getId()),
 			];

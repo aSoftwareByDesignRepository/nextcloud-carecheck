@@ -181,6 +181,37 @@ class AclService
 		return false;
 	}
 
+	/**
+	 * Human display name for a typed ref — UI chips must never show the raw
+	 * `member:3` / `uid:x` / `group:y` wire token. Returns null when the ref
+	 * is malformed or points at a deleted principal.
+	 */
+	public function refLabel(?string $ref): ?string
+	{
+		if ($ref === null || $ref === '') {
+			return null;
+		}
+		if (str_starts_with($ref, 'member:')) {
+			$id = substr($ref, 7);
+			if (preg_match('/^\d+$/', $id) !== 1) {
+				return null;
+			}
+			$m = $this->members->find((int)$id);
+			return $m !== null ? (string)$m->getDisplayName() : null;
+		}
+		if (str_starts_with($ref, 'uid:')) {
+			$uid = substr($ref, 4);
+			$u = $this->users->get($uid);
+			return $u !== null ? ($u->getDisplayName() ?: $uid) : null;
+		}
+		if (str_starts_with($ref, 'group:')) {
+			$gid = substr($ref, 6);
+			$g = $this->groups->get($gid);
+			return $g !== null ? ($g->getDisplayName() ?: $gid) : null;
+		}
+		return null;
+	}
+
 	public function pairForToken(string $token): ?Pair
 	{
 		return $this->pairs->findActiveByTokenHash(hash('sha256', $token));

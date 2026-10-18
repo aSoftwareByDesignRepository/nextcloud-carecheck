@@ -115,6 +115,12 @@
 		return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 	}
 	function fmtMin(m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+	// ISO → locale datetime (de: 18.10.2026, 11:30); falls back to ISO slice
+	function fmtTs(ts) {
+		var d = new Date(ts);
+		return isNaN(d) ? String(ts || '').slice(0, 16).replace('T', ' ')
+			: d.toLocaleString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+	}
 
 	// one replace-text banner — dedups by construction (toast-hygiene rule)
 	function notify(text, isError) {
@@ -141,7 +147,6 @@
 	// Typed refs out — searchable pickers + removable chips only.
 	// Single mode: hidden input carries the ref, chip shows the label.
 	// Multi mode (access lists): hidden input carries a JSON array.
-	var refpickSeq = 0;
 	function buildRefPick(box) {
 		var name = box.dataset.cckRefpick;
 		var kind = box.dataset.cckRefpickKind || 'staff';
@@ -161,6 +166,7 @@
 		var chips = box.querySelector('.cck-refpick__chips');
 		var hidden = box.querySelector('input[type=hidden]');
 		var inflight = null; // AbortController — stale-response guard (DS-4)
+		var seq = 0; // per-picker — a shared counter drops siblings' results
 		var selected = [];
 
 		function syncHidden() {
@@ -192,13 +198,13 @@
 		}
 		function search(q) {
 			if (inflight) { inflight.abort(); }
-			var mySeq = ++refpickSeq;
+			var mySeq = ++seq;
 			inflight = new AbortController();
 			var url = '/api/directory?q=' + encodeURIComponent(q) + (kind === 'group' ? '&type=group' : '');
 			fetch(OC.generateUrl('/apps/carecheck' + url), { headers: { 'requesttoken': OC.requestToken }, signal: inflight.signal })
 				.then(function (r) { return r.json(); })
 				.then(function (r) {
-					if (mySeq !== refpickSeq || !r.success) { return; }
+					if (mySeq !== seq || !r.success) { return; }
 					var results = r.data.results || [];
 					list.innerHTML = '';
 					results.forEach(function (item) {
@@ -232,7 +238,10 @@
 		box._refpick = {
 			get value() { return hidden.value; },
 			set: function (ref, label) { selected = ref ? [{ ref: ref, label: label || ref }] : []; syncHidden(); renderChips(); },
-			setList: function (refs) { selected = (refs || []).map(function (r2) { return { ref: r2, label: r2 }; }); syncHidden(); renderChips(); },
+			setList: function (refs, labels) {
+				selected = (refs || []).map(function (r2, i) { return { ref: r2, label: (labels && labels[i]) || r2 }; });
+				syncHidden(); renderChips();
+			},
 			clear: function () { selected = []; syncHidden(); renderChips(); },
 		};
 		renderChips();
@@ -259,8 +268,8 @@
 		var box = document.querySelector('[data-cck-team-list]');
 		if (!box) { return; }
 		box.innerHTML = teamsCache.map(function (t) {
-			var leads = (t.leads || []).map(function (u) {
-				return '<span class="cck-refpick__chip">' + esc(u) +
+			var leads = (t.leads || []).map(function (u, i) {
+				return '<span class="cck-refpick__chip">' + esc((t.leadLabels || [])[i] || u) +
 					' <button type="button" class="cck-refpick__rm" data-cck-team-rm="' + t.id + ':' + esc(u) + '" aria-label="' + esc(tr('Remove lead')) + '">×</button></span>';
 			}).join('') || '<span class="cck-muted">' + esc(tr('No leads yet.')) + '</span>';
 			return '<div class="cck-team" data-cck-team="' + t.id + '"><h3>' + esc(t.name) + '</h3>' +
@@ -380,7 +389,7 @@
 	}
 	function tourLabel(t) {
 		var name = (templateNames && t.templateId && templateNames[t.templateId]) || null;
-		var exec = t.executorRef || tr('Unassigned');
+		var exec = t.executorLabel || t.executorRef || tr('Unassigned');
 		return name ? name + ' — ' + exec : exec;
 	}
 	var STOP_STATUS = {
@@ -713,22 +722,44 @@
 		});
 	});
 
-	// plan editor — pick from catalog; precheck the published selection
+	// plan editor — pick from catalog; precheck the published selection.
+	// Sorted card grid + a filter so long catalogs stay scannable. Filter
+	// only toggles `hidden` — rows stay in the DOM so a checked task outside
+	// the current filter still publishes (no silent drops, no lost checks).
 	function loadPlanTasks(client) {
 		var form = document.querySelector('[data-cck-plan-form]');
 		form.elements.base_revision.value = client.plan ? client.plan.revision : 0;
 		var current = {};
 		((client.plan && client.plan.tasks) || []).forEach(function (t) { current[t.task_code || t.code] = true; });
 		var box = document.querySelector('[data-cck-plan-tasks]');
+		var filter = document.querySelector('[data-cck-plan-filter]');
+		if (filter) { filter.value = ''; } // stale filter must not hide the new client's picks
 		api('/api/catalog').then(function (r) {
-			var tasks = (r.data && r.data.tasks) || [];
+			var tasks = ((r.data && r.data.tasks) || []).slice();
+			tasks.sort(function (a, b) {
+				return String(a.label || '').localeCompare(String(b.label || ''), undefined, { sensitivity: 'base' });
+			});
 			box.innerHTML = tasks.map(function (t) {
 				return '<label class="cck-plan-task"><input type="checkbox" name="task" value="' + esc(t.code) + '"' +
 					' data-label="' + esc(t.label) + '"' + (current[t.code] ? ' checked' : '') + '> ' +
-					esc(t.icon ? t.icon + ' ' : '') + esc(t.label) + '</label>';
+					'<span class="cck-plan-task__text">' + esc(t.icon ? t.icon + ' ' : '') + esc(t.label) + '</span></label>';
 			}).join('') || '<p class="cck-empty">' + esc(tr('Add catalog tasks first.')) + '</p>';
+			var wrap = document.querySelector('[data-cck-plan-filter-wrap]');
+			if (wrap) { wrap.hidden = tasks.length < 8; }
 		});
 	}
+	(function () {
+		var filter = document.querySelector('[data-cck-plan-filter]');
+		if (!filter) { return; }
+		filter.addEventListener('input', function () {
+			var q = filter.value.trim().toLowerCase();
+			document.querySelectorAll('#cck-sec-plan .cck-plan-task').forEach(function (l) {
+				var cb = l.querySelector('input[name=task]');
+				var hay = (((cb && cb.dataset.label) || '') + ' ' + ((cb && cb.value) || '')).toLowerCase();
+				l.hidden = q !== '' && hay.indexOf(q) < 0;
+			});
+		});
+	})();
 	document.querySelector('[data-cck-plan-form]').addEventListener('submit', function (e) {
 		e.preventDefault();
 		var f = e.target;
@@ -749,7 +780,7 @@
 			var el = document.querySelector('[data-cck-journal]');
 			if (!r.success) { el.innerHTML = '<li class="cck-empty">' + esc(r.message || tr('No access.')) + '</li>'; return; }
 			el.innerHTML = ((r.data && r.data.entries) || []).map(function (en) {
-				return '<li><strong>' + esc(tokenLabel(JOURNAL_TYPE, en.type)) + '</strong> — ' + esc(en.actorRef) + ' <em>' + esc(en.ts.slice(0, 16).replace('T', ' ')) + '</em>' +
+				return '<li><strong>' + esc(tokenLabel(JOURNAL_TYPE, en.type)) + '</strong> — ' + esc(en.actorLabel || en.actorRef) + ' <em>' + esc(fmtTs(en.ts)) + '</em>' +
 					(en.text ? ' — ' + esc(en.text) : '') + '</li>';
 			}).join('') || '<li class="cck-empty">' + esc(tr('No entries yet.')) + '</li>';
 		});
@@ -799,7 +830,7 @@
 				return '<figure class="cck-photo"><a href="' + esc(OC.generateUrl('/apps/carecheck/api/clients/' + clientId + '/photos/' + p.id)) +
 					'" target="_blank" rel="noopener" aria-label="' + esc(tr('Open photo')) + '"><img loading="lazy" alt="' + esc(tr('Client photo')) + ' ' + esc(String(p.id)) +
 					'" src="' + esc(OC.generateUrl('/apps/carecheck/api/clients/' + clientId + '/photos/' + p.id)) + '"></a>' +
-					'<figcaption>' + esc((p.createdAt || '').slice(0, 16)) + ' · ' + esc(p.by || '') +
+					'<figcaption>' + esc(fmtTs(p.createdAt)) + ' · ' + esc(p.by || '') +
 					' <button type="button" class="cck-btn cck-btn--ghost cck-btn--sm" data-cck-photo-del="' + p.id + '">' + esc(tr('Delete')) + '</button></figcaption></figure>';
 			}).join('') || '<p class="cck-empty">' + esc(tr('No photos yet.')) + '</p>';
 		});
@@ -1033,7 +1064,7 @@
 			var cb = f.querySelector('input[name=wd][value="' + d.trim() + '"]');
 			if (cb) { cb.checked = true; }
 		});
-		document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.set(t.leadRef || '', t.leadRef || '');
+		document.querySelector('[data-cck-refpick="lead_ref"]')._refpick.set(t.leadRef || '', t.leadRefLabel || t.leadRef || '');
 		f.elements.status.value = t.status || 'draft';
 		(t.stops || []).forEach(function (s) { addStopRow(s); });
 		document.querySelector('[data-cck-tour-submit]').textContent = tr('Update tour template');
@@ -1213,7 +1244,7 @@
 			var el = document.querySelector('[data-cck-absences]');
 			if (!r.success) { el.innerHTML = '<li class="cck-empty">' + esc(r.message || tr('No access.')) + '</li>'; return; }
 			el.innerHTML = ((r.data && r.data.absences) || []).map(function (a) {
-				return '<li><strong>' + esc(a.staffRef) + '</strong> ' + esc(a.from) + ' → ' + esc(a.until) + ' (' + esc(tokenLabel(ABSENCE_KIND, a.kind)) + ')' +
+				return '<li><strong>' + esc(a.staffLabel || a.staffRef) + '</strong> ' + esc(a.from) + ' → ' + esc(a.until) + ' (' + esc(tokenLabel(ABSENCE_KIND, a.kind)) + ')' +
 					' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-absc="' + a.id + '">' + esc(tr('Cancel')) + '</button></li>';
 			}).join('') || '<li class="cck-empty">' + esc(tr('No absences marked.')) + '</li>';
 			el.querySelectorAll('[data-cck-absc]').forEach(function (b) {
@@ -1370,7 +1401,7 @@
 			el.innerHTML = items.map(function (v) {
 				return '<div class="cck-notice cck-notice--high">' +
 					'<strong>' + esc(v.clientName || ('#' + v.clientId)) + '</strong> ' +
-					'<span>' + esc(v.actorRef) + '</span> ' +
+					'<span>' + esc(v.actorLabel || v.actorRef) + '</span> ' +
 					'<span class="cck-chip">' + esc(tr('rejected')) + '</span>' +
 					'<p class="cck-notice__text">' + esc(v.rejectReason || '') + '</p>' +
 					' <a class="cck-link" href="#/client/' + v.clientId + '">' + esc(tr('Open client')) + '</a>' +
@@ -1401,7 +1432,7 @@
 				if (n.resolution === 'error') { chips += '<span class="cck-chip">' + esc(tr('sent in error')) + '</span> '; }
 				if (n.state === 'acked' && n.resolution !== 'error') { chips += '<span class="cck-chip">' + esc(tr('acknowledged')) + '</span> '; }
 				return '<div class="cck-notice cck-notice--' + esc(n.priority) + '"><strong>' + esc(tokenLabel(NOTICE_KIND, n.kind)) + '</strong> ' +
-					'<span>' + esc(n.actorRef) + '</span> ' + chips +
+					'<span>' + esc(n.actorLabel || n.actorRef) + '</span> ' + chips +
 					(n.note ? ' <p class="cck-notice__text">' + esc(n.note) + '</p>' : '') +
 					(n.state === 'open' || n.state === 'escalated' ? ' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-ack="' + n.id + '">' + esc(tr('Acknowledge')) + '</button>' : '') +
 					'</div>';
@@ -1487,6 +1518,8 @@
 				});
 		}
 	});
+	// Machine tokens must never reach the UI — map before render.
+	var LICENSE_STATE = { none: 'No license — companion app is locked', active: 'Active', inactive: 'Inactive' };
 	function loadDiagnostics() {
 		var panel = document.querySelector('[data-cck-diag-panel]');
 		var dl = document.querySelector('[data-cck-diag-state]');
@@ -1499,7 +1532,7 @@
 				[tr('Cron'), d.cronOk ? tr('OK') : tr('stale — check the instance cron')],
 				[tr('Paired devices'), d.pairedDevices !== undefined ? String(d.pairedDevices) : '—'],
 				[tr('Outbox backlog'), d.pendingOutbox !== undefined ? String(d.pendingOutbox) : '—'],
-				[tr('License'), d.licenseState],
+				[tr('License'), tokenLabel(LICENSE_STATE, d.licenseState)],
 			]);
 		});
 	}
@@ -1552,7 +1585,7 @@
 			}
 			['allowed_users', 'allowed_groups', 'app_admins'].forEach(function (k) {
 				var box = document.querySelector('[data-cck-refpick="' + k + '"]');
-				if (box && box._refpick) { box._refpick.setList(r.data.settings[k] || []); }
+				if (box && box._refpick) { box._refpick.setList(r.data.settings[k] || [], r.data.settings[k + '_labels'] || []); }
 			});
 			ungateSettingsForms();
 			return r;

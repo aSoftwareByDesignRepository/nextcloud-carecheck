@@ -75,7 +75,8 @@ async function settle(page, hash) {
 		document.querySelectorAll('.cck-toast, [role="alert"].cck-toast').forEach((n) => n.remove());
 	});
 	await page.waitForLoadState('networkidle');
-	await page.waitForTimeout(350);
+	// two painted frames — the real "rendered" signal, not a blind settle
+	await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 const STATE_PRODUCERS = {
@@ -194,7 +195,7 @@ test.describe('SCREENSHOT_MATRIX capture', () => {
 				const shotH = Math.min(Math.max(contentH + 60, vp.height), 8192);
 				if (shotH !== vp.height) {
 					await page.setViewportSize({ width: vp.width, height: shotH });
-					await page.waitForTimeout(150);
+					await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 				}
 				await page.screenshot({ path: file });
 				if (!existsSync(file)) { missing.push(file); }

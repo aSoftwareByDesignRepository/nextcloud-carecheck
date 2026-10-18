@@ -86,6 +86,7 @@ class AbsenceService
 			$out[] = [
 				'id' => (int)$a->getId(),
 				'staffRef' => $a->getActorRef(),
+				'staffLabel' => $this->acl->refLabel($a->getActorRef()),
 				'from' => $a->getFromDate()->format('Y-m-d'),
 				'until' => $a->getUntilDate()->format('Y-m-d'),
 				'kind' => $a->getKind(),

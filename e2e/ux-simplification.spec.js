@@ -19,6 +19,7 @@ const CLIENT_NAME = `UX Klient ${TS}`
 let rt = ''
 let deviceToken = ''
 let stopId = 0
+let memberId = 0
 
 async function api(request, path, opts = {}) {
   const res = await request.fetch(`/apps/carecheck${path}`, {
@@ -49,6 +50,7 @@ test.beforeAll(async ({ browser }, testInfo) => {
 
   const m = await api(request, '/api/members', { method: 'POST', data: { display_name: MEMBER_NAME, qualification: 'fachkraft' } })
   expect(m.success).toBe(true)
+  memberId = m.data.id
   await api(request, '/api/settings', { method: 'POST', data: { seat_limit: '999' } })
   const code = (await api(request, `/api/members/${m.data.id}/pair-code`, { method: 'POST' })).data.code
   // pair redemption is IP-rate-limited (10/10min fixed window) — repeated suite
@@ -408,4 +410,155 @@ test('template PUT enforces CAS and uniform 404 — no existence oracle', async 
   expect(row.code).toBe(`ux-imm-${TS}`)
   expect(row.label).toBe('Renamed label')
   expect(row.requiresQual).toBe('fachkraft')
+})
+
+test('care plan editor filters the catalog grid without losing checked tasks', async ({ page }) => {
+	// the filter only appears once the catalog outgrows a glance — top up if short
+	const cat = await papi(page, '/api/catalog')
+	for (let i = (cat.data.tasks || []).length; i < 9; i++) {
+		const add = await papi(page, '/api/catalog', {
+			method: 'POST', data: { code: `ux-fill-${TS}-${i}`, label: `UX Fill ${i}`, requires_qual: null },
+		})
+		expect(add.success).toBe(true)
+	}
+	// a catalog task this test owns — the grid renders catalog codes, not plan rows
+	const code = `uxpick${TS}`.slice(0, 20)
+	const own = await papi(page, '/api/catalog', {
+		method: 'POST', data: { code, label: `UX PlanPick ${TS}`, requires_qual: null },
+	})
+	expect(own.success).toBe(true)
+
+	await page.goto('/apps/carecheck/#/clients', { waitUntil: 'domcontentloaded' })
+	const row = page.locator('[data-cck-clients] tr', { hasText: CLIENT_NAME })
+	await row.locator(`text=${CLIENT_NAME}`).click()
+	await page.locator('[data-cck-section="plan"]').click()
+
+	const filter = page.locator('[data-cck-plan-filter]')
+	await expect(filter).toBeVisible()
+	const tasks = page.locator('#cck-sec-plan .cck-plan-task')
+	expect(await tasks.count()).toBeGreaterThanOrEqual(9)
+
+	// check our task, then filter it out of view — the pick must survive
+	const pick = tasks.locator(`input[name=task][value="${code}"]`)
+	await pick.check()
+	await filter.fill(`no-match-${TS}`)
+	await expect(page.locator('#cck-sec-plan .cck-plan-task:visible')).toHaveCount(0)
+	await expect(pick).toBeChecked()
+
+	await filter.fill(`planpick ${TS}`)
+	const visible = page.locator('#cck-sec-plan .cck-plan-task:visible')
+	await expect(visible).toHaveCount(1)
+	await expect(visible).toContainText(`UX PlanPick ${TS}`)
+})
+
+test('board headings and inbox notices show people names, never raw wire refs', async ({ page }) => {
+	// a notice authored by the paired device carries actorRef member:N
+	const dev = { 'X-CCK-Device-Token': deviceToken, 'Content-Type': 'application/json' }
+	const res = await page.request.fetch('/apps/carecheck/api/v1/notices', {
+		method: 'POST', headers: dev,
+		data: { kind: 'info', note: `UX ref notice ${TS}`, idem_key: `ux-ref-${TS}` },
+	})
+	expect(res.ok()).toBe(true)
+
+	// a template whose lead is a member — the tour heading must show the
+	// display name, not the member:N wire ref
+	const weekday = ((new Date().getDay() + 6) % 7) + 1
+	const t = await papi(page, '/api/tour-templates', {
+		method: 'POST',
+		data: { name: `UX Lead Tour ${TS}`, weekday_set: [weekday], status: 'published', lead_ref: `member:${memberId}`,
+				stops: [{ kind: 'external', loc_text: 'Depot', win_start: 600, win_end: 660, order_hint: 0 }] },
+	})
+	expect(t.success).toBe(true)
+	const gen = await papi(page, '/api/tours/generate', { method: 'POST' })
+	expect(gen.success).toBe(true)
+
+	await page.goto('/apps/carecheck/#/board', { waitUntil: 'domcontentloaded' })
+	const head = page.locator('[data-cck-board] .cck-tour h2', { hasText: `UX Lead Tour ${TS}` })
+	await expect(head).toBeVisible()
+	await expect(head).toContainText(MEMBER_NAME)
+	await expect(head).not.toContainText('member:')
+
+	await page.goto('/apps/carecheck/#/inbox', { waitUntil: 'domcontentloaded' })
+	const notice = page.locator('.cck-notice', { hasText: `UX ref notice ${TS}` })
+	await expect(notice).toBeVisible()
+	await expect(notice).toContainText(MEMBER_NAME)
+	await expect(notice).not.toContainText('member:')
+})
+
+test('access-list chips render display names and typed refs save', async ({ page }) => {
+	// pickers submit uid:x — the door normalizes before userExists (was a 100% save-fail bug)
+	const s = await papi(page, '/api/settings', { method: 'POST', data: { allowed_users: '["uid:cck_smoke"]' } })
+	expect(s.success).toBe(true)
+
+	await page.goto('/apps/carecheck/#/settings/access', { waitUntil: 'domcontentloaded' })
+	const chip = page.locator('[data-cck-refpick="allowed_users"] .cck-refpick__chip').first()
+	await expect(chip).toBeVisible()
+	await expect(chip).toContainText('cck_smoke')
+	await expect(chip).not.toContainText('uid:')
+
+	// the × stays vertically centered in the chip — a bare descendant rule
+	// (.cck-form-col button) used to top-pin it against sibling alignment
+	const chipBox = await chip.boundingBox()
+	const rmBox = await chip.locator('.cck-refpick__rm').boundingBox()
+	expect(Math.abs((chipBox.y + chipBox.height / 2) - (rmBox.y + rmBox.height / 2))).toBeLessThanOrEqual(2)
+})
+
+test('checkboxes sit inline with their label text — never stacked', async ({ page }) => {
+	// seed one catalog task so the plan grid renders real checkbox rows
+	const code = `uxcb${TS}`.slice(0, 20)
+	const add = await papi(page, '/api/catalog', {
+		method: 'POST', data: { code, label: `UX Check ${TS}`, requires_qual: null },
+	})
+	expect(add.success).toBe(true)
+
+	const probe = () => page.evaluate(() => {
+		const bad = []
+		document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((cb) => {
+			if (cb.offsetParent === null) { return }
+			const label = cb.closest('label')
+			if (!label) { bad.push(`unlabelled ${cb.name || cb.id || 'input'}`); return }
+			const tn = (function find(n) {
+				for (const c of n.childNodes) {
+					if (c.nodeType === 3 && c.textContent.trim()) { return c }
+					const hit = c.nodeType === 1 ? find(c) : null
+					if (hit) { return hit }
+				}
+				return null
+			})(label)
+			if (!tn) { return }
+			const rng = document.createRange()
+			rng.selectNodeContents(tn)
+			const cr = cb.getBoundingClientRect()
+			const tr = rng.getBoundingClientRect()
+			if (tr.top > cr.bottom + 4 || cr.top > tr.bottom + 4) {
+				bad.push(`${cb.name || cb.value || 'input'} stacked (flexDir ${getComputedStyle(label).flexDirection})`)
+			}
+		})
+		return bad
+	})
+
+	// surfaces with checkbox rows: weekday fieldset in the tours editor,
+	// gps/consent toggles in settings
+	for (const hash of ['#/tours', '#/settings/general']) {
+		await page.goto(`/apps/carecheck/${hash}`, { waitUntil: 'domcontentloaded' })
+		await page.waitForSelector('#app-content .cck-view:not([hidden])', { timeout: 30_000 })
+		expect(await probe(), `${hash} checkbox geometry`).toEqual([])
+	}
+
+	// and the inverse must still hold: a label wrapping a text control stacks
+	// label-above-input (the column rule must not die with the :has() fix)
+	const stacked = await page.evaluate(() =>
+		[...document.querySelectorAll('#app-content .cck-form-col label')]
+			.filter((l) => l.offsetParent !== null
+				&& l.querySelector(':scope > input:not([type="checkbox"],[type="radio"]), :scope > select, :scope > textarea'))
+			.filter((l) => getComputedStyle(l).flexDirection !== 'column')
+			.length)
+	expect(stacked, 'text-input labels must stay column-stacked').toBe(0)
+
+	// client detail: photo consent + the care-plan grid
+	await page.goto('/apps/carecheck/#/clients', { waitUntil: 'domcontentloaded' })
+	await page.locator('[data-cck-clients] tr', { hasText: CLIENT_NAME }).locator(`text=${CLIENT_NAME}`).click()
+	await page.locator('[data-cck-section="plan"]').click()
+	await expect(page.locator(`#cck-sec-plan input[value="${code}"]`)).toBeVisible({ timeout: 10_000 })
+	expect(await probe(), 'client detail checkbox geometry').toEqual([])
 })

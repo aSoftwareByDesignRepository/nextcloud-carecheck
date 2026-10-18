@@ -148,6 +148,8 @@ OC.L10N.register(
 	"Filter clients" : "Filter clients",
 	"Filter members" : "Filter members",
 	"Filter notices" : "Filter notices",
+	"Filter tasks" : "Filter tasks",
+	"Filter tasks…" : "Filter tasks…",
 	"Filter tours by status" : "Filter tours by status",
 	"Find staff by name or qualification." : "Find staff by name or qualification.",
 	"Find tasks by code, label or required qualification." : "Find tasks by code, label or required qualification.",
@@ -198,6 +200,7 @@ OC.L10N.register(
 	"Location" : "Location",
 	"Location (external)" : "Location (external)",
 	"Log entry" : "Log entry",
+	"Manage catalog tasks" : "Manage catalog tasks",
 	"Manual note" : "Manual note",
 	"Mark absent" : "Mark absent",
 	"Member" : "Member",
@@ -375,6 +378,7 @@ OC.L10N.register(
 	"Template deleted." : "Template deleted.",
 	"Templates" : "Templates",
 	"templates" : "templates",
+	"The plan picks from the task catalog." : "The plan picks from the task catalog.",
 	"The web app is free — the license unlocks companion-app seats only." : "The web app is free — the license unlocks companion-app seats only.",
 	"Thu" : "Thu",
 	"Time of day" : "Time of day",
@@ -418,6 +422,5 @@ OC.L10N.register(
 	"Window" : "Window",
 	"Work" : "Work",
 	"Zentrale" : "Head office"
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );

@@ -5,7 +5,7 @@
  * ============================================================ */
 
 /* ---------- §3.6.0 control-border baseline (app-entry mandatory) ---------- */
-#app-content input:not([type='range'], [type='hidden'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset'], .form-input--error, .form-input--success, .form-input--warning, .has-error, [aria-invalid='true'], .has-error *),
+#app-content input:not([type='range'], [type='hidden'], [type='checkbox'], [type='radio'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset'], .form-input--error, .form-input--success, .form-input--warning, .has-error, [aria-invalid='true'], .has-error *),
 #app-content select:not(.form-input--error, .form-input--success, .form-input--warning, [aria-invalid='true'], .has-error *),
 #app-content textarea:not(.form-input--error, .form-input--success, .form-input--warning, [aria-invalid='true'], .has-error *),
 #app-content button:not(.primary, .error, .warning, .success, .danger, .button-vue, .cck-btn--primary, .cck-btn--danger),
@@ -290,8 +290,13 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 #app-content .cck-form-col input:not([type='checkbox']),
 #app-content .cck-form-col select,
 #app-content .cck-form-col textarea { min-height: var(--cck-touch); }
-.cck-form-col button { align-self: flex-start; }
-.cck-form-col label { display: flex; flex-direction: column; gap: var(--cck-space-1); font-weight: 500; }
+/* Direct children only — reaching into nested rows (.cck-form button rows,
+   refpick × chips) used to top-align those buttons against their siblings. */
+.cck-form-col > button { align-self: flex-start; }
+/* Column stack only for labels wrapping a text control — a label whose
+   direct child is a checkbox/radio stays a horizontal row, no class
+   bookkeeping (the 2026-10 centered-checkbox regression). */
+.cck-form-col label:has(> input:not([type='checkbox'], [type='radio']), > select, > textarea) { display: flex; flex-direction: column; gap: var(--cck-space-1); font-weight: 500; }
 /* Visible labels on inline quick-add rows — placeholders are hints, never labels. */
 .cck-field { display: flex; flex-direction: column; gap: var(--cck-space-1); }
 .cck-field__label { font-size: var(--cck-fs-sm); font-weight: 600; color: var(--cck-text); }
@@ -564,7 +569,28 @@ dialog.cck-dialog[open] {
 .cck-tstop .cck-field { flex: 0 1 auto; }
 #app-content .cck-tstop input:not([type='checkbox']),
 #app-content .cck-tstop select { min-height: var(--cck-touch); }
-.cck-plan-task { display: flex; gap: var(--cck-space-2); align-items: center; padding: var(--cck-space-2) 0; min-height: var(--cck-touch); }
+/* Plan picker: card grid instead of one tall list — stays scannable when
+   the catalog grows. */
+.cck-plan-filter { margin-bottom: var(--cck-space-3); max-width: 24rem; }
+.cck-plan-tasks {
+	display: grid; grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+	gap: var(--cck-space-2);
+}
+.cck-plan-task {
+	display: flex; flex-direction: row; gap: var(--cck-space-3); align-items: center;
+	padding: var(--cck-space-2) var(--cck-space-3); min-height: var(--cck-touch);
+	border: 1px solid var(--cck-border); border-radius: var(--cck-radius-sm);
+	background: var(--cck-bg-card); cursor: pointer;
+}
+.cck-plan-task:hover { background: var(--color-background-hover); }
+.cck-plan-task:has(input:checked) {
+	border-color: var(--color-primary-element);
+	background: var(--cck-tint-info);
+}
+#app-content .cck-plan-task input[type="checkbox"] {
+	width: 24px; height: 24px; flex: none; accent-color: var(--color-primary-element);
+}
+.cck-plan-task__text { min-width: 0; overflow-wrap: anywhere; }
 .cck-journal { padding-inline-start: var(--cck-space-5); }
 .cck-journal li { padding: var(--cck-space-2) 0; border-bottom: 1px solid var(--cck-border); }
 .cck-demo { color: var(--color-warning-text, var(--color-warning)); font-weight: 600; }
@@ -1236,7 +1262,7 @@ dialog.cck-dialog[open] {
 
 /* NH-04 photos + consent checkbox */
 #app-content .cck-check {
-	display: flex; align-items: center; gap: var(--cck-space-3);
+	display: flex; flex-direction: row; align-items: center; gap: var(--cck-space-3);
 	min-height: var(--cck-touch); cursor: pointer;
 	font-size: var(--cck-fs-md);
 }

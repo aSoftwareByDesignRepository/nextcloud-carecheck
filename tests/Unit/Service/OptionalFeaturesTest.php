@@ -52,8 +52,11 @@ class OptionalFeaturesTest extends TestCase
 		$expr->method('lte')->willReturn('1=1');
 		$expr->method('gte')->willReturn('1=1');
 		$expr->method('in')->willReturn('1=1');
+		$func = $this->createMock(\OCP\DB\QueryBuilder\IFunctionBuilder::class);
+		$func->method('count')->willReturn($this->createMock(\OCP\DB\QueryBuilder\IQueryFunction::class));
 		$qb = $this->createMock(IQueryBuilder::class);
 		$qb->method('expr')->willReturn($expr);
+		$qb->method('func')->willReturn($func);
 		foreach (['select','from','where','andWhere','innerJoin','orderBy','addOrderBy','setMaxResults','groupBy'] as $m) {
 			$qb->method($m)->willReturnSelf();
 		}
@@ -505,5 +508,29 @@ class OptionalFeaturesTest extends TestCase
 		);
 		$svc->assignLead('uid:admin', 1, 'lead1'); // no exception, no insert
 		$this->addToAssertionCount(1);
+	}
+
+	public function testListTeamsShipsLeadLabelsBesideRawUids(): void
+	{
+		// Chips render `leadLabels`; `leads` keeps raw uids for the rm route.
+		$team = new Team();
+		$lead = new TeamLead();
+		$lead->setUid('lead1');
+		$teams = $this->createMock(TeamMapper::class);
+		$teams->method('findAll')->willReturn([$team]);
+		$leads = $this->createMock(TeamLeadMapper::class);
+		$leads->method('findByTeam')->willReturn([$lead]);
+		$acl = $this->createMock(AclService::class);
+		$acl->method('refLabel')->willReturnCallback(
+			static fn (?string $r) => $r === 'uid:lead1' ? 'Lead One' : null
+		);
+		$svc = new TeamService(
+			$this->db($this->emptyResult()), $teams, $leads,
+			$this->createMock(ClientMapper::class), $this->createMock(MemberMapper::class),
+			$acl, $this->createMock(IUserManager::class), $this->createMock(IGroupManager::class)
+		);
+		$out = $svc->list('uid:admin');
+		$this->assertSame(['lead1'], $out[0]['leads']);
+		$this->assertSame(['Lead One'], $out[0]['leadLabels']);
 	}
 }
