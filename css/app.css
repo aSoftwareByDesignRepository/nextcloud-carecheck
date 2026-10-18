@@ -302,6 +302,15 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 .cck-field__label { font-size: var(--cck-fs-sm); font-weight: 600; color: var(--cck-text); }
 .cck-form .cck-field { flex: 1 1 11rem; }
 .cck-form .cck-field .cck-refpick { min-width: 0; }
+/* NC core pins every input/select/textarea to width:130px (inputs.scss) —
+   an explicit width defeats flex stretch, so controls inside field wrappers,
+   column forms and dialogs must fill their slot instead. */
+#app-content .cck-form-col :is(input, select, textarea):not([type='checkbox'], [type='radio'], [type='hidden'], [type='range'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset']),
+#app-content .cck-field :is(input, select, textarea):not([type='checkbox'], [type='radio'], [type='hidden'], [type='range'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset']),
+dialog.cck-dialog :is(input, select, textarea):not([type='checkbox'], [type='radio'], [type='hidden'], [type='range'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset']) {
+	width: 100%;
+	box-sizing: border-box;
+}
 .cck-form-col fieldset { border: 1px solid var(--cck-border); border-radius: var(--cck-radius-sm); padding: var(--cck-space-3) var(--cck-space-4); }
 .cck-form-col legend { font-weight: 600; padding: 0 var(--cck-space-2); }
 .cck-settings-stack { display: flex; flex-direction: column; }
@@ -518,6 +527,8 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 	display: flex; align-items: center;
 }
 #app-content .cck-refpick__opt:hover, #app-content .cck-refpick__opt:focus { background: var(--color-background-hover); outline: none; }
+.cck-crm-results { margin: var(--cck-space-2) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--cck-space-1); }
+.cck-crm-results .cck-crm-pick { justify-content: flex-start; width: 100%; text-align: start; }
 .cck-refpick__chips { display: flex; flex-wrap: wrap; gap: var(--cck-space-2); margin-top: var(--cck-space-2); min-height: 0; }
 .cck-refpick__chip {
 	display: inline-flex; align-items: center; gap: var(--cck-space-1);

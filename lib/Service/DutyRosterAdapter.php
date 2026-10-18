@@ -6,6 +6,7 @@ namespace OCA\CareCheck\Service;
 
 use OCP\App\IAppManager;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IConfig;
 use OCP\IDBConnection;
 
 /**
@@ -15,12 +16,19 @@ use OCP\IDBConnection;
  * absent or mid-upgrade → empty list, never an error. Only uid-linked
  * employees are actionable (tours assign to actor refs), but unlinked
  * employees still surface so staffing gaps are visible.
+ *
+ * The feed only crosses when the DutyCheck admin opted in — the same
+ * `mc_onduty_hook_enabled` flag that gates the `check.on-duty` endpoint
+ * (MaintenanceCheckOnDutyReader) upstream.
  */
 class DutyRosterAdapter
 {
+	private const DC_ONDUTY_FLAG = 'mc_onduty_hook_enabled';
+
 	public function __construct(
 		private IDBConnection $db,
 		private IAppManager $appManager,
+		private IConfig $config,
 	) {
 	}
 
@@ -41,6 +49,11 @@ class DutyRosterAdapter
 	public function onDuty(string $date): array
 	{
 		if (!$this->installed()) {
+			return ['available' => false, 'rows' => []];
+		}
+		// Owner-side consent: no roster data crosses while the DutyCheck
+		// on-duty hook is off — regardless of this app's own settings.
+		if ($this->config->getAppValue('dutycheck', self::DC_ONDUTY_FLAG, '0') !== '1') {
 			return ['available' => false, 'rows' => []];
 		}
 		try {

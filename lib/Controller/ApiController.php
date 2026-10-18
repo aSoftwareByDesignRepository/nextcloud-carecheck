@@ -79,6 +79,8 @@ class ApiController extends Controller
 		private \OCA\CareCheck\Service\VoiceNoteService $voiceNotes,
 		private \OCA\CareCheck\Service\TeamService $teams,
 		private \OCA\CareCheck\Service\GroupSessionService $groupSessions,
+		private \OCA\CareCheck\Service\PrivacyProposalService $privacyProposals,
+		private \OCA\CareCheck\Service\CrmLinkService $crmLinks,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -766,6 +768,51 @@ class ApiController extends Controller
 	}
 
 	/**
+	 * F15: PrivacyCheck VVT proposal state for the settings surface.
+	 * Staff may read the state (it reveals nothing beyond "proposed: yes/no");
+	 * minting the draft is admin-gated below.
+	 */
+	#[NoAdminRequired]
+	public function privacyProposalState(): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			$this->acl->assertStaff($actor);
+			return $this->ok(['proposal' => $this->privacyProposals->state()]);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	/**
+	 * F15: create the draft register entry (+ seeded DPIA) in PrivacyCheck.
+	 * Admin-only like the access door — a VVT entry is a provider-level
+	 * compliance artifact. Idempotent: the stored activity id makes repeat
+	 * clicks return the existing draft instead of minting another.
+	 */
+	#[NoAdminRequired]
+	public function proposePrivacyActivity(): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			$this->acl->assertStaff($actor);
+			if (!$this->acl->isAppAdmin()) {
+				throw ApiException::notFound();
+			}
+			$res = $this->privacyProposals->propose($actor);
+			$this->acl->audit($actor, 'privacy_proposal', null,
+				($res['ok'] ?? false) ? 'ok' : ('failed:' . ($res['code'] ?? 'unknown')));
+			return $this->ok(['proposal' => array_merge(
+				$this->privacyProposals->state(),
+				['ok' => $res['ok'], 'already' => $res['already'] ?? false,
+				 'code' => $res['code'] ?? null, 'message' => $res['message'] ?? null]
+			)]);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	/**
 	 * Rejected-review resolution (spec UX-13): a Zentrale reviewer marks a
 	 * quarantined bundle as corrected. The status flip and the correcting
 	 * journal entry commit atomically — the journal proves the human decision
@@ -824,6 +871,11 @@ class ApiController extends Controller
 			// Chips must show names, never raw member:/uid: wire refs.
 			$h['primaryRefLabel'] = $this->acl->refLabel($h['primaryRef']);
 			$h['subRefLabel'] = $this->acl->refLabel($h['subRef']);
+			// F14: resolved soft link — name:null with a stored id renders a
+			// muted "no longer available" (company archived, CUC offline, or
+			// actor lost access); the relation is never silently dropped.
+			$h['crm'] = $this->crmLinks->linkInfo($actor, $h['crmCompanyId']);
+			$h['crm']['canEdit'] = $this->acl->isAppAdmin();
 			// published plan rides along — the editor needs revision for CAS
 			// and the current task selection to precheck.
 			$plan = null;
@@ -973,6 +1025,58 @@ class ApiController extends Controller
 		try {
 			$t = $this->request->getParam('team_id');
 			$this->teams->assignClient($this->actor(), $id, $t === null || $t === '' ? null : (int)$t);
+			return $this->ok(['assigned' => true]);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	/**
+	 * F14: picker source — CustomerCheck companies for the client→CRM
+	 * soft link. Staff-readable; `available:false` when the sibling is
+	 * absent so the UI can render the muted state instead of an error.
+	 */
+	#[NoAdminRequired]
+	public function crmCompanies(): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			$this->acl->assertStaff($actor);
+			// Admin-only like setClientCrmLink — the picker exists solely to
+			// serve the link action, and the whole book stays unenumerable.
+			if (!$this->acl->isAppAdmin()) {
+				throw ApiException::notFound();
+			}
+			$q = $this->request->getParam('q');
+			return $this->ok($this->crmLinks->companies($actor, is_string($q) ? $q : null));
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	/**
+	 * F14: set/clear the client's CRM soft link. Admin-only like the access
+	 * door — the link is a provider-level billing relation, and setting it
+	 * wrong silently routes F13 drafts to the wrong company.
+	 */
+	#[NoAdminRequired]
+	public function setClientCrmLink(int $id): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			if (!$this->acl->isAppAdmin()) {
+				throw ApiException::notFound();
+			}
+			$raw = $this->request->getParam('crm_company_id');
+			$companyId = null;
+			if ($raw !== null && $raw !== '') {
+				// strict int ids — "2.9"/"2e3" must not truncate silently
+				if (!is_int($raw) && !is_string($raw) || (is_string($raw) && preg_match('/^\d+$/', $raw) !== 1)) {
+					throw ApiException::validation('Validation failed.', ['crm_company_id' => 'invalid']);
+				}
+				$companyId = (int)$raw;
+			}
+			$this->crmLinks->setLink($actor, $id, $companyId);
 			return $this->ok(['assigned' => true]);
 		} catch (ApiException $e) {
 			return $this->error($e);

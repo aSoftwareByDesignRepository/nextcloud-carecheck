@@ -327,7 +327,7 @@
 	// ---------------- routing ----------------
 	var currentClient = null;
 
-	var SETTINGS_SECTIONS = ['general', 'companion', 'access', 'support'];
+	var SETTINGS_SECTIONS = ['general', 'companion', 'access', 'privacy', 'support'];
 	var mountedSettings = {};
 	// null = unknown (first /api/settings round-trip pending). The access
 	// section stays unmounted until the server confirms admin — DS-2 door.
@@ -356,7 +356,7 @@
 		var id = parseInt(sub, 10);
 		if (view === 'settings') {
 			var sec = SETTINGS_SECTIONS.indexOf(sub) >= 0 ? sub : 'general';
-			if (sec === 'access' && settingsAdmin !== true) {
+			if ((sec === 'access' || sec === 'privacy') && settingsAdmin !== true) {
 				if (settingsAdmin === false) { location.replace('#/settings/general'); return; }
 				sec = 'general';
 			}
@@ -682,6 +682,7 @@
 					if (!ts.dataset.cckBound) { ts.dataset.cckBound = '1'; bindTeamSelect(ts, 'clients', id); }
 				});
 			}
+			renderCrmLink(c.crm || null);
 			loadPhotos(id, !!c.payload.photo_consent);
 			var pp = document.querySelector('[data-cck-refpick="primary_ref"]');
 			var sp = document.querySelector('[data-cck-refpick="sub_ref"]');
@@ -691,6 +692,96 @@
 			loadJournal(id);
 		});
 	}
+	// F14: CRM soft link — separate action endpoint, outside the CAS edit
+	// form. Hidden entirely when CustomerCheck is absent and no link exists;
+	// a stale link stays visible (muted) instead of vanishing silently.
+	function renderCrmLink(crm) {
+		var box = document.querySelector('[data-cck-crm]');
+		if (!box) { return; }
+		var state = box.querySelector('[data-cck-crm-state]');
+		var open = box.querySelector('[data-cck-crm-open]');
+		var unlink = box.querySelector('[data-cck-crm-unlink]');
+		var pick = box.querySelector('[data-cck-crm-pick]');
+		var res = box.querySelector('[data-cck-crm-results]');
+		crm = crm || { available: false, id: null, name: null, deepLink: null, canEdit: false };
+		box.hidden = !(crm.available || crm.id);
+		if (crm.id && crm.name) {
+			state.textContent = tr('Linked to a CRM company:');
+		} else if (crm.id) {
+			state.textContent = tr('The linked company is no longer available — ask an admin to check the link.');
+		} else if (!crm.available) {
+			state.textContent = tr('CustomerCheck is not installed — CRM linking is unavailable.');
+		} else {
+			state.textContent = tr('No CRM company linked.');
+		}
+		var hasLink = !!(crm.id && crm.name);
+		open.hidden = !(hasLink && crm.deepLink);
+		open.textContent = crm.name || '';
+		open.setAttribute('href', crm.deepLink || '#');
+		unlink.hidden = !(crm.canEdit && crm.id);
+		pick.hidden = !(crm.canEdit && crm.available && !crm.id);
+		if (res) { res.innerHTML = ''; }
+	}
+	var crmSearchTimer = null;
+	document.addEventListener('input', function (e) {
+		if (!e.target || !e.target.hasAttribute || !e.target.hasAttribute('data-cck-crm-q')) { return; }
+		var q = e.target.value;
+		clearTimeout(crmSearchTimer);
+		crmSearchTimer = setTimeout(function () {
+			q = q.trim();
+			var res = document.querySelector('[data-cck-crm-results]');
+			if (!res) { return; }
+			if (!q) { res.innerHTML = ''; return; }
+			api('/api/crm-companies?q=' + encodeURIComponent(q)).then(function (r) {
+				res.innerHTML = '';
+				if (!r.success) { return; }
+				var items = (r.data && r.data.companies) || [];
+				if (!items.length) {
+					var li = document.createElement('li');
+					li.className = 'cck-empty';
+					li.textContent = tr('No companies found.');
+					res.appendChild(li);
+					return;
+				}
+				items.forEach(function (c) {
+					var li = document.createElement('li');
+					var b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'cck-btn cck-btn--secondary cck-crm-pick';
+					b.setAttribute('data-cck-crm-id', c.id);
+					b.textContent = c.label;
+					li.appendChild(b);
+					res.appendChild(li);
+				});
+			});
+		}, 250);
+	});
+	document.addEventListener('click', function (e) {
+		var pick = e.target.closest ? e.target.closest('.cck-crm-pick') : null;
+		var unlink = e.target.closest ? e.target.closest('[data-cck-crm-unlink]') : null;
+		if (pick) {
+			var cid = parseInt(pick.getAttribute('data-cck-crm-id'), 10);
+			if (!(cid > 0)) { return; }
+			pick.disabled = true;
+			api('/api/clients/' + currentClient + '/crm-link', {
+				method: 'PUT', body: JSON.stringify({ crm_company_id: cid }),
+			}).then(function (r) {
+				if (r.success) { notify(tr('Linked.')); loadClientDetail(currentClient); }
+				else { pick.disabled = false; notify(r.message || tr('Failed.'), true); }
+			});
+			return;
+		}
+		if (unlink) {
+			unlink.disabled = true;
+			api('/api/clients/' + currentClient + '/crm-link', {
+				method: 'PUT', body: JSON.stringify({ crm_company_id: null }),
+			}).then(function (r) {
+				unlink.disabled = false;
+				if (r.success) { notify(tr('Link removed.')); loadClientDetail(currentClient); }
+				else { notify(r.message || tr('Failed.'), true); }
+			});
+		}
+	});
 	document.querySelector('[data-cck-client-back]').addEventListener('click', function () { location.hash = '#/clients'; });
 	// in-page section chips — long detail page gets a mini-IA instead of a wall
 	document.querySelectorAll('[data-cck-section]').forEach(function (chip) {
@@ -1576,13 +1667,13 @@
 			// DS-2 access door — admin-only section (server enforces too).
 			var isAdmin = r.data.settings.is_app_admin === '1';
 			settingsAdmin = isAdmin;
-			document.querySelectorAll('[data-cck-subnav="access"]').forEach(function (a) {
+			document.querySelectorAll('[data-cck-subnav="access"], [data-cck-subnav="privacy"]').forEach(function (a) {
 				a.hidden = !isAdmin;
 			});
 			var curHash = location.hash.replace(/^#\/?/, '') || '';
-			if (!isAdmin && curHash === 'settings/access') {
+			if (!isAdmin && (curHash === 'settings/access' || curHash === 'settings/privacy')) {
 				location.replace('#/settings/general');
-			} else if (isAdmin && curHash === 'settings/access') {
+			} else if (isAdmin && (curHash === 'settings/access' || curHash === 'settings/privacy')) {
 				route(true); // admin confirmed — mount + show the door now
 				loadTeams();
 			}
@@ -1591,11 +1682,65 @@
 				if (box && box._refpick) { box._refpick.setList(r.data.settings[k] || [], r.data.settings[k + '_labels'] || []); }
 			});
 			ungateSettingsForms();
+			if (mountedSettings.privacy) { loadPrivacyProposal(); }
 			return r;
 		});
 		if (!settingsHydrated) { settingsHydrated = p.finally(ungateSettingsForms); }
 		return p;
 	}
+
+	// F15: PrivacyCheck VVT proposal card — muted text when the sibling is
+	// absent, a one-click CTA for admins when a draft is missing, and a link
+	// into PrivacyCheck once the draft exists.
+	function renderPrivacyProposal(p) {
+		var stateEl = document.querySelector('[data-cck-privacy-state]');
+		var btn = document.querySelector('[data-cck-privacy-propose]');
+		var open = document.querySelector('[data-cck-privacy-open]');
+		if (!stateEl || !btn || !open) { return; }
+		if (!p.available) {
+			stateEl.textContent = tr('PrivacyCheck is not installed — the register proposal is unavailable.');
+			btn.hidden = true; open.hidden = true;
+			return;
+		}
+		if (p.activityId) {
+			stateEl.textContent = tr('Draft register entry filed — a privacy lead reviews and publishes it in PrivacyCheck.');
+			btn.hidden = true;
+			open.hidden = false;
+			open.setAttribute('href', OC.generateUrl('/apps/privacycheck/'));
+			return;
+		}
+		if (p.ok === false) {
+			stateEl.textContent = tr(p.code === 'sibling_unavailable'
+				? 'PrivacyCheck is not installed — the register proposal is unavailable.'
+				: 'The proposal failed — try again or file the entry directly in PrivacyCheck.');
+		} else {
+			stateEl.textContent = tr('No register draft filed yet.');
+		}
+		btn.hidden = settingsAdmin !== true;
+		btn.disabled = false;
+		open.hidden = true;
+	}
+	function loadPrivacyProposal() {
+		api('/api/privacy-proposal').then(function (r) {
+			if (r && r.success) { renderPrivacyProposal(r.data.proposal || {}); }
+		});
+	}
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest ? e.target.closest('[data-cck-privacy-propose]') : null;
+		if (!b) { return; }
+		b.disabled = true;
+		api('/api/privacy-proposal', { method: 'POST', body: '{}' }).then(function (r) {
+			if (r && r.success) {
+				renderPrivacyProposal(r.data.proposal || {});
+				var p = r.data.proposal || {};
+				if (p.ok && !p.already) { notify(tr('Draft register entry filed.')); }
+				else if (p.ok && p.already) { notify(tr('A register draft already exists.')); }
+			} else {
+				b.disabled = false;
+				notify((r && r.message) || tr('Failed.'), true);
+			}
+		});
+	});
 	document.addEventListener('submit', function (e) {
 		var f = e.target;
 		if (!(f && f.hasAttribute && f.hasAttribute('data-cck-settings-form'))) { return; }

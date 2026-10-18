@@ -14,11 +14,13 @@ use OCA\CareCheck\Service\AzcAbsenceAdapter;
 use OCA\CareCheck\Service\ClientImportService;
 use OCA\CareCheck\Service\ClientService;
 use OCA\CareCheck\Service\CryptoService;
+use OCA\CareCheck\Service\DutyRosterAdapter;
 use OCA\CareCheck\Service\PresenceService;
 use OCA\CareCheck\Service\ShareService;
 use OCA\CareCheck\Service\TourService;
 use OCP\App\IAppManager;
 use OCP\DB\IResult;
+use OCP\IConfig;
 use OCP\DB\QueryBuilder\IExpressionBuilder;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -58,6 +60,7 @@ class NhFeaturesTest extends TestCase
 		$qb->method('where')->willReturnSelf();
 		$qb->method('andWhere')->willReturnSelf();
 		$qb->method('innerJoin')->willReturnSelf();
+		$qb->method('leftJoin')->willReturnSelf();
 		$qb->method('orderBy')->willReturnSelf();
 		$qb->method('addOrderBy')->willReturnSelf();
 		$qb->method('setMaxResults')->willReturnSelf();
@@ -365,10 +368,10 @@ class NhFeaturesTest extends TestCase
 		$apps->method('isEnabledForUser')->willReturn(false);
 		$svc = new AzcAbsenceAdapter($this->emptyDb(), $apps);
 		$out = $svc->import('2026-10-01', '2026-10-31');
-		$this->assertSame(['scanned' => 0, 'imported' => 0, 'skipped' => 0, 'available' => false], $out);
+		$this->assertSame(['scanned' => 0, 'imported' => 0, 'skipped' => 0, 'errors' => 0, 'available' => false], $out);
 	}
 
-	public function testAzcImportFailsSoftOnSchemaDrift(): void
+	public function testAzcImportFailsSoftOnOwnSchemaDrift(): void
 	{
 		$apps = $this->createMock(IAppManager::class);
 		$apps->method('isEnabledForUser')->willReturn(true);
@@ -376,8 +379,52 @@ class NhFeaturesTest extends TestCase
 		$db->method('getQueryBuilder')->willThrowException(new \RuntimeException('table missing'));
 		$svc = new AzcAbsenceAdapter($db, $apps);
 		$out = $svc->import('2026-10-01', '2026-10-31');
-		$this->assertFalse($out['available']);
+		// Never throws, never imports bogus rows — the error counter is the
+		// honest signal when the own-side dedupe index is unreadable.
 		$this->assertSame(0, $out['imported']);
+		$this->assertSame(0, $out['skipped']);
+		if ($out['available']) {
+			// Facade reachable (Docker) but the dedupe index blew up.
+			$this->assertSame(1, $out['errors']);
+		}
+	}
+
+	/* ---------- NH-02 DutyRosterAdapter — owner opt-in gate ---------- */
+
+	public function testDutyRosterMutedWhenDcOptInOff(): void
+	{
+		$apps = $this->createMock(IAppManager::class);
+		$apps->method('isEnabledForUser')->willReturn(true);
+		$config = $this->createMock(IConfig::class);
+		$config->method('getAppValue')->willReturn('0');
+		// opt-in off → the adapter must not even touch the sibling schema
+		$db = $this->createMock(IDBConnection::class);
+		$db->expects($this->never())->method('getQueryBuilder');
+		$svc = new DutyRosterAdapter($db, $apps, $config);
+		$out = $svc->onDuty('2026-10-18');
+		$this->assertSame(['available' => false, 'rows' => []], $out);
+	}
+
+	public function testDutyRosterReadsWhenDcOptInOn(): void
+	{
+		$apps = $this->createMock(IAppManager::class);
+		$apps->method('isEnabledForUser')->willReturn(true);
+		$config = $this->createMock(IConfig::class);
+		$config->method('getAppValue')->willReturn('1');
+		$svc = new DutyRosterAdapter($this->emptyDb(), $apps, $config);
+		$out = $svc->onDuty('2026-10-18');
+		$this->assertTrue($out['available']);
+		$this->assertSame([], $out['rows']);
+	}
+
+	public function testDutyRosterMutedWhenDcAbsent(): void
+	{
+		$apps = $this->createMock(IAppManager::class);
+		$apps->method('isEnabledForUser')->willReturn(false);
+		$config = $this->createMock(IConfig::class);
+		$config->expects($this->never())->method('getAppValue');
+		$svc = new DutyRosterAdapter($this->emptyDb(), $apps, $config);
+		$this->assertSame(['available' => false, 'rows' => []], $svc->onDuty('2026-10-18'));
 	}
 
 	/* ---------- archive repeat → uniform 404 ---------- */

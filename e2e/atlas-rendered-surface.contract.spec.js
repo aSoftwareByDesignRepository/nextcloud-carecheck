@@ -5,12 +5,35 @@
  * icons non-zero, controls not center-aligned by inherited shell styles.
  * CareCheck is a hash-routed SPA — each route gets its own pass.
  */
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import shared from '../../_shared/e2e/atlas-rendered-surface-contract.js';
 import { login } from './helpers/auth.js';
 
 const { assertAtlasRenderedSurface } = shared;
 const CREDS = { username: 'cck_smoke', password: 'CckSmoke!2026' };
+
+// Client record (Klientenakte) lives behind a hash route that needs a real
+// client id — seed one so the pinned-control check reaches the edit form.
+let clientId = 0;
+
+test.beforeAll(async ({ browser }) => {
+	const ctx = await browser.newContext();
+	const page = await ctx.newPage();
+	await login(page, CREDS);
+	const request = page.context().request;
+	const html = await (await request.get('/apps/carecheck/')).text();
+	const rt = (html.match(/data-requesttoken="([^"]+)"/) || [])[1] || '';
+	expect(rt).not.toBe('');
+	const res = await request.fetch('/apps/carecheck/api/clients', {
+		method: 'POST',
+		headers: { requesttoken: rt, 'Content-Type': 'application/json' },
+		data: { name: `RS Klient ${Date.now()}`, street: 'Renderweg 2' },
+	});
+	const body = await res.json();
+	expect(body.success, JSON.stringify(body)).toBe(true);
+	clientId = body.data.id;
+	await ctx.close();
+});
 
 const SURFACES = [
 	['#/board', 'coverage board'],
@@ -52,6 +75,7 @@ test.describe('Rendered-surface contract', () => {
 		test(`ATLAS_RENDERED_SURFACE_CONTRACT ${name} (${hash})`, async ({ page }) => {
 			await page.setViewportSize({ width: 1280, height: 800 });
 			await page.goto(`/apps/carecheck/${hash}`, { waitUntil: 'domcontentloaded' });
+			await page.waitForSelector('#app-content.cck-app .cck-view:not([hidden])', { timeout: 30_000 });
 			await assertAtlasRenderedSurface(page, {
 				content: '#app-content.cck-app',
 				navExclude: '#app-navigation',
@@ -59,4 +83,19 @@ test.describe('Rendered-surface contract', () => {
 			});
 		});
 	}
+
+	// Klientenakte — the screen that shipped 130px fields (core inputs.scss pin
+	// vs. stretch-intended .cck-form-col). Needs the client seeded in beforeAll.
+	test('ATLAS_RENDERED_SURFACE_CONTRACT client record (#/client)', async ({ page }) => {
+		expect(clientId).toBeGreaterThan(0);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await page.goto(`/apps/carecheck/#/client/${clientId}`, { waitUntil: 'domcontentloaded' });
+		await page.waitForSelector('#app-content.cck-app [data-cck-view="client"]:not([hidden])', { timeout: 30_000 });
+		await page.waitForSelector('[data-cck-client-edit] input[name="name"]', { state: 'visible', timeout: 30_000 });
+		await assertAtlasRenderedSurface(page, {
+			content: '#app-content.cck-app',
+			navExclude: '#app-navigation',
+			listAllow: LIST_ALLOW,
+		});
+	});
 });

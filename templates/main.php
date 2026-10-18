@@ -32,6 +32,7 @@ $settingsNav = static function () use ($l): string {
 		'general' => $l->t('General'),
 		'companion' => $l->t('Companion app'),
 		'access' => $l->t('Access'),
+		'privacy' => $l->t('Privacy & register'),
 		'support' => $l->t('Support & us'),
 	];
 	$out = '<nav class="cck-chipbar" aria-label="' . htmlspecialchars($l->t('Settings sections'), ENT_QUOTES, 'UTF-8') . '">';
@@ -210,6 +211,19 @@ $settingsNav = static function () use ($l): string {
 						<span><?php p($l->t('Photo documentation consent given')); ?></span></label>
 					<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Save')); ?></button>
 				</form>
+				<fieldset class="cck-refpick-field cck-crm" data-cck-crm hidden>
+					<legend><?php p($l->t('CRM company')); ?></legend>
+					<p class="cck-hint" data-cck-crm-state role="status"></p>
+					<div class="cck-form">
+						<a class="cck-link" data-cck-crm-open href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+						<button type="button" class="cck-btn cck-btn--secondary" data-cck-crm-unlink hidden><?php p($l->t('Remove link')); ?></button>
+					</div>
+					<div data-cck-crm-pick hidden>
+						<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Link a company')); ?></span>
+							<input type="search" data-cck-crm-q autocomplete="off" placeholder="<?php p($l->t('Search companies…')); ?>" aria-describedby="cck-crm-results"></label>
+						<ul class="cck-crm-results" data-cck-crm-results role="listbox" aria-label="<?php p($l->t('Matching companies')); ?>"></ul>
+					</div>
+				</fieldset>
 			</section>
 
 			<section class="cck-panel" id="cck-sec-plan" tabindex="-1">
@@ -475,7 +489,7 @@ $settingsNav = static function () use ($l): string {
 			</section>
 		</div>
 
-		<?php foreach (['general', 'companion', 'access', 'support'] as $sec): ?>
+		<?php foreach (['general', 'companion', 'access', 'privacy', 'support'] as $sec): ?>
 		<div class="cck-view" data-cck-view="settings-<?php p($sec); ?>" hidden>
 			<?php print_unescaped($viewHead('settings', $l->t('Settings'), $l->t('Provider-wide configuration — one section per page.'))); ?>
 			<?php print_unescaped($settingsNav()); ?>
@@ -603,6 +617,17 @@ $settingsNav = static function () use ($l): string {
 			<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Create team')); ?></button>
 		</form>
 		<div data-cck-team-list class="cck-team-list"><p class="cck-empty"><?php p($l->t('Loading…')); ?></p></div>
+	</section>
+</template>
+<template data-cck-settings-tpl="privacy">
+	<section class="cck-panel">
+		<h2><?php p($l->t('Privacy & register')); ?></h2>
+		<p class="cck-hint"><?php p($l->t('PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck.')); ?></p>
+		<p class="cck-hint" data-cck-privacy-state role="status"><?php p($l->t('Loading…')); ?></p>
+		<div class="cck-form">
+			<button type="button" class="cck-btn cck-btn--primary" data-cck-privacy-propose hidden><?php p($l->t('Create draft register entry')); ?></button>
+			<a class="cck-btn cck-btn--secondary" data-cck-privacy-open hidden href="#"><?php p($l->t('Open PrivacyCheck')); ?></a>
+		</div>
 	</section>
 </template>
 <template data-cck-settings-tpl="support">

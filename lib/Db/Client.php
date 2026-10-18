@@ -33,6 +33,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setPresenceHash(string|null $presenceHash)
  * @method int|null getTeamId()
  * @method void setTeamId(int|null $teamId)
+ * @method int|null getCrmCompanyId()
+ * @method void setCrmCompanyId(int|null $crmCompanyId)
  */
 class Client extends Entity
 {
@@ -49,6 +51,7 @@ class Client extends Entity
 	protected $isDemo;
 	protected $presenceHash;
 	protected $teamId;
+	protected $crmCompanyId;
 
 	public function __construct()
 	{
@@ -66,5 +69,6 @@ class Client extends Entity
 		$this->addType('isDemo', 'integer');
 		$this->addType('presenceHash', 'string');
 		$this->addType('teamId', 'integer');
+		$this->addType('crmCompanyId', 'integer');
 	}
 }

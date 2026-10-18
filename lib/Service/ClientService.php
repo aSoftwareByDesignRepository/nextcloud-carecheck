@@ -40,6 +40,7 @@ class ClientService
 				unset($payload[$k]);
 			}
 		}
+		unset($payload['crm_company_id']); // F14 — column-managed, see update()
 		$c = new Client();
 		$c->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName($name)));
 		$c->setPayloadEnc($this->crypto->encrypt(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)));
@@ -111,6 +112,9 @@ class ClientService
 					unset($payload[$k]);
 				}
 			}
+			// F14: managed via the dedicated link endpoint — a stray payload
+			// key must never land silently inside the encrypted blob.
+			unset($payload['crm_company_id']);
 			$merged = array_merge($existing, $payload);
 			if (isset($payload['name'])) {
 				$c->setNameHmac($this->crypto->nameHmac($this->crypto->normalizeName((string)$payload['name'])));
@@ -157,9 +161,8 @@ class ClientService
 		return $ref;
 	}
 
-	/** @return array{id:int,requiresQual:?string,payload:array} */
 	/**
-	 * @return array{id:int,requiresQual:?string,primaryRef:?string,subRef:?string,isDemo:bool,teamId:?int,revision:int,payload:array<string,mixed>}
+	 * @return array{id:int,requiresQual:?string,primaryRef:?string,subRef:?string,isDemo:bool,teamId:?int,crmCompanyId:?int,revision:int,payload:array<string,mixed>}
 	 */
 	public function hydrated(Client $c): array
 	{
@@ -170,6 +173,7 @@ class ClientService
 			'subRef' => $c->getSubRef(),
 			'isDemo' => (int)$c->getIsDemo() === 1,
 			'teamId' => $c->getTeamId() !== null ? (int)$c->getTeamId() : null,
+			'crmCompanyId' => $c->getCrmCompanyId() !== null ? (int)$c->getCrmCompanyId() : null,
 			'revision' => (int)$c->getRevision(),
 			'payload' => json_decode($this->crypto->decrypt((string)$c->getPayloadEnc()), true) ?? [],
 		];

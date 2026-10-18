@@ -29,6 +29,9 @@ const THEME_MARKER = { light: 'default', dark: 'dark', 'dark-highcontrast': 'dar
 const VIEWPORTS = [
   { name: 'mobile-320', width: 320, height: 640 },
   { name: 'tablet-768', width: 768, height: 900 },
+  // Exact drawer→sidebar boundary: at 1023 the nav is a hidden drawer,
+  // at 1024 it must render as the persistent sidebar (css/app.css @media).
+  { name: 'desktop-1024', width: 1024, height: 800 },
   { name: 'desktop-1280', width: 1280, height: 800 },
 ];
 const SURFACES = ['#/board', '#/settings/general'];
@@ -60,44 +63,46 @@ test.describe.serial('THEME_RESPONSIVE', () => {
 
   for (const theme of THEMES) {
     for (const vp of VIEWPORTS) {
-      test(`${theme} @ ${vp.name}: no pan + axe + focus ring`, async ({ page }) => {
-        setTheme(theme);
-        await page.setViewportSize({ width: vp.width, height: vp.height });
-        await page.goto(`/apps/carecheck/#/board`, { waitUntil: 'domcontentloaded' });
-        await page.waitForSelector(`${CONTENT} .cck-view:not([hidden])`, { timeout: 30_000 });
+      for (const surface of SURFACES) {
+        test(`${theme} @ ${vp.name} ${surface}: no pan + axe + focus ring`, async ({ page }) => {
+          setTheme(theme);
+          await page.setViewportSize({ width: vp.width, height: vp.height });
+          await page.goto(`/apps/carecheck/${surface}`, { waitUntil: 'domcontentloaded' });
+          await page.waitForSelector(`${CONTENT} .cck-view:not([hidden])`, { timeout: 30_000 });
 
-        // 1) theme actually applied — NC marks body[data-theme-*]
-        const applied = await page.evaluate(() =>
-          document.body.outerHTML.match(/data-theme[a-z-]*="[^"]*"/g)?.join(',') ?? 'none');
-        expect(applied, `theme marker missing for ${theme}`).toContain(THEME_MARKER[theme]);
+          // 1) theme actually applied — NC marks body[data-theme-*]
+          const applied = await page.evaluate(() =>
+            document.body.outerHTML.match(/data-theme[a-z-]*="[^"]*"/g)?.join(',') ?? 'none');
+          expect(applied, `theme marker missing for ${theme}`).toContain(THEME_MARKER[theme]);
 
-        // 2) no horizontal page pan
-        const pan = await page.evaluate(() => {
-          const r = document.documentElement;
-          return r.scrollWidth > r.clientWidth + 1;
+          // 2) no horizontal page pan
+          const pan = await page.evaluate(() => {
+            const r = document.documentElement;
+            return r.scrollWidth > r.clientWidth + 1;
+          });
+          expect(pan, `horizontal pan at ${vp.width}px in ${surface} in ${theme}`).toBe(false);
+
+          // 3) cck tokens resolve (catches undefined-var silent failures)
+          const missing = await page.evaluate(() => {
+            const cs = getComputedStyle(document.body);
+            return ['--cck-text', '--cck-muted', '--cck-bg-card', '--cck-border',
+                    '--cck-tint-info', '--cck-danger-fill', '--cck-radius-md', '--cck-touch']
+              .filter((v) => !cs.getPropertyValue(v).trim());
+          });
+          expect(missing, `unresolved tokens in ${theme}`).toEqual([]);
+
+          // 4) keyboard focus ring on first nav link
+          const navLink = page.locator('#app-navigation .cck-nav__link').first();
+          await navLink.focus();
+          const ring = await navLink.evaluate((el) => {
+            const cs = getComputedStyle(el);
+            return parseFloat(cs.outlineWidth) > 0 && cs.outlineStyle !== 'none';
+          });
+          expect(ring, 'no focus ring on nav link').toBe(true);
+
+          await axe(page, `${theme} @ ${vp.name} ${surface}`);
         });
-        expect(pan, `horizontal pan at ${vp.width}px in ${theme}`).toBe(false);
-
-        // 3) cck tokens resolve (catches undefined-var silent failures)
-        const missing = await page.evaluate(() => {
-          const cs = getComputedStyle(document.body);
-          return ['--cck-text', '--cck-muted', '--cck-bg-card', '--cck-border',
-                  '--cck-tint-info', '--cck-danger-fill', '--cck-radius-md', '--cck-touch']
-            .filter((v) => !cs.getPropertyValue(v).trim());
-        });
-        expect(missing, `unresolved tokens in ${theme}`).toEqual([]);
-
-        // 4) keyboard focus ring on first nav link
-        const navLink = page.locator('#app-navigation .cck-nav__link').first();
-        await navLink.focus();
-        const ring = await navLink.evaluate((el) => {
-          const cs = getComputedStyle(el);
-          return parseFloat(cs.outlineWidth) > 0 && cs.outlineStyle !== 'none';
-        });
-        expect(ring, 'no focus ring on nav link').toBe(true);
-
-        await axe(page, `${theme} @ ${vp.name} board`);
-      });
+      }
     }
   }
 
