@@ -705,3 +705,61 @@ test('resolve dialog cancel leaves the review queue untouched', async ({ page })
 	// the queue row is still there — cancel is not a silent resolve
 	await expect(page.locator('[data-cck-resolve]').first()).toBeVisible()
 })
+
+test('team selects outside settings offer real teams and persist the pick', async ({ page }) => {
+	const team = await papi(page, '/api/teams', { method: 'POST', data: { name: `UX Team ${TS}` } })
+	expect(team.success).toBe(true)
+	const teamId = team.data.team.id
+
+	// member row — the dead loadTeams() early-return left only the empty option
+	await page.goto('/apps/carecheck/#/members', { waitUntil: 'domcontentloaded' })
+	const msel = page.locator('[data-cck-members] tr', { hasText: MEMBER_NAME }).locator('select.cck-team-sel')
+	await expect(msel.locator('option', { hasText: `UX Team ${TS}` })).toHaveCount(1)
+
+	// picking it fires the PUT and the choice survives an API re-read
+	await Promise.all([
+		page.waitForResponse((r) => r.url().includes(`/api/members/${memberId}/team`) && r.request().method() === 'PUT'),
+		msel.selectOption({ label: `UX Team ${TS}` }),
+	])
+	const members = await papi(page, '/api/members')
+	expect(members.data.members.find((x) => x.id === memberId).teamId).toBe(teamId)
+
+	// client record — the same never-fetched cache fed this select
+	await page.goto('/apps/carecheck/#/clients', { waitUntil: 'domcontentloaded' })
+	await page.locator('[data-cck-clients] tr', { hasText: CLIENT_NAME }).locator(`text=${CLIENT_NAME}`).click()
+	const csel = page.locator('[data-cck-client-edit] select[name="team_id"]')
+	await expect(csel.locator('option', { hasText: `UX Team ${TS}` })).toHaveCount(1)
+})
+
+test('photo captions render the actor display name, never the raw uid ref', async ({ page }) => {
+	// consent is provider master data — enable it through the CAS'd update
+	const cur = await papi(page, `/api/clients/${clientId}`)
+	const consent = await papi(page, `/api/clients/${clientId}`, {
+		method: 'PUT',
+		data: { base_revision: cur.data.client.revision, photo_consent: true },
+	})
+	expect(consent.success).toBe(true)
+
+	// real 1×1 PNG bytes — the server sniffs, the declared mime alone won't pass
+	const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+	const up = await papi(page, `/api/clients/${clientId}/photos`, {
+		method: 'POST', data: { mime: 'image/png', data_b64: png },
+	})
+	expect(up.success).toBe(true)
+
+	// wire contract: the list carries a resolved label beside the raw ref
+	const listed = await papi(page, `/api/clients/${clientId}/photos`)
+	const row = listed.data.photos.find((x) => x.id === up.data.photo.id)
+	expect(row.by).toMatch(/^uid:/)
+	expect(row.byLabel).toBeTruthy()
+	expect(row.byLabel).not.toContain('uid:')
+
+	// the rendered caption shows the label — the raw ref never reaches the DOM
+	await page.goto('/apps/carecheck/#/clients', { waitUntil: 'domcontentloaded' })
+	await page.locator('[data-cck-clients] tr', { hasText: CLIENT_NAME }).locator(`text=${CLIENT_NAME}`).click()
+	await page.locator('[data-cck-section="photos"]').click()
+	const caption = page.locator('[data-cck-photos] .cck-photo figcaption').first()
+	await expect(caption).toBeVisible()
+	await expect(caption).toContainText(row.byLabel)
+	await expect(caption).not.toContainText('uid:')
+})

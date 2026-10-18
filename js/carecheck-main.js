@@ -252,9 +252,12 @@
 	var teamsCache = [];
 	function loadTeams() {
 		var box = document.querySelector('[data-cck-team-list]');
-		if (!box) { return Promise.resolve(); }
 		return api('/api/teams').then(function (r) {
-			if (!r.success) { box.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; teamsCache = []; return; }
+			if (!r.success) {
+				teamsCache = [];
+				if (box) { box.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; }
+				return;
+			}
 			teamsCache = r.data.teams || [];
 			renderTeams();
 		});
@@ -830,7 +833,7 @@
 				return '<figure class="cck-photo"><a href="' + esc(OC.generateUrl('/apps/carecheck/api/clients/' + clientId + '/photos/' + p.id)) +
 					'" target="_blank" rel="noopener" aria-label="' + esc(tr('Open photo')) + '"><img loading="lazy" alt="' + esc(tr('Client photo')) + ' ' + esc(String(p.id)) +
 					'" src="' + esc(OC.generateUrl('/apps/carecheck/api/clients/' + clientId + '/photos/' + p.id)) + '"></a>' +
-					'<figcaption>' + esc(fmtTs(p.createdAt)) + ' · ' + esc(p.by || '') +
+					'<figcaption>' + esc(fmtTs(p.createdAt)) + ' · ' + esc(p.byLabel || p.by || '') +
 					' <button type="button" class="cck-btn cck-btn--ghost cck-btn--sm" data-cck-photo-del="' + p.id + '">' + esc(tr('Delete')) + '</button></figcaption></figure>';
 			}).join('') || '<p class="cck-empty">' + esc(tr('No photos yet.')) + '</p>';
 		});

@@ -58,6 +58,7 @@ class PhotoService
 				'size' => (int)$p->getByteSize(),
 				'createdAt' => $p->getCreatedAt()?->format('Y-m-d H:i:s'),
 				'by' => (string)$p->getActorRef(),
+				'byLabel' => $this->acl->refLabel($p->getActorRef()),
 			];
 		}
 		return $out;

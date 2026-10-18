@@ -315,6 +315,27 @@ class OptionalFeaturesTest extends TestCase
 		$svc->fileFor('uid:x', 5, 3);
 	}
 
+	public function testPhotoListEmitsActorLabelBesideRawRef(): void
+	{
+		// wire_ref_rendered_raw regression — the caption needs the resolved
+		// display name, never the raw uid: wire token.
+		$photo = new \OCA\CareCheck\Db\Photo();
+		$photo->setId(3);
+		$photo->setClientId(5);
+		$photo->setActorRef('uid:x');
+		$photo->setMime('image/png');
+		$photo->setByteSize(10);
+		$photo->setCreatedAt(new \DateTime('2026-10-18 12:00:00'));
+
+		[$svc, $photos, , $acl] = $this->photoSvc([]);
+		$photos->method('findByClient')->with(5)->willReturn([$photo]);
+		$acl->method('refLabel')->with('uid:x')->willReturn('Alex Mäule');
+
+		$row = $svc->list('uid:x', 5)[0];
+		$this->assertSame('uid:x', $row['by']);
+		$this->assertSame('Alex Mäule', $row['byLabel']);
+	}
+
 	/* ---------- NH-12 GroupSessionService ---------- */
 
 	private function groupSvc(?GroupSession $found, array $parts = []): array
