@@ -1334,7 +1334,7 @@
 			return '<tr>' + nameCell +
 				'<td data-cell="' + esc(tr('Qualification')) + '">' + qualLabel(m.qualification) + '</td>' +
 				'<td data-cell="' + esc(tr('Team')) + '"><select class="cck-team-sel" data-cck-member-team="' + m.id + '" aria-label="' + esc(tr('Team')) + '">' + teamOptions(m.teamId) + '</select></td>' +
-				'<td>' + actions + '</td></tr>';
+				'<td class="cck-row-actions">' + actions + '</td></tr>';
 		}).join('') || '<tr><td colspan="4" class="cck-empty">' + esc(membersCache.length ? tr('No members match the filter.') : tr('No members yet — add the first one below.')) + '</td></tr>';
 		tb.querySelectorAll('[data-cck-member-team]').forEach(function (sel) {
 			bindTeamSelect(sel, 'members', parseInt(sel.dataset.cckMemberTeam, 10));

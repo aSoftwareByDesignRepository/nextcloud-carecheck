@@ -24,14 +24,23 @@ test.beforeAll(async ({ browser }) => {
 	const html = await (await request.get('/apps/carecheck/')).text();
 	const rt = (html.match(/data-requesttoken="([^"]+)"/) || [])[1] || '';
 	expect(rt).not.toBe('');
-	const res = await request.fetch('/apps/carecheck/api/clients', {
+	const post = (path, data) => request.fetch(`/apps/carecheck${path}`, {
 		method: 'POST',
 		headers: { requesttoken: rt, 'Content-Type': 'application/json' },
-		data: { name: `RS Klient ${Date.now()}`, street: 'Renderweg 2' },
+		data,
 	});
+	const res = await post('/api/clients', { name: `RS Klient ${Date.now()}`, street: 'Renderweg 2' });
 	const body = await res.json();
 	expect(body.success, JSON.stringify(body)).toBe(true);
 	clientId = body.data.id;
+	// Member-row actions fit check needs an active member row plus a team
+	// option long enough to expose an unbounded select (async-loaded option
+	// widths drove the 2026-10-19 members table clip).
+	const ts = Date.now();
+	const team = await (await post('/api/teams', { name: `RS Overflow Team ${ts} mit extra langem Namen` })).json();
+	expect(team.success, JSON.stringify(team)).toBe(true);
+	const member = await (await post('/api/members', { display_name: `RS Mitglied ${ts}`, qualification: 'fachkraft' })).json();
+	expect(member.success, JSON.stringify(member)).toBe(true);
 	await ctx.close();
 });
 
@@ -84,6 +93,31 @@ test.describe('Rendered-surface contract', () => {
 			});
 		});
 	}
+
+	// Member row actions must fit the scroll wrap at desktop width — a long
+	// team name must not inflate the team column and push Edit/Pair code/
+	// Practice tour/Deactivate behind horizontal scroll (learned 2026-10-19:
+	// clipped_control_text_at_screen_edge + async_option_layout_shift).
+	test('ATLAS_RENDERED_SURFACE_CONTRACT members row actions fit wrap @1280', async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await page.goto('/apps/carecheck/#/members', { waitUntil: 'domcontentloaded' });
+		await page.waitForSelector('[data-cck-members] tbody tr .cck-row-actions .cck-btn', { state: 'visible', timeout: 30_000 });
+		const fit = await page.evaluate(() => {
+			const wrap = document.querySelector('[data-cck-members]').closest('.cck-table-wrap');
+			const wrapRight = wrap.getBoundingClientRect().right;
+			const offenders = [];
+			document.querySelectorAll('[data-cck-members] .cck-row-actions .cck-btn, [data-cck-members] .cck-team-sel').forEach((el) => {
+				const r = el.getBoundingClientRect();
+				if (r.right > wrapRight + 1) {
+					offenders.push(`${el.className} right=${Math.round(r.right)} > wrap=${Math.round(wrapRight)}`);
+				}
+			});
+			return { scrollWidth: wrap.scrollWidth, clientWidth: wrap.clientWidth, offenders };
+		});
+		expect(fit.offenders, JSON.stringify(fit)).toEqual([]);
+		expect(fit.scrollWidth, `member table needs no horizontal scroll at 1280 (${JSON.stringify(fit)})`)
+			.toBeLessThanOrEqual(fit.clientWidth + 1);
+	});
 
 	// Klientenakte — the screen that shipped 130px fields (core inputs.scss pin
 	// vs. stretch-intended .cck-form-col). Needs the client seeded in beforeAll.

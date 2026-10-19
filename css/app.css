@@ -325,7 +325,7 @@ dialog.cck-dialog :is(input, select, textarea):not([type='checkbox'], [type='rad
 	border: 1px solid var(--cck-border);
 	border-radius: var(--cck-radius-md);
 }
-.cck-table { width: 100%; border-collapse: collapse; }
+.cck-table { width: 100%; border-collapse: collapse; white-space: normal; }
 .cck-table th {
 	padding: var(--cck-space-3) var(--cck-space-4);
 	background: var(--cck-bg-soft);
@@ -1215,7 +1215,7 @@ dialog.cck-dialog[open] {
 	border: 0;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 768.98px) {
 	.cck-support-us__options {
 		grid-template-columns: 1fr;
 	}
@@ -1304,6 +1304,19 @@ dialog.cck-dialog[open] {
 	min-height: var(--cck-touch); border: 1px solid var(--cck-form-border);
 	border-radius: var(--cck-radius-md); background: var(--cck-bg-card); color: var(--cck-text);
 	padding: 0 var(--cck-space-2); font-size: var(--cck-fs-sm);
+	/* Async team names can be arbitrarily long — the select must not size to
+	   its longest option, or the column pushes row actions behind the scroll
+	   wrap at desktop width (async_option_layout_shift /
+	   clipped_control_text_at_screen_edge). */
+	width: 100%; min-width: 0; max-width: 14rem; box-sizing: border-box;
+}
+/* Actions cells with several row buttons wrap to a second line inside the
+   cell instead of widening the table past .cck-table-wrap. */
+.cck-table td.cck-row-actions { white-space: normal; }
+/* ≤768px the card transform's flex gap already spaces wrapped buttons —
+   the row-gap margin is desktop-only. */
+@media (min-width: 769px) {
+	.cck-table td.cck-row-actions .cck-btn { margin-block-end: var(--cck-space-1); }
 }
 
 /* ---------- F12 on-duty strip (board) ---------- */
