@@ -17,7 +17,7 @@ function run_unit_tests(string $appRoot, string $workspaceRoot, string $appId, s
 		$phpunit = 'vendor/bin/phpunit';
 	}
 	$cmd = sprintf(
-		'cd %s && php %s --bootstrap tests/bootstrap.php --filter %s tests/Unit 2>&1',
+		'cd %s && php -d opcache.enable_cli=0 %s --bootstrap tests/bootstrap.php --filter %s tests/Unit 2>&1',
 		escapeshellarg($appRoot),
 		escapeshellarg($phpunit),
 		escapeshellarg($filter)
@@ -93,6 +93,32 @@ $targets = [
 			'close_not_idempotent' => [
 				'from' => "if ((string)\$s->getStatus() !== 'open') {\n\t\t\treturn; // idempotent close\n\t\t}",
 				'to' => "if ((string)\$s->getStatus() !== 'open') {\n\t\t\tthrow new \\RuntimeException('double close');\n\t\t}",
+			],
+		],
+	],
+	[
+		'file' => $appRoot . '/lib/Service/DutyRosterAdapter.php',
+		'filter' => 'NhFeaturesTest',
+		'mutations' => [
+			// owner opt-in gate removed → roster data crosses without consent
+			'optin_gate_removed' => [
+				'from' => "if (\$this->config->getAppValue('dutycheck', self::DC_ONDUTY_FLAG, '0') !== '1') {",
+				'to' => 'if (false) {',
+			],
+			// installed gate removed → reader probed on absent sibling
+			'installed_gate_removed' => [
+				'from' => 'if (!$this->installed()) {',
+				'to' => 'if (false) {',
+			],
+			// uid: prefix dropped → rows can't be matched to actor refs
+			'actorref_prefix_dropped' => [
+				'from' => "'actorRef' => \$uid !== '' ? 'uid:' . \$uid : null,",
+				'to' => "'actorRef' => \$uid !== '' ? \$uid : null,",
+			],
+			// fail-closed flipped → a dead DutyCheck reports available
+			'failclosed_flipped' => [
+				'from' => "} catch (\\Throwable) {\n\t\t\treturn ['available' => false, 'rows' => []];",
+				'to' => "} catch (\\Throwable) {\n\t\t\treturn ['available' => true, 'rows' => []];",
 			],
 		],
 	],

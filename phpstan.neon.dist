@@ -8,6 +8,7 @@ parameters:
         - lib
     scanFiles:
         - stubs/nextcloud-internal.php
+        - stubs/sibling-facades.php
     excludePaths:
         - lib/Migration
         - stubs
@@ -26,10 +27,13 @@ parameters:
         - '~should return .* but returns OCP\\AppFramework\\Db\\Entity~'
         - '~should return .* but returns list<OCP\\AppFramework\\Db\\Entity>~'
         - '~Call to an undefined method OCP\\AppFramework\\Db\\Entity::~'
-        - '~Offset .* on .* left side of \\?\\? always exists and is not nullable~'
-        - '~Offset .* on .* on left side of \\?\\? always exists and is not nullable~'
-        - '~Expression on left side of \\?\\? is not nullable~'
+        - '~Offset .* on .* left side of \?\? always exists and is not nullable~'
+        - '~Offset .* on .* on left side of \?\? always exists and is not nullable~'
+        - '~Expression on left side of \?\? is not nullable~'
         - '~will always evaluate to true~'
+        # Sibling-facade FACADE_VERSION gates: stubs pin the const literal, so
+        # `>= 1` folds — at runtime the const may be absent or older.
+        - '~Comparison operation ">=" between \d+ and \d+ is always true~'
         - '~Strict comparison using !== between .* will always evaluate to true~'
         - '~Strict comparison using === between .* will always evaluate to false~'
         - '~Offset .* might not exist on .*~'

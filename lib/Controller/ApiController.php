@@ -81,6 +81,7 @@ class ApiController extends Controller
 		private \OCA\CareCheck\Service\GroupSessionService $groupSessions,
 		private \OCA\CareCheck\Service\PrivacyProposalService $privacyProposals,
 		private \OCA\CareCheck\Service\CrmLinkService $crmLinks,
+		private \OCA\CareCheck\Service\InvoiceDraftPushService $invoiceDraftPush,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -801,7 +802,7 @@ class ApiController extends Controller
 			}
 			$res = $this->privacyProposals->propose($actor);
 			$this->acl->audit($actor, 'privacy_proposal', null,
-				($res['ok'] ?? false) ? 'ok' : ('failed:' . ($res['code'] ?? 'unknown')));
+				$res['ok'] ? 'ok' : ('failed:' . ($res['code'] ?? 'unknown')));
 			return $this->ok(['proposal' => array_merge(
 				$this->privacyProposals->state(),
 				['ok' => $res['ok'], 'already' => $res['already'] ?? false,
@@ -1078,6 +1079,63 @@ class ApiController extends Controller
 			}
 			$this->crmLinks->setLink($actor, $id, $companyId);
 			return $this->ok(['assigned' => true]);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
+	}
+
+	/**
+	 * F13 push — send this client's signed-evidence billing draft to
+	 * InvoiceCheck. Staff + client scope; the sibling decides the rest.
+	 * Coded errors are user-actionable (link the client first, no signed
+	 * visits, …) — never an existence oracle beyond the client id itself.
+	 */
+	#[NoAdminRequired]
+	public function pushInvoiceDraft(int $id): JSONResponse
+	{
+		try {
+			$actor = $this->actor();
+			$this->acl->assertStaff($actor);
+			$this->acl->assertClientScope($actor, $id);
+			$period = (string)$this->request->getParam('period', '');
+			$kind = (string)$this->request->getParam('kind', 'haeusliche_betreuung');
+			$r = $this->invoiceDraftPush->push($actor, $id, $period, $kind);
+			if (!$r['ok']) {
+				// Domain-state rejections are 409 (user-actionable), not 502 —
+				// reserving 5xx for genuine upstream failure keeps monitoring
+				// and client retry semantics honest.
+				$map = [
+					'bad_request' => [400, 'VALIDATION_FAILED'],
+					'not_linked' => [409, 'NOT_LINKED'],
+					'no_pc_customer' => [409, 'NO_PC_CUSTOMER'],
+					'no_visits' => [409, 'NO_VISITS'],
+					'sibling_unavailable' => [502, 'SIBLING_UNAVAILABLE'],
+					'sibling_error' => [502, 'SIBLING_ERROR'],
+				];
+				$messages = [
+					'bad_request' => 'Validation failed.',
+					'not_linked' => 'Link a CustomerCheck company to this client first.',
+					'no_pc_customer' => 'The linked company has no billing customer.',
+					'no_visits' => 'No signed visits in this period.',
+					'sibling_unavailable' => 'InvoiceCheck is not enabled.',
+					'sibling_error' => 'InvoiceCheck rejected the draft.',
+				];
+				$code = (string)$r['code'];
+				if ($code === 'not_found') {
+					// Byte-identical to the authz-deny envelope — a missing or
+					// inactive client must not be distinguishable from a
+					// client the caller may not see.
+					return new JSONResponse(Constants::notFoundPayload(), 404);
+				}
+				[$status, $wire] = $map[$code] ?? [502, 'SIBLING_ERROR'];
+				return new JSONResponse([
+					'success' => false,
+					'error' => $wire,
+					'message' => $messages[$code] ?? $messages['sibling_error'],
+					'fields' => $code === 'bad_request' ? ['period' => 'invalid'] : new \stdClass(),
+				], $status);
+			}
+			return $this->ok($r);
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
@@ -1540,11 +1598,13 @@ class ApiController extends Controller
 	public function dutyRoster(string $date = ''): JSONResponse
 	{
 		try {
-			$this->acl->assertStaff($this->actor());
+			$this->acl->assertDispatch($this->actor());
 			if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) {
 				$date = (new \DateTime('today', new \DateTimeZone($this->tours->providerTz())))->format('Y-m-d');
 			}
-			return $this->ok(['date' => $date] + $this->dutyRoster->onDuty($date));
+			$actorRef = $this->actor();
+			$actorUid = str_starts_with($actorRef, 'uid:') ? substr($actorRef, 4) : null;
+			return $this->ok(['date' => $date] + $this->dutyRoster->onDuty($date, $actorUid));
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}

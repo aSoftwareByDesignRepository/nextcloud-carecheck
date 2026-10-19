@@ -8,6 +8,12 @@ use OCA\CareCheck\Support\SupportUsLinks;
 
 $lang = method_exists($l, 'getLanguageCode') ? (string)$l->getLanguageCode() : 'en';
 $mobile = new MobileAppLinks();
+try {
+	$dutyRosterUrl = \OCP\Server::get(\OCP\IURLGenerator::class)->linkToRoute('dutycheck.page.roster');
+} catch (\Throwable) {
+	// DutyCheck absent/disabled — the on-duty strip stays hidden; never break the board.
+	$dutyRosterUrl = '';
+}
 
 if (!empty($_['isAppAdmin'])) {
 	$cckRoleLabel = $l->t('App admin');
@@ -112,6 +118,13 @@ $settingsNav = static function () use ($l): string {
 				<h2 class="cck-callout__title"><?php p($l->t('Unassigned stops')); ?></h2>
 				<ul data-cck-uncovered-list></ul>
 			</div>
+			<section data-cck-duty class="cck-duty cck-card" hidden aria-label="<?php p($l->t('On duty (DutyCheck)')); ?>">
+				<h2 class="cck-duty__title"><?php p($l->t('On duty (DutyCheck)')); ?></h2>
+				<ul data-cck-duty-list class="cck-duty__list"></ul>
+				<?php if ($dutyRosterUrl !== ''): ?>
+				<a class="cck-duty__link" href="<?php p($dutyRosterUrl); ?>" target="_blank" rel="noopener"><?php p($l->t('Open DutyCheck roster')); ?></a>
+				<?php endif; ?>
+			</section>
 			<div data-cck-board class="cck-board cck-card-grid"></div>
 			<div class="cck-board-actions">
 				<button type="button" data-cck-generate class="cck-btn cck-btn--primary"><?php p($l->t('Generate tours now')); ?></button>
@@ -270,6 +283,21 @@ $settingsNav = static function () use ($l): string {
 					<button type="button" data-cck-export-json class="cck-btn cck-btn--secondary"><?php p($l->t('Billing data (JSON)')); ?></button>
 					<button type="button" data-cck-export-xml class="cck-btn cck-btn--secondary"><?php p($l->t('Billing data (XML)')); ?></button>
 				</div>
+				<?php if (!empty($_['invoicePushAvailable'])) { ?>
+				<div class="cck-form">
+					<label><?php p($l->t('Billing kind')); ?>
+						<select data-cck-invoice-kind>
+							<option value="haeusliche_betreuung"><?php p($l->t('Häusliche Betreuung (Pauschale)')); ?></option>
+							<option value="entlastungsbetrag"><?php p($l->t('Entlastungsbetrag § 45b SGB XI')); ?></option>
+							<option value="pflege_einsatz"><?php p($l->t('Pflegeeinsatz')); ?></option>
+							<option value="privat_leistung"><?php p($l->t('Private Zusatzleistung')); ?></option>
+							<option value="sgb_xii"><?php p($l->t('Hilfe zur Pflege SGB XII')); ?></option>
+						</select>
+					</label>
+					<button type="button" data-cck-invoice-push class="cck-btn cck-btn--primary"><?php p($l->t('Send draft to InvoiceCheck')); ?></button>
+					<p class="cck-hint" data-cck-invoice-status role="status" aria-live="polite"></p>
+				</div>
+				<?php } ?>
 			</section>
 		</div>
 

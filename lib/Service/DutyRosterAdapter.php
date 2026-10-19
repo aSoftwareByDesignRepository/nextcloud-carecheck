@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace OCA\CareCheck\Service;
 
 use OCP\App\IAppManager;
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IConfig;
-use OCP\IDBConnection;
+use OCP\IUserSession;
 
 /**
  * NH-02 / suite flange F12 (consumer half) — DutyCheck's published roster
@@ -17,18 +16,29 @@ use OCP\IDBConnection;
  * employees are actionable (tours assign to actor refs), but unlinked
  * employees still surface so staffing gaps are visible.
  *
- * The feed only crosses when the DutyCheck admin opted in — the same
- * `mc_onduty_hook_enabled` flag that gates the `check.on-duty` endpoint
- * (MaintenanceCheckOnDutyReader) upstream.
+ * Rows come from DutyCheck's owner-side reader
+ * (`MaintenanceCheckOnDutyReader::onDutyToday`) resolved through the
+ * server container — this adapter never queries `dc_*` tables directly,
+ * so published-period and standby/cancellation filtering stay in one
+ * place. The feed only crosses when the DutyCheck admin opted in — the
+ * same `mc_onduty_hook_enabled` flag that gates the `check.on-duty`
+ * endpoint upstream.
  */
 class DutyRosterAdapter
 {
 	private const DC_ONDUTY_FLAG = 'mc_onduty_hook_enabled';
+	private const READER = 'OCA\\DutyCheck\\Integration\\MaintenanceCheckOnDutyReader';
 
+	/**
+	 * @param null|callable(?string, ?string): list<array<string, mixed>> $readerInvoker
+	 *        Test seam — production resolves the DutyCheck reader via the
+	 *        server container.
+	 */
 	public function __construct(
-		private IDBConnection $db,
 		private IAppManager $appManager,
 		private IConfig $config,
+		private ?IUserSession $userSession = null,
+		private mixed $readerInvoker = null,
 	) {
 	}
 
@@ -42,11 +52,12 @@ class DutyRosterAdapter
 	}
 
 	/**
-	 * On-duty employees for `date` (published/closed periods only — a draft
-	 * roster must not leak into tour planning).
+	 * On-duty employees for `date` (the owner reader already restricts to
+	 * published/closed periods and non-cancelled, non-standby assignments —
+	 * a draft roster must not leak into tour planning).
 	 * @return array{available:bool, rows:list<array{employeeId:int,displayName:string,actorRef:?string,locationName:string,startTime:string,endTime:string}>}
 	 */
-	public function onDuty(string $date): array
+	public function onDuty(string $date, ?string $actorUid = null): array
 	{
 		if (!$this->installed()) {
 			return ['available' => false, 'rows' => []];
@@ -56,31 +67,53 @@ class DutyRosterAdapter
 		if ($this->config->getAppValue('dutycheck', self::DC_ONDUTY_FLAG, '0') !== '1') {
 			return ['available' => false, 'rows' => []];
 		}
+		// DutyCheck too old to expose the reader → not available, not empty.
+		if ($this->readerInvoker === null && !class_exists(self::READER)) {
+			return ['available' => false, 'rows' => []];
+		}
+		if ($actorUid === null) {
+			$user = $this->userSession?->getUser();
+			$actorUid = $user !== null ? $user->getUID() : null;
+		}
 		try {
-			$qb = $this->db->getQueryBuilder();
-			$qb->select('a.employee_id', 'a.start_time', 'a.end_time', 'e.display_name', 'e.linked_user_id', 'l.name AS location_name')
-				->from('dc_assignments', 'a')
-				->innerJoin('a', 'dc_periods', 'p', 'a.period_id = p.id')
-				->leftJoin('a', 'dc_employees', 'e', 'a.employee_id = e.id')
-				->leftJoin('a', 'dc_locations', 'l', 'a.location_id = l.id')
-				->where($qb->expr()->eq('a.duty_date', $qb->createNamedParameter($date)))
-				->andWhere($qb->expr()->in('p.status', $qb->createNamedParameter(['published', 'closed'], IQueryBuilder::PARAM_STR_ARRAY)))
-				->orderBy('a.start_time', 'ASC');
+			$readerRows = $this->readAssignments($date, $actorUid);
 			$rows = [];
-			foreach ($qb->executeQuery()->iterateAssociative() as $r) {
-				$uid = trim((string)($r['linked_user_id'] ?? ''));
+			foreach ($readerRows as $r) {
+				$uid = trim((string)($r['linkedUserId'] ?? ''));
 				$rows[] = [
-					'employeeId' => (int)$r['employee_id'],
-					'displayName' => (string)($r['display_name'] ?? ''),
+					'employeeId' => (int)($r['employeeId'] ?? 0),
+					'displayName' => (string)($r['displayName'] ?? ''),
 					'actorRef' => $uid !== '' ? 'uid:' . $uid : null,
-					'locationName' => (string)($r['location_name'] ?? ''),
-					'startTime' => (string)$r['start_time'],
-					'endTime' => (string)$r['end_time'],
+					'locationName' => (string)($r['locationName'] ?? ''),
+					'startTime' => (string)($r['startTime'] ?? ''),
+					'endTime' => (string)($r['endTime'] ?? ''),
 				];
 			}
 			return ['available' => true, 'rows' => $rows];
 		} catch (\Throwable) {
 			return ['available' => false, 'rows' => []];
 		}
+	}
+
+	/**
+	 * @return list<array<string, mixed>>
+	 */
+	private function readAssignments(string $date, ?string $actorUid): array
+	{
+		if ($this->readerInvoker !== null) {
+			/** @var list<array<string, mixed>> $rows */
+			$rows = ($this->readerInvoker)($date, $actorUid);
+			return is_array($rows) ? $rows : [];
+		}
+		if (!class_exists(self::READER)) {
+			return [];
+		}
+		$reader = \OCP\Server::get(self::READER);
+		if (!is_object($reader) || !method_exists($reader, 'onDutyToday')) {
+			return [];
+		}
+		/** @var list<array<string, mixed>> $rows */
+		$rows = $reader->onDutyToday($date, $actorUid);
+		return is_array($rows) ? $rows : [];
 	}
 }

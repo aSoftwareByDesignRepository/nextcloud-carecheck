@@ -42,7 +42,7 @@ class CrmLinkService
 		}
 	}
 
-	private function facade(): ?object
+	private function facade(): ?\OCA\CustomerCheck\Public\CrmCompanyLinkReadFacade
 	{
 		if (!$this->installed()
 			|| !class_exists(self::FACADE)
@@ -51,10 +51,17 @@ class CrmLinkService
 		}
 		try {
 			$f = \OCP\Server::get(self::FACADE);
+			if (!$f instanceof \OCA\CustomerCheck\Public\CrmCompanyLinkReadFacade) {
+				return null;
+			}
+			// defined()+constant() instead of a bare ::FACADE_VERSION read:
+			// a facade without the const throws Error, which ?? cannot catch.
+			$ver = defined(self::FACADE . '::FACADE_VERSION')
+				? (int)constant(self::FACADE . '::FACADE_VERSION') : 0;
 		} catch (\Throwable) {
 			return null;
 		}
-		return (($f)::FACADE_VERSION ?? 0) >= 1 ? $f : null;
+		return $ver >= 1 ? $f : null;
 	}
 
 	private static function uidOf(string $actorRef): string
@@ -88,6 +95,28 @@ class CrmLinkService
 			];
 		}
 		return ['available' => true, 'companies' => $out];
+	}
+
+	/**
+	 * F13 support: resolve a linked CUC company to its ProjectCheck
+	 * customer id so billing drafts can target `pc_customer_id`. Returns
+	 * null when CUC is offline, the company no longer resolves, or the
+	 * company has no pc customer — the caller surfaces that as an
+	 * unlinked/incomplete mapping, never a guessed id.
+	 */
+	public function pcCustomerIdFor(string $actorRef, ?int $companyId): ?int
+	{
+		$f = $this->facade();
+		if ($f === null || $companyId === null || $companyId <= 0) {
+			return null;
+		}
+		try {
+			$r = $f->findByCompanyId(self::uidOf($actorRef), $companyId);
+		} catch (\Throwable) {
+			return null;
+		}
+		$pc = is_array($r) ? (int)($r['pcCustomerId'] ?? 0) : 0;
+		return $pc > 0 ? $pc : null;
 	}
 
 	/**

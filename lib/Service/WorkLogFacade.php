@@ -19,6 +19,8 @@ use OCP\IDBConnection;
  */
 class WorkLogFacade
 {
+	public const FACADE_VERSION = 1;
+
 	public function __construct(private IDBConnection $db)
 	{
 	}

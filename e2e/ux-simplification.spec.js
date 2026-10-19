@@ -134,6 +134,13 @@ test('review queue resolves through a real dialog, not window.prompt', async ({ 
   page.on('dialog', (d) => { prompts.push(d.type()); return d.dismiss() })
   await page.goto('/apps/carecheck/#/inbox', { waitUntil: 'domcontentloaded' })
 
+  // reject reason renders localized field labels, never raw wire paths
+  // (l10n_unlocalized_error_surface): 'plan_version_id'/'tasks.0.status'
+  // were rendered verbatim to the Zentrale. Machine tokens are locale-safe
+  // to assert on because no catalog translates them.
+  const reasonText = await page.locator('[data-cck-reviews] .cck-notice__text').first().textContent()
+  expect(reasonText || '').not.toMatch(/\b(plan_version_id|joint_visit_ref|sig_state|signer_name|reason_code|tasks\.\d+\.\w+)\b/)
+
   const resolve = page.locator('[data-cck-resolve]').first()
   await expect(resolve).toBeVisible()
   await resolve.click()

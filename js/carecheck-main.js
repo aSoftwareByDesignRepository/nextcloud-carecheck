@@ -39,6 +39,30 @@
 	};
 	function tokenLabel(map, k) { return map[k] !== undefined ? tr(map[k]) : k; }
 
+	// Visit-bundle validation paths stored in reject_reason are wire
+	// vocabulary (tasks.0.status,signature) — meaningless to a Zentrale.
+	// Map each path to a localized label; unknown segments stay verbatim.
+	var REJECT_FIELD = {
+		plan_version_id: 'Care plan version',
+		joint_visit_ref: 'Joint visit',
+		sig_state: 'Signature state',
+		signature: 'Signature',
+		signer_name: 'Signer name',
+		status: 'Status',
+		reason_code: 'Reason code',
+	};
+	function rejectReasonLabel(reason) {
+		return String(reason || '').split(',').map(function (f) {
+			f = f.trim();
+			var m = f.match(/^tasks\.(\d+)\.(\w+)$/);
+			if (m) {
+				var leaf = REJECT_FIELD[m[2]] !== undefined ? tr(REJECT_FIELD[m[2]]) : m[2];
+				return tr('Task') + ' ' + (Number(m[1]) + 1) + ': ' + leaf;
+			}
+			return REJECT_FIELD[f] !== undefined ? tr(REJECT_FIELD[f]) : f;
+		}).join(', ');
+	}
+
 	// Shared styled confirm — destructive actions ask once via a real
 	// <dialog> (localized buttons, Escape-safe), never window.confirm.
 	function confirmAsk(text, okLabel) {
@@ -416,12 +440,31 @@
 				templateNames = {};
 				if (r.success) { ((r.data && r.data.templates) || []).forEach(function (t) { templateNames[t.id] = t.name; }); }
 			});
-		Promise.all([namesReady, api('/api/coverage/' + boardDate)]).then(function (res) {
+		Promise.all([namesReady, api('/api/coverage/' + boardDate), api('/api/duty-roster?date=' + boardDate)]).then(function (res) {
 			var r = res[1];
+			var duty = res[2];
 			var el = document.querySelector('[data-cck-board]');
 			var uncoveredEl = document.querySelector('[data-cck-uncovered]');
 			var uncoveredList = document.querySelector('[data-cck-uncovered-list]');
 			var statsEl = document.querySelector('[data-cck-stats]');
+			var dutyEl = document.querySelector('[data-cck-duty]');
+			var dutyList = document.querySelector('[data-cck-duty-list]');
+			// F12: on-duty strip from DutyCheck — advisory only; a missing feed
+			// must never blank the board or block planning.
+			var onDutyRefs = {};
+			var dutyHasRows = false;
+			if (dutyEl && dutyList) {
+				var drows = (duty && duty.success && duty.data && duty.data.available) ? (duty.data.rows || []) : [];
+				dutyHasRows = drows.length > 0;
+				dutyEl.hidden = drows.length === 0;
+				dutyList.innerHTML = drows.map(function (d) {
+					if (d.actorRef) { onDutyRefs[d.actorRef] = true; }
+					var when = d.startTime && d.endTime ? ' <time>' + esc(d.startTime) + '–' + esc(d.endTime) + '</time>' : '';
+					var where = d.locationName ? ' · ' + esc(d.locationName) : '';
+					return '<li class="cck-duty__person' + (d.actorRef ? '' : ' cck-duty__person--unlinked') + '">' +
+						esc(d.displayName || tr('Unknown')) + when + where + '</li>';
+				}).join('');
+			}
 			if (!r.success) { el.innerHTML = '<p class="cck-empty">' + esc(r.message || tr('No access.')) + '</p>'; if (statsEl) { statsEl.hidden = true; } return; }
 			var tours = r.data.tours || [];
 			var cronBanner = document.querySelector('[data-cck-cron-banner]');
@@ -475,11 +518,15 @@
 						var who = s.clientId
 							? '<a class="cck-stop__who cck-link" href="#/client/' + s.clientId + '">' + esc(s.clientName || ('#' + s.clientId)) + '</a>'
 							: '<span class="cck-stop__who">' + esc(s.locText || '') + '</span>';
+						var offDuty = dutyHasRows
+							&& s.executorRef && s.executorRef.indexOf('uid:') === 0
+							&& !onDutyRefs[s.executorRef];
 						return '<li class="cck-stop cck-stop--' + esc(s.status) + '">' +
 							'<span class="cck-stop-time">' + esc(badge) + '</span>' +
 							who +
 							(s.isDemo ? ' <em class="cck-demo">' + esc(tr('Practice')) + '</em>' : '') +
 							stopBadge(s.status) +
+							(offDuty ? ' <span class="cck-badge cck-badge--warning"><span class="cck-badge__dot" aria-hidden="true"></span>' + esc(tr('not on duty')) + '</span>' : '') +
 							((s.status === 'uncovered' || !s.executorRef) ? ' <button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-assign="' + s.id + '">' + esc(tr('Assign…')) + '</button>' : '') +
 							'</li>';
 					}).join('') + '</ul></section>';
@@ -909,6 +956,41 @@
 		var p = document.querySelector('[data-cck-export-period]').value || today().slice(0, 7);
 		window.location = OC.generateUrl('/apps/carecheck/api/clients/' + currentClient + '/export/billing?period=' + p + '&fmt=xml');
 	});
+
+	// F13: push this client's billing draft to InvoiceCheck (draft only — a
+	// human still prices and finalizes it there). Guarded: the whole block
+	// is omitted server-side when the facade is unavailable.
+	var invoicePushBtn = document.querySelector('[data-cck-invoice-push]');
+	if (invoicePushBtn) {
+		invoicePushBtn.addEventListener('click', function () {
+			var statusEl = document.querySelector('[data-cck-invoice-status]');
+			var p = document.querySelector('[data-cck-export-period]').value || today().slice(0, 7);
+			var kind = document.querySelector('[data-cck-invoice-kind]').value;
+			invoicePushBtn.disabled = true;
+			statusEl.textContent = tr('Sending to InvoiceCheck …');
+			api('/api/clients/' + currentClient + '/invoice-draft', {
+				method: 'POST',
+				body: JSON.stringify({ period: p, kind: kind })
+			}).then(function (r) {
+				if (r && r.success && r.data) {
+					statusEl.textContent = r.data.created
+						? tr('Draft invoice created in InvoiceCheck.')
+						: tr('Draft already exists in InvoiceCheck — nothing duplicated.');
+				} else {
+					var errMap = {
+						SIBLING_UNAVAILABLE: tr('InvoiceCheck is not enabled.'),
+						NOT_LINKED: tr('Link a CustomerCheck company to this client first.'),
+						NO_PC_CUSTOMER: tr('The linked company has no billing customer.'),
+						NO_VISITS: tr('No signed visits in this period.'),
+						SIBLING_ERROR: tr('InvoiceCheck rejected the draft.'),
+					};
+					statusEl.textContent = (r && errMap[r.error]) || (r && r.message) || tr('Could not send the draft.');
+				}
+			}).finally(function () {
+				invoicePushBtn.disabled = false;
+			});
+		});
+	}
 
 	// ---------------- NH-04 photos (consent-gated) ----------------
 	function loadPhotos(clientId, consent) {
@@ -1497,7 +1579,7 @@
 					'<strong>' + esc(v.clientName || ('#' + v.clientId)) + '</strong> ' +
 					'<span>' + esc(v.actorLabel || v.actorRef) + '</span> ' +
 					'<span class="cck-chip">' + esc(tr('rejected')) + '</span>' +
-					'<p class="cck-notice__text">' + esc(v.rejectReason || '') + '</p>' +
+					'<p class="cck-notice__text">' + esc(rejectReasonLabel(v.rejectReason)) + '</p>' +
 					' <a class="cck-link" href="#/client/' + v.clientId + '">' + esc(tr('Open client')) + '</a>' +
 					' <button type="button" class="cck-btn cck-btn--primary cck-btn--sm" data-cck-resolve="' + v.id + '">' + esc(tr('Resolve')) + '</button>' +
 					'</div>';

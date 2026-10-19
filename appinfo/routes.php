@@ -65,6 +65,7 @@ return [
 		['name' => 'api#groupSessionCsv', 'url' => '/api/group-sessions/{id}/export.csv', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
 		['name' => 'api#clientVoiceNotes', 'url' => '/api/clients/{id}/voicenotes', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
 		['name' => 'api#exportBillingStructured', 'url' => '/api/clients/{id}/export/billing', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
+		['name' => 'api#pushInvoiceDraft', 'url' => '/api/clients/{id}/invoice-draft', 'verb' => 'POST', 'requirements' => ['id' => '\d+']],
 		['name' => 'api#exportMonthlyPdf', 'url' => '/api/clients/{id}/export/pdf', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
 		['name' => 'api#exportVisitPdf', 'url' => '/api/visits/{id}/pdf', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
 		['name' => 'api#directory', 'url' => '/api/directory', 'verb' => 'GET'],

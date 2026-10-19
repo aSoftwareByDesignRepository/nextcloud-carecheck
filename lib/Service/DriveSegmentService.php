@@ -20,6 +20,9 @@ use OCP\IDBConnection;
  */
 class DriveSegmentService
 {
+	/** Contract version consumers must match (class + const + segments()). */
+	public const FACADE_VERSION = 1;
+
 	/** Generic purpose text — spec-pinned, never client-identifying. */
 	public const PURPOSE = 'Dienstfahrt Tour';
 

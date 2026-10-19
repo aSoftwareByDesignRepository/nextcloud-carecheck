@@ -20,7 +20,8 @@ use OCP\Util;
 
 class PageController extends Controller
 {
-	public function __construct(IRequest $request, private AclService $acl, private ShareService $shares)
+	public function __construct(IRequest $request, private AclService $acl, private ShareService $shares,
+		private \OCA\CareCheck\Service\InvoiceDraftPushService $invoiceDraftPush)
 	{
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -55,6 +56,7 @@ class PageController extends Controller
 			'isAppAdmin' => $this->acl->isAppAdmin($uid),
 			'isZentrale' => $this->acl->isZentrale($uid),
 			'isBuchhaltung' => $this->acl->isBuchhaltung($uid),
+			'invoicePushAvailable' => $this->invoiceDraftPush->available(),
 		]);
 	}
 

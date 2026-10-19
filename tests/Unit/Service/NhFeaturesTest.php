@@ -397,12 +397,15 @@ class NhFeaturesTest extends TestCase
 		$apps->method('isEnabledForUser')->willReturn(true);
 		$config = $this->createMock(IConfig::class);
 		$config->method('getAppValue')->willReturn('0');
-		// opt-in off → the adapter must not even touch the sibling schema
-		$db = $this->createMock(IDBConnection::class);
-		$db->expects($this->never())->method('getQueryBuilder');
-		$svc = new DutyRosterAdapter($db, $apps, $config);
+		// opt-in off → the adapter must not even touch the owner reader
+		$readerCalled = false;
+		$svc = new DutyRosterAdapter($apps, $config, null, function () use (&$readerCalled) {
+			$readerCalled = true;
+			return [];
+		});
 		$out = $svc->onDuty('2026-10-18');
 		$this->assertSame(['available' => false, 'rows' => []], $out);
+		$this->assertFalse($readerCalled);
 	}
 
 	public function testDutyRosterReadsWhenDcOptInOn(): void
@@ -411,10 +414,30 @@ class NhFeaturesTest extends TestCase
 		$apps->method('isEnabledForUser')->willReturn(true);
 		$config = $this->createMock(IConfig::class);
 		$config->method('getAppValue')->willReturn('1');
-		$svc = new DutyRosterAdapter($this->emptyDb(), $apps, $config);
+		$svc = new DutyRosterAdapter($apps, $config, null, function (?string $day, ?string $actor) {
+			$this->assertSame('2026-10-18', $day);
+			return [[
+				'employeeId' => 7, 'displayName' => 'M. Pflege',
+				'linkedUserId' => 'mpflege', 'locationName' => 'Nord',
+				'startTime' => '06:00', 'endTime' => '14:00',
+			]];
+		});
 		$out = $svc->onDuty('2026-10-18');
 		$this->assertTrue($out['available']);
-		$this->assertSame([], $out['rows']);
+		$this->assertSame('uid:mpflege', $out['rows'][0]['actorRef']);
+		$this->assertSame('Nord', $out['rows'][0]['locationName']);
+	}
+
+	public function testDutyRosterFailsClosedWhenReaderThrows(): void
+	{
+		$apps = $this->createMock(IAppManager::class);
+		$apps->method('isEnabledForUser')->willReturn(true);
+		$config = $this->createMock(IConfig::class);
+		$config->method('getAppValue')->willReturn('1');
+		$svc = new DutyRosterAdapter($apps, $config, null, function () {
+			throw new \RuntimeException('dc table gone');
+		});
+		$this->assertSame(['available' => false, 'rows' => []], $svc->onDuty('2026-10-18'));
 	}
 
 	public function testDutyRosterMutedWhenDcAbsent(): void
@@ -423,7 +446,7 @@ class NhFeaturesTest extends TestCase
 		$apps->method('isEnabledForUser')->willReturn(false);
 		$config = $this->createMock(IConfig::class);
 		$config->expects($this->never())->method('getAppValue');
-		$svc = new DutyRosterAdapter($this->emptyDb(), $apps, $config);
+		$svc = new DutyRosterAdapter($apps, $config);
 		$this->assertSame(['available' => false, 'rows' => []], $svc->onDuty('2026-10-18'));
 	}
 

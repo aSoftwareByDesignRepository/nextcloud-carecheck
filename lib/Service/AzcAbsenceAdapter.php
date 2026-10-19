@@ -39,7 +39,8 @@ class AzcAbsenceAdapter
 		try {
 			return $this->appManager->isEnabledForUser('arbeitszeitcheck')
 				&& class_exists(ApprovedAbsenceReadFacade::class)
-				&& ApprovedAbsenceReadFacade::FACADE_VERSION >= 1;
+				&& defined(ApprovedAbsenceReadFacade::class . '::FACADE_VERSION')
+				&& (int)constant(ApprovedAbsenceReadFacade::class . '::FACADE_VERSION') >= 1;
 		} catch (\Throwable) {
 			return false;
 		}
