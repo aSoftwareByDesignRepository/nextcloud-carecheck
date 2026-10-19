@@ -80,7 +80,7 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 	width: var(--cck-icon-well); height: var(--cck-icon-well);
 	border-radius: var(--cck-radius-sm);
 	background: var(--cck-tint-info);
-	color: var(--color-primary-element);
+	color: var(--cck-accent-ink, var(--color-primary-element));
 	flex-shrink: 0;
 }
 .cck-brand__icon-svg { width: var(--cck-icon-lg); height: var(--cck-icon-lg); }
@@ -184,7 +184,7 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 	width: 56px; height: 56px;
 	border-radius: var(--cck-radius-md);
 	background: var(--cck-tint-info);
-	color: var(--color-primary-element);
+	color: var(--cck-accent-ink, var(--color-primary-element));
 }
 .cck-view-head__icon-svg { width: 28px; height: 28px; }
 .cck-view-head__title {
@@ -630,7 +630,7 @@ dialog.cck-dialog[open] {
 #app-content .cck-getapp__links a {
 	display: inline-flex; align-items: center;
 	min-height: var(--cck-touch); min-width: var(--cck-touch);
-	color: var(--color-primary-element);
+	color: var(--cck-accent-ink, var(--color-primary-element));
 }
 
 /* ---------- public share page (NH-05, guest layout) ---------- */
