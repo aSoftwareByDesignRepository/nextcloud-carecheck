@@ -52,7 +52,7 @@ release: clean
 		rsync -a $(release_exclude) ./ "$$staging/$(app_name)/" && \
 		composer install --no-dev --optimize-autoloader --ignore-platform-reqs --quiet \
 			--working-dir="$$staging/$(app_name)" && \
-		tar -czf $(release_dir)/$(app_name).tar.gz -C "$$staging" $(app_name) && \
+		tar --mode='u+rwX,go+rX,go-w' --owner=0 --group=0 --numeric-owner -czf $(release_dir)/$(app_name).tar.gz -C "$$staging" $(app_name) && \
 		rm -rf "$$staging"
 	@echo "Created $(release_dir)/$(app_name).tar.gz"
 	@echo "Add appinfo/signature.json with: make sign"
