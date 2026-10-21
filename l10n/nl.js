@@ -306,7 +306,7 @@ OC.L10N.register(
 	"Previous day" : "Vorige dag",
 	"Primary caregiver" : "Primair zorgverlener",
 	"Primary caregiver (ref)" : "Primair zorgverlener (ref.)",
-	"Privacy & register" : "Privacy & register",
+	"Privacy & register" : "Privacy en register",
 	"Privacy notes (mobile)" : "Privacy-informatie (mobiel)",
 	"PrivacyCheck is not installed — the register proposal is unavailable." : "PrivacyCheck is niet geïnstalleerd — het registervoorstel is niet beschikbaar.",
 	"PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck." : "PrivacyCheck beheert je verwerkingsregister (VVT) en de gegevensbeschermingsanalyses. Eén klik maakt een kant-en-klaar concept voor CareCheck — een privacyverantwoordelijke beoordeelt en publiceert het in PrivacyCheck.",
