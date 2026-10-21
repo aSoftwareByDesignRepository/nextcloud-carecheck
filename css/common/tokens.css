@@ -107,3 +107,14 @@ body.theme--dark {
 		--cck-border-strong: color-mix(in srgb, var(--color-main-text) 40%, transparent);
 	}
 }
+
+/* Accent ink for text-on-surface: --color-primary-element as text drops below
+   WCAG AA (~4.3:1) on dark themes — blend toward main-text there. */
+body {
+	--cck-accent-ink: var(--color-primary-element);
+}
+
+body[data-theme-dark],
+body[data-theme-dark-highcontrast] {
+	--cck-accent-ink: color-mix(in srgb, var(--color-primary-element) 70%, var(--color-main-text));
+}
