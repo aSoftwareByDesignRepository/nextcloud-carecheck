@@ -1,0 +1,10 @@
+# nb target-lexicon allowlist — reviewed 2026-10-22
+# Legit Bokmål vocabulary the flat nb_NO wordlist misses. Markers:
+# shared|loanword|proper|abbrev — required so entries are reviewed
+# exceptions, not donor-laundering.
+fre # abbrev — Friday (fredag)
+ons # abbrev — Wednesday (onsdag)
+søn # abbrev — Sunday (søndag)
+utboksen # shared — utboks definite (outbox)
+utkø # shared — ut+kø compound (out queue)
+gjennomgangskø # shared — gjennomgang+kø compound (review queue)

@@ -1,0 +1,10 @@
+# sv target-lexicon allowlist — reviewed 2026-10-22
+# Legit Swedish vocabulary the flat sv_SE wordlist misses. Markers:
+# shared|loanword|proper|abbrev — required so entries are reviewed
+# exceptions, not donor-laundering.
+fre # abbrev — Friday (fredag)
+tis # abbrev — Tuesday (tisdag)
+ons # abbrev — Wednesday (onsdag)
+lör # abbrev — Saturday (lördag)
+sön # abbrev — Sunday (söndag)
+granskningskö # shared — granskning+kö compound (review queue)

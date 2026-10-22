@@ -66,6 +66,7 @@ class CompanionApiController extends Controller
 			$this->acl->audit($actor, 'tour_pull', null, 'bootstrap');
 			return $this->ok([
 				'actorRef' => $actor,
+				'actorLabel' => $this->acl->refLabel($actor),
 				'serverVersion' => '0.1.0',
 				'providerTz' => $this->tours->providerTz(),
 				'minCompanionVersion' => $this->settings->get('min_companion_version'),

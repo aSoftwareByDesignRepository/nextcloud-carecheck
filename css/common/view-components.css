@@ -135,6 +135,10 @@ button.cck-stat-tile:hover, button.cck-stat-tile:focus-visible {
 }
 .cck-filter-bar { display: flex; gap: var(--cck-space-1, 4px); flex-wrap: wrap; }
 #app-content .cck-filter {
+	/* inline-flex is load-bearing: an <a>/<button> stays inline without it
+	   and the 44px min-height silently dies (WCAG 2.5.8 target size). */
+	display: inline-flex;
+	align-items: center;
 	min-height: var(--cck-touch, 44px);
 	padding: var(--cck-space-1, 4px) var(--cck-space-3, 12px);
 	border: 1px solid var(--cck-form-border, var(--color-border-maxcontrast));
@@ -146,7 +150,10 @@ button.cck-stat-tile:hover, button.cck-stat-tile:focus-visible {
 	cursor: pointer;
 }
 .cck-filter:hover { background: var(--color-background-hover); }
-.cck-filter[aria-pressed='true'] {
+/* anchors must not carry aria-pressed (axe aria-allowed-attr) — link
+   pills mark the active item with aria-current instead */
+.cck-filter[aria-pressed='true'],
+.cck-filter[aria-current='true'] {
 	background: var(--cck-tint-info, var(--color-primary-element-light));
 	border-color: var(--color-primary-element);
 	color: var(--cck-text, var(--color-main-text));
