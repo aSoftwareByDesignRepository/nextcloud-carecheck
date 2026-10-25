@@ -175,7 +175,7 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 
 /* ---------- view head (§2.2 page header, SPA variant) ---------- */
 .cck-view-head {
-	display: grid; grid-template-columns: var(--cck-space-7) 1fr auto;
+	display: grid; grid-template-columns: var(--cck-space-7) minmax(0, 1fr) auto;
 	align-items: center; gap: var(--cck-space-4);
 	margin-bottom: var(--cck-space-5);
 }
@@ -190,6 +190,9 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 .cck-view-head__title {
 	margin: 0; font-size: var(--cck-fs-2xl); font-weight: 700;
 	line-height: var(--cck-line-tight); color: var(--cck-text);
+	/* Long compounds must wrap, never widen the head track. */
+	overflow-wrap: anywhere;
+	hyphens: auto;
 }
 .cck-view-head__lead {
 	margin: var(--cck-space-1) 0 0; color: var(--cck-muted);
@@ -314,7 +317,7 @@ dialog.cck-dialog :is(input, select, textarea):not([type='checkbox'], [type='rad
 .cck-form-col fieldset { border: 1px solid var(--cck-border); border-radius: var(--cck-radius-sm); padding: var(--cck-space-3) var(--cck-space-4); }
 .cck-form-col legend { font-weight: 600; padding: 0 var(--cck-space-2); }
 .cck-settings-stack { display: flex; flex-direction: column; }
-.cck-license-state { display: grid; grid-template-columns: max-content 1fr; gap: var(--cck-space-1) var(--cck-space-4); margin: 0 0 var(--cck-space-4); }
+.cck-license-state { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--cck-space-1) var(--cck-space-4); margin: 0 0 var(--cck-space-4); }
 .cck-license-state dt { color: var(--cck-muted); font-weight: 500; }
 .cck-license-state dd { margin: 0; font-weight: 600; font-variant-numeric: var(--cck-tab-num); }
 
@@ -671,7 +674,7 @@ dialog.cck-dialog[open] {
 		inset: var(--cck-overlay-top) 0 0 0;
 		background: var(--cck-scrim); z-index: 1400;
 	}
-	.cck-view-head { grid-template-columns: var(--cck-space-7) 1fr; }
+	.cck-view-head { grid-template-columns: var(--cck-space-7) minmax(0, 1fr); }
 	.cck-view-head__back { grid-column: 1 / -1; justify-self: start; }
 	.cck-form { flex-direction: column; align-items: stretch; }
 	.cck-form .cck-btn { width: 100%; }
