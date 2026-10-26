@@ -159,6 +159,22 @@
 		el.setAttribute('role', isError ? 'alert' : 'status');
 		el.classList.toggle('cck-banner--error', !!isError);
 		el.textContent = text;
+		if (isError) {
+			// Family contract (_shared/app-feedback): error chrome offers a
+			// "Report this problem" mailto next to the message. The banner is
+			// app-owned so the shared toast hook never sees it — attach here.
+			try {
+				var feedback = window.SbdAppFeedback;
+				if (feedback && typeof feedback.buildMailto === 'function') {
+					el.appendChild(document.createTextNode(' '));
+					var link = document.createElement('a');
+					link.className = 'cck-nav-footer__toast-link';
+					link.href = feedback.buildMailto('problem', {});
+					link.textContent = tr('Report this problem');
+					el.appendChild(link);
+				}
+			} catch (e) { /* never break the banner */ }
+		}
 		el.hidden = false;
 		clearTimeout(el._t);
 		el._t = setTimeout(function () { el.textContent = ''; el.hidden = true; }, 6000);
