@@ -91,12 +91,17 @@ const STATE_PRODUCERS = {
 		},
 		clients: async (page) => {
 			await page.locator('[data-cck-clients-filter] [name="q"]').fill('');
+			// bindListFilter debounces text input 200ms — wait for a real row
+			// to repopulate past the debounce before the shutter fires.
+			await expect(page.locator('[data-cck-clients] tbody tr:not(:has(td.cck-empty))').first()).toBeVisible({ timeout: 10_000 });
 		},
 		members: async (page) => {
 			await page.locator('[data-cck-members-filter] [name="q"]').fill('');
+			await expect(page.locator('[data-cck-members] tbody tr:not(:has(td.cck-empty))').first()).toBeVisible({ timeout: 10_000 });
 		},
 		catalog: async (page) => {
 			await page.locator('[data-cck-catalog-filter] [name="q"]').fill('');
+			await expect(page.locator('[data-cck-catalog] tbody tr:not(:has(td.cck-empty))').first()).toBeVisible({ timeout: 10_000 });
 		},
 	},
 	empty: {

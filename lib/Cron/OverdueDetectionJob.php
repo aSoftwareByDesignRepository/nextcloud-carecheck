@@ -7,9 +7,13 @@ namespace OCA\CareCheck\Cron;
 use OCA\CareCheck\Db\Notice;
 use OCA\CareCheck\Db\NoticeMapper;
 use OCA\CareCheck\Service\SettingsService;
+use OCA\CareCheck\Service\UpgradeBackupService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
 use OCP\IDBConnection;
+use OCP\Lock\ILockingProvider;
+use OCP\Lock\LockedException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Marks stops past their window as overdue (stays completable — OVERDUE is a
@@ -22,12 +26,41 @@ class OverdueDetectionJob extends TimedJob
 		private IDBConnection $db,
 		private NoticeMapper $notices,
 		private SettingsService $settings,
+		private ILockingProvider $locking,
+		private LoggerInterface $logger,
 	) {
 		parent::__construct($time);
 		$this->setInterval(300); // every 5 min — pinned cadence
 	}
 
 	protected function run($argument): void
+	{
+		// Shared lock on the upgrade-backup key: a restore holds it
+		// exclusively (UpgradeBackupService::runExclusive) — app-table
+		// scans/writes must not interleave with a mid-restore
+		// truncate+reinsert. A skip is not a failure: TimedJobs re-run
+		// on their interval.
+		try {
+			$this->locking->acquireLock(
+				UpgradeBackupService::LOCK_KEY,
+				ILockingProvider::LOCK_SHARED,
+				'overdue detection',
+			);
+		} catch (LockedException) {
+			$this->logger->warning(
+				'CareCheck: skipping overdue detection — upgrade backup/restore in progress.',
+				['app' => 'carecheck'],
+			);
+			return;
+		}
+		try {
+			$this->doRun();
+		} finally {
+			$this->locking->releaseLock(UpgradeBackupService::LOCK_KEY, ILockingProvider::LOCK_SHARED);
+		}
+	}
+
+	private function doRun(): void
 	{
 		$this->settings->touchCron('overdue');
 		$now = new \DateTime();

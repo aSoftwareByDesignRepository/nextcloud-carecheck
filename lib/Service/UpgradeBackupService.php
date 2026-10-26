@@ -661,9 +661,9 @@ class UpgradeBackupService
 			$qb = $this->db->getQueryBuilder();
 			$qb->insert($table);
 			foreach ($row as $column => $value) {
-				// Generated columns (e.g. at_entries.live_user_id) are recomputed
-				// by the engine on insert — writing them explicitly is an SQL
-				// error (MySQL/MariaDB 1906, Postgres 42602-class).
+				// Generated columns are recomputed by the engine on insert —
+				// writing them explicitly is an SQL error
+				// (MySQL/MariaDB 1906, Postgres 42602-class).
 				if (isset($generatedColumns[(string)$column])) {
 					continue;
 				}
