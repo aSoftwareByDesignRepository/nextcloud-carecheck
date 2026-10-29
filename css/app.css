@@ -857,7 +857,8 @@ dialog.cck-dialog[open] {
 	font-size: var(--cck-fs-sm, 0.875rem);
 	line-height: var(--cck-line-base, 1.45);
 	white-space: normal;
-	overflow-wrap: anywhere;
+	/* Menu labels keep normal word breaks — anywhere tears mid-word. */
+	overflow-wrap: break-word;
 }
 
 .cck-nav-footer__menu-item:hover {
