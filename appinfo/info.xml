@@ -23,6 +23,12 @@ Ambulatory care documentation on your own Nextcloud: recurring tour templates th
 	<category>tools</category>
 	<website>https://nextcloud.software-by-design.de/</website>
 	<bugs>https://github.com/aSoftwareByDesignRepository/nextcloud-carecheck/issues</bugs>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/01.png</screenshot>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/02.png</screenshot>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/03.png</screenshot>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/04.png</screenshot>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/05.png</screenshot>
+	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/06.png</screenshot>
 	<dependencies>
 		<nextcloud min-version="32" max-version="35"/>
 		<php min-version="8.2" max-version="8.5"/>
