@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.2 — 2026-11-02
+
+### Added
+
+- Suite integration: F12 duty-roster consumer rework with F13 invoice-draft
+  push, and F15 privacycheck register proposal with CRM company link
+
+### Fixed
+
+- API routes now return a JSON 500 envelope on unexpected errors, and
+  settings saves write an audit record
+- Uniform 404/409 wire codes across suite-facing endpoints
+- Anchor digests validate SHA-256 length and use DER-safe packing
+- Background jobs wired into the upgrade-backup shared-lock contract
+- Error banners carry a "Report this problem" mailto link
+- Dark-theme accent-ink token; checkbox geometry, typed-ref labels, and
+  access-list normalization in intake forms; member row-actions wrap on
+  narrow viewports
+- l10n fixes and re-sync across nl, sv, nb, pl and other locales
+
 ## 0.4.1 — 2026-10
 
 ### Security
