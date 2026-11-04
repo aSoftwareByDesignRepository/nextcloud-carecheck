@@ -1309,7 +1309,7 @@ dialog.cck-dialog[open] {
 .cck-team__leads { display: flex; flex-wrap: wrap; gap: var(--cck-space-2); margin: var(--cck-space-2) 0; }
 #app-content .cck-team-sel {
 	min-height: var(--cck-touch); border: 1px solid var(--cck-form-border);
-	border-radius: var(--cck-radius-md); background: var(--cck-bg-card); color: var(--cck-text);
+	border-radius: var(--cck-radius-md); background-color: var(--cck-bg-card); color: var(--cck-text);
 	padding: 0 var(--cck-space-2); font-size: var(--cck-fs-sm);
 	/* Async team names can be arbitrarily long — the select must not size to
 	   its longest option, or the column pushes row actions behind the scroll
