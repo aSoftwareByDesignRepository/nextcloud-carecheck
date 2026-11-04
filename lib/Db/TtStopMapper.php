@@ -43,4 +43,13 @@ class TtStopMapper extends QBMapper
 			->where($qb->expr()->eq('template_id', $qb->createNamedParameter($templateId)));
 		$qb->executeStatement();
 	}
+
+	/** Archive cascade — a discharged client's template stops stop planning. */
+	public function deleteForClient(int $clientId): void
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->getTableName())
+			->where($qb->expr()->eq('client_id', $qb->createNamedParameter($clientId)));
+		$qb->executeStatement();
+	}
 }

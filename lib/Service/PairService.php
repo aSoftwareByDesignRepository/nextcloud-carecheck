@@ -219,10 +219,36 @@ class PairService
 		}
 	}
 
+	/**
+	 * Live paired devices grouped by member id — feeds the staff member
+	 * list so a single lost phone can be revoked without deactivating the
+	 * member. Only redeemed, non-revoked rows surface: a pending pair code
+	 * carries no token yet and is harmless.
+	 * @return array<int, list<array{id:int,label:?string,lastSeen:?string}>>
+	 */
+	public function devicesByMember(): array
+	{
+		$out = [];
+		foreach ($this->pairs->findAll() as $p) {
+			if ($p->getMemberId() === null || $p->getTokenHash() === null
+				|| (int)$p->getRevoked() !== 0) {
+				continue;
+			}
+			$out[(int)$p->getMemberId()][] = [
+				'id' => (int)$p->getId(),
+				'label' => $p->getDeviceLabel(),
+				'lastSeen' => $p->getLastSeen()?->format('c'),
+			];
+		}
+		return $out;
+	}
+
 	public function revokeDevice(int $pairId): void
 	{
 		$p = $this->pairs->find($pairId);
-		if ($p === null) {
+		// already-revoked collapses to the same uniform 404 as missing —
+		// a second POST must not succeed (repeat-mutation contract).
+		if ($p === null || (int)$p->getRevoked() === 1) {
 			throw ApiException::notFound();
 		}
 		$p->setRevoked(1);

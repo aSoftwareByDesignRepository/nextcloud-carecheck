@@ -40,6 +40,7 @@ class AclService
 		private AuditMapper $audit,
 		private SettingsService $settings,
 		private \OCA\CareCheck\Db\TeamLeadMapper $teamLeads,
+		private ?\Psr\Log\LoggerInterface $logger = null,
 	) {
 	}
 
@@ -137,7 +138,9 @@ class AclService
 						$pair->setLastSeen(new \DateTime());
 						$this->pairs->update($pair);
 					}
-				} catch (\Throwable) {
+				} catch (\Throwable $e) {
+					// non-fatal — a missed last_seen touch must never break the request
+					$this->logger?->debug('CareCheck: last_seen touch failed', ['exception' => $e->getMessage()]);
 				}
 				if ($pair->getKind() === 'station') {
 					// NH-09: station tokens get their own ref — sign-off scope

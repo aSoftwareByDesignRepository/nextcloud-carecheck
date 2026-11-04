@@ -482,9 +482,12 @@ class ApiController extends Controller
 		try {
 			$actor = $this->actor();
 			$this->acl->assertStaff($actor);
+			// live devices ride along so staff can revoke a single lost
+			// phone without deactivating the whole member (US-209).
+			$devices = $this->pairs->devicesByMember();
 			$out = [];
 			foreach ($this->members->findAll() as $m) {
-				$out[] = ['id' => (int)$m->getId(), 'displayName' => $m->getDisplayName(), 'qualification' => $m->getQualification(), 'active' => (int)$m->getActive() === 1, 'teamId' => $m->getTeamId() !== null ? (int)$m->getTeamId() : null];
+				$out[] = ['id' => (int)$m->getId(), 'displayName' => $m->getDisplayName(), 'qualification' => $m->getQualification(), 'active' => (int)$m->getActive() === 1, 'teamId' => $m->getTeamId() !== null ? (int)$m->getTeamId() : null, 'devices' => $devices[(int)$m->getId()] ?? []];
 			}
 			return $this->ok(['members' => $out]);
 		} catch (ApiException $e) {

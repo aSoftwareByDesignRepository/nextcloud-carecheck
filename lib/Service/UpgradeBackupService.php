@@ -412,7 +412,9 @@ class UpgradeBackupService
 	{
 		try {
 			$this->getSnapshotFolder($snapshotId)->delete();
-		} catch (\Throwable) {
+		} catch (\Throwable $e) {
+			// best-effort cleanup — a stale snapshot folder is reclaimed by rotation
+			$this->logger->warning('CareCheck: snapshot folder delete failed', ['snapshot' => $snapshotId, 'exception' => $e->getMessage()]);
 		}
 	}
 
@@ -616,7 +618,9 @@ class UpgradeBackupService
 		$destPath = $this->getAppDataPath($folderName);
 		try {
 			$this->rootFolder->get($destPath)->delete();
-		} catch (NotFoundException) {
+		} catch (NotFoundException $e) {
+			// non-fatal — delete-if-exists: an absent restore target is already the goal
+			$this->logger->debug('CareCheck: restore target already absent', ['path' => $destPath, 'exception' => $e->getMessage()]);
 		}
 
 		try {

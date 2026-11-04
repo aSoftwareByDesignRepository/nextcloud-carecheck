@@ -90,6 +90,25 @@ class TourService
 
 	private function materialize(int $templateId, string $date, ?string $leadRef): int
 	{
+		// Archived (or deleted) clients never get new stops — archive()
+		// prunes template rows too, but rows predate that cascade and other
+		// paths can flip active. Stops without a client (external/office)
+		// are always eligible.
+		$tplStops = [];
+		foreach ($this->ttStops->findAll() as $s) {
+			if ((int)$s->getTemplateId() !== $templateId) {
+				continue;
+			}
+			$cid = $s->getClientId();
+			if ($cid !== null && !$this->clientIsActive((int)$cid)) {
+				continue;
+			}
+			$tplStops[] = $s;
+		}
+		if ($tplStops === []) {
+			return 0; // never mint a stop-less tour shell
+		}
+
 		$t = new Tour();
 		$t->setTemplateId($templateId);
 		$t->setDate(new \DateTime($date));
@@ -100,10 +119,7 @@ class TourService
 		$t = $this->tours->insert($t);
 
 		$n = 0;
-		foreach ($this->ttStops->findAll() as $s) {
-			if ((int)$s->getTemplateId() !== $templateId) {
-				continue;
-			}
+		foreach ($tplStops as $s) {
 			$st = new TourStop();
 			$st->setTourId((int)$t->getId());
 			$st->setOrderHint((int)$s->getOrderHint());
@@ -377,6 +393,17 @@ class TourService
 
 	private array $payloadCache = [];
 	private array $demoCache = [];
+	private array $activeClientCache = [];
+
+	/** Stop-materialization eligibility — missing or archived ⇒ not planned. */
+	private function clientIsActive(int $clientId): bool
+	{
+		if (!array_key_exists($clientId, $this->activeClientCache)) {
+			$c = $this->clients !== null ? $this->clients->find($clientId) : null;
+			$this->activeClientCache[$clientId] = $c !== null && (int)$c->getActive() === 1;
+		}
+		return $this->activeClientCache[$clientId];
+	}
 
 	private function clientPayload(int $clientId): ?array
 	{

@@ -52,6 +52,7 @@ class VoiceNoteService
 		private IRootFolder $rootFolder,
 		private IGroupManager $groups,
 		private ITaskManager $tasks,
+		private ?\Psr\Log\LoggerInterface $logger = null,
 	) {
 	}
 
@@ -124,7 +125,9 @@ class VoiceNoteService
 			$this->db->rollBack();
 			try {
 				$this->blobFolder($clientId)->getFile($blobKey)->delete();
-			} catch (\Throwable) {
+			} catch (\Throwable $e) {
+				// best-effort cleanup — the row is rolled back; an orphan blob is cosmetic
+				$this->logger?->warning('CareCheck: orphaned voicenote blob after rollback', ['exception' => $e->getMessage()]);
 			}
 			throw $t;
 		}
@@ -288,7 +291,9 @@ class VoiceNoteService
 					$f->delete();
 				}
 			}
-		} catch (\Throwable) {
+		} catch (\Throwable $e) {
+			// cleanup only — a leftover temp file is reclaimed by the next sweep
+			$this->logger?->warning('CareCheck: voicenote temp cleanup failed', ['exception' => $e->getMessage()]);
 		}
 	}
 

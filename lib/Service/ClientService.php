@@ -7,6 +7,7 @@ namespace OCA\CareCheck\Service;
 use OCA\CareCheck\Constants;
 use OCA\CareCheck\Db\Client;
 use OCA\CareCheck\Db\ClientMapper;
+use OCA\CareCheck\Db\TtStopMapper;
 use OCA\CareCheck\Exception\ApiException;
 use OCP\IDBConnection;
 
@@ -17,6 +18,7 @@ class ClientService
 		private ClientMapper $clients,
 		private CryptoService $crypto,
 		private AclService $acl,
+		private ?TtStopMapper $ttStops = null,
 	) {
 	}
 
@@ -65,10 +67,21 @@ class ClientService
 		if ($c === null || (int)$c->getActive() === 0) {
 			throw ApiException::notFound();
 		}
-		$c->setActive(0);
-		$c->setRevision((int)$c->getRevision() + 1);
-		$c->setUpdatedAt(new \DateTime());
-		$this->clients->update($c);
+		$this->db->beginTransaction();
+		try {
+			$c->setActive(0);
+			$c->setRevision((int)$c->getRevision() + 1);
+			$c->setUpdatedAt(new \DateTime());
+			$this->clients->update($c);
+			// "no new stops are planned" needs the template rows gone —
+			// a stale client_id also fails templateParams validation on
+			// the next template save (active-only rule).
+			$this->ttStops?->deleteForClient($clientId);
+			$this->db->commit();
+		} catch (\Throwable $e) {
+			$this->db->rollBack();
+			throw $e;
+		}
 	}
 
 	public function getForActor(string $actorRef, int $clientId): Client

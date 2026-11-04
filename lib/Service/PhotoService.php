@@ -42,6 +42,7 @@ class PhotoService
 		private CryptoService $crypto,
 		private JournalService $journal,
 		private IAppData $appData,
+		private ?\Psr\Log\LoggerInterface $logger = null,
 	) {
 	}
 
@@ -113,7 +114,9 @@ class PhotoService
 			$this->db->rollBack();
 			try {
 				$this->blobFolder($clientId)->getFile($blobKey)->delete();
-			} catch (\Throwable) {
+			} catch (\Throwable $e) {
+				// best-effort cleanup — the row is rolled back; an orphan blob is cosmetic
+				$this->logger?->warning('CareCheck: orphaned photo blob after rollback', ['exception' => $e->getMessage()]);
 			}
 			throw $t;
 		}
@@ -163,7 +166,9 @@ class PhotoService
 		}
 		try {
 			$this->blobFolder($clientId)->getFile((string)$p->getBlobKey())->delete();
-		} catch (NotFoundException) {
+		} catch (NotFoundException $e) {
+			// non-fatal — delete-if-exists: an absent blob is already the goal
+			$this->logger?->debug('CareCheck: photo blob already absent on delete', ['exception' => $e->getMessage()]);
 		}
 		$this->acl->audit($actorRef, 'photo_del', $clientId, (string)$photoId);
 	}

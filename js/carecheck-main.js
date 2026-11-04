@@ -10,7 +10,7 @@
 			return r.json();
 		}).catch(function () { return { success: false, message: tr('Connection failed — check the network and try again.') }; });
 	};
-	var tr = function (s) { return OC.L10N.translate('carecheck', s); };
+	var tr = function (s, v) { return OC.L10N.translate('carecheck', s, v); };
 	var esc = function (s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; };
 
 	var FIELD_MSG = {
@@ -1095,16 +1095,22 @@
 		});
 		tb.querySelectorAll('[data-cck-tpl-del]').forEach(function (b) {
 			b.onclick = function () {
-				confirmAsk(tr('Delete this tour template? Already generated tours for today and tomorrow stay unchanged.'), tr('Delete'))
-					.then(function (yes) {
-						if (!yes) { return; }
-						api('/api/tour-templates/' + b.dataset.cckTplDel, { method: 'DELETE' }).then(function (r) {
-							if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
-							notify(tr('Template deleted.'));
-							resetTourForm();
-							loadTours();
-						});
+				// The keep-alive window is horizon_days+1 calendar days
+				// (generate materializes today..today+horizon) — say the
+				// configured number, never a stale "today and tomorrow".
+				loadPresets().then(function (p) {
+					var horizon = parseInt(p.horizonDays, 10);
+					if (!isFinite(horizon) || horizon < 0) { horizon = 7; }
+					return confirmAsk(tr('Delete this tour template? Already generated tours for today and the next {days} days stay unchanged.', { days: horizon }), tr('Delete'));
+				}).then(function (yes) {
+					if (!yes) { return; }
+					api('/api/tour-templates/' + b.dataset.cckTplDel, { method: 'DELETE' }).then(function (r) {
+						if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+						notify(tr('Template deleted.'));
+						resetTourForm();
+						loadTours();
 					});
+				});
 			};
 		});
 	}
@@ -1136,6 +1142,7 @@
 				early: s2.preset_early || '360-540', morning: s2.preset_morning || '540-720',
 				noon: s2.preset_noon || '720-840', afternoon: s2.preset_afternoon || '840-1020',
 				evening: s2.preset_evening || '1020-1200',
+				horizonDays: parseInt(s2.horizon_days, 10),
 			};
 		}).catch(function () { PRESETS = null; return {}; });
 		return PRESETS;
@@ -1344,6 +1351,7 @@
 			var actions = m.active
 				? '<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-member-edit="' + m.id + '">' + esc(tr('Edit')) + '</button> ' +
 				'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-pair="' + m.id + '">' + esc(tr('Pair code')) + '</button> ' +
+				'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-devices="' + m.id + '">' + esc(tr('Devices')) + '</button> ' +
 				'<button type="button" class="cck-btn cck-btn--secondary cck-btn--sm" data-cck-practice="' + m.id + '">' + esc(tr('Practice tour')) + '</button> ' +
 				'<button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-deact="' + m.id + '">' + esc(tr('Deactivate')) + '</button>'
 				: '';
@@ -1368,6 +1376,9 @@
 				});
 			};
 		});
+		tb.querySelectorAll('[data-cck-devices]').forEach(function (b) {
+			b.onclick = function () { openDevicesDialog(parseInt(b.dataset.cckDevices, 10)); };
+		});
 		tb.querySelectorAll('[data-cck-practice]').forEach(function (b) {
 			b.onclick = function () {
 				withBusy(b, function () {
@@ -1389,6 +1400,50 @@
 					});
 			};
 		});
+	}
+	// Lost-phone flow (US-209): a single device is revoked without
+	// deactivating the member — devices arrive on the member payload.
+	var devicesDlg = document.querySelector('[data-cck-devices-dialog]');
+	function renderDevicesList(m) {
+		var list = devicesDlg.querySelector('[data-cck-devices-list]');
+		devicesDlg.querySelector('[data-cck-devices-hint]').textContent = m.displayName;
+		var devices = m.devices || [];
+		list.innerHTML = devices.length ? devices.map(function (d) {
+			var label = (d.label && String(d.label).trim() !== '') ? d.label : tr('Unnamed device');
+			var seen = '';
+			if (d.lastSeen) {
+				try { seen = ' · ' + tr('Last seen') + ' ' + new Date(d.lastSeen).toLocaleDateString(); }
+				catch (e) { seen = ' · ' + tr('Last seen') + ' ' + String(d.lastSeen).slice(0, 10); }
+			}
+			return '<li class="cck-device-list__item"><span class="cck-device-list__label">' + esc(label) + esc(seen) + '</span>' +
+				'<button type="button" class="cck-btn cck-btn--danger cck-btn--sm" data-cck-device-revoke="' + d.id + '">' + esc(tr('Revoke')) + '</button></li>';
+		}).join('') : '<li class="cck-device-list__item cck-muted">' + esc(tr('No paired devices.')) + '</li>';
+		list.querySelectorAll('[data-cck-device-revoke]').forEach(function (b) {
+			b.onclick = function () {
+				confirmAsk(tr('Revoke this device? It loses access on the next call.'), tr('Revoke'))
+					.then(function (yes) {
+						if (!yes) { return; }
+						api('/api/devices/' + b.dataset.cckDeviceRevoke + '/revoke', { method: 'POST' }).then(function (r) {
+							if (!r.success) { notify(r.message || tr('Failed.'), true); return; }
+							notify(tr('Device revoked.'));
+							m.devices = devices.filter(function (d) { return String(d.id) !== String(b.dataset.cckDeviceRevoke); });
+							renderDevicesList(m);
+							loadMembers(); // cache refresh — next open shows server truth
+						});
+					});
+			};
+		});
+	}
+	function openDevicesDialog(memberId) {
+		var m = membersCache.find(function (x) { return x.id === memberId; });
+		if (!devicesDlg || !m) { return; }
+		renderDevicesList(m);
+		devicesDlg._invoker = document.activeElement;
+		devicesDlg.showModal();
+		devicesDlg.querySelector('[data-cck-devices-close]').focus();
+	}
+	if (devicesDlg) {
+		devicesDlg.querySelector('[data-cck-devices-close]').onclick = function () { devicesDlg.close(); };
 	}
 	var editingMemberId = null;
 	function resetMemberForm() {

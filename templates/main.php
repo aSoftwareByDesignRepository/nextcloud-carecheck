@@ -701,3 +701,12 @@ $settingsNav = static function () use ($l): string {
 		<button type="button" data-cck-resolve-confirm class="cck-btn cck-btn--primary"><?php p($l->t('Resolve')); ?></button>
 	</div>
 </dialog>
+
+<dialog class="cck-dialog" data-cck-devices-dialog aria-labelledby="cck-devices-title">
+	<h2 id="cck-devices-title"><?php p($l->t('Paired devices')); ?></h2>
+	<p class="cck-dialog__hint" data-cck-devices-hint></p>
+	<ul class="cck-device-list" data-cck-devices-list></ul>
+	<div class="cck-dialog__actions">
+		<button type="button" data-cck-devices-close class="cck-btn cck-btn--secondary"><?php p($l->t('Close')); ?></button>
+	</div>
+</dialog>
