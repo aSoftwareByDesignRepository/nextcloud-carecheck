@@ -19,8 +19,9 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\ICacheFactory;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 /**
  * companionApi — dual auth: `X-CCK-Device-Token` (paired member) OR an
@@ -47,6 +48,8 @@ class CompanionApiController extends Controller
 		private \OCA\CareCheck\Service\PhotoService $photos,
 		private \OCA\CareCheck\Service\VoiceNoteService $voiceNotes,
 		private \OCA\CareCheck\Service\GroupSessionService $groupSessions,
+		private ICacheFactory $cacheFactory,
+		private LoggerInterface $logger,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -510,8 +513,8 @@ class CompanionApiController extends Controller
 			$channel = $this->request->getParam('channel');
 			if ($channel !== null && $channel !== '' && $channel !== 'app'
 				&& \in_array($channel, ['widget', 'kiosk', 'api', 'sync'], true)) {
-				\OCP\Log\logger('carecheck')->info('capture_channel visit-checkin via ' . $channel,
-					['capture_source' => $channel]);
+				$this->logger->info('capture_channel visit-checkin via ' . $channel,
+					['capture_source' => $channel, 'app' => 'carecheck']);
 			}
 			return $this->ok($this->visits->checkin($actor, $this->request->getParams()));
 		} catch (ApiException $e) {
@@ -675,20 +678,39 @@ class CompanionApiController extends Controller
 			return $this->error($e);
 		}
 	}
-	/** Compact widget snapshot (NH-P2): one doc per sync + serverNow (MH-P18), 60 s/user cache. */
-	#[NoAdminRequired]
+	/**
+	 * `GET /api/v1/widget-snapshot` — compact widget snapshot (NH-P2): one doc
+	 * per sync + serverNow (MH-P18), 60 s/actor cache. Same dual auth as every
+	 * companion route; the cache key is the actor ref so member-mode devices
+	 * get their own snapshot, never a session user's.
+	 */
+	#[PublicPage]
+	#[NoCSRFRequired]
 	public function widgetSnapshot(): JSONResponse
 	{
-		$uid = \OCP\Server::get(\OCP\IUserSession::class)->getUser()?->getUID();
-		if ($uid === null) return new JSONResponse(['error' => 'unauthenticated'], 401);
-		$cache = \OCP\Server::get(\OCP\ICacheFactory::class)->createDistributed('carecheck_wsnap');
-		$key = $uid . ':toursToday';
-		if (($hit = $cache->get($key)) !== null) return new JSONResponse($hit);
-		$status = $this->toursToday()->getData();
-		$payload = ['status' => $status,
-			'serverNow' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM)];
-		$cache->set($key, $payload, 60);
-		return new JSONResponse($payload);
+		try {
+			$actor = $this->actor();
+			$cache = $this->cacheFactory->createDistributed('carecheck_wsnap');
+			$key = 'snap:' . $actor;
+			if (($hit = $cache->get($key)) !== null) {
+				return new JSONResponse($hit);
+			}
+			$resp = $this->toursToday();
+			$status = $resp->getData();
+			// Error envelopes pass through uncached — a transient failure must
+			// not stick to the actor for the TTL window.
+			if (!is_array($status) || ($status['success'] ?? false) !== true) {
+				return $resp;
+			}
+			$payload = [
+				'status' => $status,
+				'serverNow' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM),
+			];
+			$cache->set($key, $payload, 60);
+			return new JSONResponse($payload);
+		} catch (ApiException $e) {
+			return $this->error($e);
+		}
 	}
 
 }
