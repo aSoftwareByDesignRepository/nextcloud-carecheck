@@ -179,7 +179,13 @@ class AclService
 		}
 		if (str_starts_with($ref, 'uid:')) {
 			$uid = substr($ref, 4);
-			return $uid !== '' && $this->users->userExists($uid);
+			if ($uid === '') {
+				return false;
+			}
+			// Deactivated accounts still exist — mirror the member leg's
+			// active check so work can never be assigned to a dead login.
+			$u = $this->users->get($uid);
+			return $u !== null && $u->isEnabled();
 		}
 		return false;
 	}

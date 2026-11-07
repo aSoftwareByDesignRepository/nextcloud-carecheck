@@ -1542,6 +1542,10 @@ class ApiController extends Controller
 				}
 			}
 			foreach ($this->users->searchDisplayName($q, 25) as $u) {
+				// Person pickers never offer deactivated accounts.
+				if (!$u->isEnabled()) {
+					continue;
+				}
 				$out[] = ['ref' => 'uid:' . $u->getUID(), 'label' => $u->getDisplayName() ?: $u->getUID(), 'kind' => 'uid'];
 				if (count($out) >= 25) {
 					break;

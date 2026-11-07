@@ -33,7 +33,19 @@ class RefAndScopeTest extends TestCase
 		);
 		$users = $this->createMock(IUserManager::class);
 		$users->method('userExists')->willReturnCallback(
-			fn (string $uid) => $uidExists[$uid] ?? false
+			fn (string $uid) => isset($uidExists[$uid])
+		);
+		$users->method('get')->willReturnCallback(
+			function (string $uid) use ($uidExists) {
+				$enabled = $uidExists[$uid] ?? null;
+				if ($enabled === null) {
+					return null;
+				}
+				$u = $this->createMock(\OCP\IUser::class);
+				$u->method('isEnabled')->willReturn($enabled);
+				$u->method('getUID')->willReturn($uid);
+				return $u;
+			}
 		);
 		return new AclService(
 			$this->createMock(IDBConnection::class),
@@ -65,10 +77,11 @@ class RefAndScopeTest extends TestCase
 		$this->assertFalse($acl->validRef('member:999')); // ghost member refuses
 	}
 
-	public function testUidRefRequiresExistingAccount(): void
+	public function testUidRefRequiresExistingEnabledAccount(): void
 	{
-		$acl = $this->acl([], ['alex' => true]);
+		$acl = $this->acl([], ['alex' => true, 'deactivated' => false]);
 		$this->assertTrue($acl->validRef('uid:alex'));
+		$this->assertFalse($acl->validRef('uid:deactivated')); // dead login refuses work
 		$this->assertFalse($acl->validRef('uid:deleted-user'));
 		$this->assertFalse($acl->validRef('uid:'));
 	}
