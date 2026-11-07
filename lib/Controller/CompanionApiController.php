@@ -19,6 +19,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDownloadResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\IRequest;
 
 /**
@@ -504,6 +505,14 @@ class CompanionApiController extends Controller
 			$actor = $this->actor();
 			$this->rateLimit->hit('companion', $actor, $this->settings->getInt('device_rate_per_min'));
 			$this->license->requireMobileLicense();
+			// Widget-initiated check-ins carry channel=widget (suite spec MH-P24);
+			// allowlist-validate + log provenance — never reject a real stamp.
+			$channel = $this->request->getParam('channel');
+			if ($channel !== null && $channel !== '' && $channel !== 'app'
+				&& \in_array($channel, ['widget', 'kiosk', 'api', 'sync'], true)) {
+				\OCP\Log\logger('carecheck')->info('capture_channel visit-checkin via ' . $channel,
+					['capture_source' => $channel]);
+			}
 			return $this->ok($this->visits->checkin($actor, $this->request->getParams()));
 		} catch (ApiException $e) {
 			return $this->error($e);
@@ -666,4 +675,20 @@ class CompanionApiController extends Controller
 			return $this->error($e);
 		}
 	}
+	/** Compact widget snapshot (NH-P2): one doc per sync + serverNow (MH-P18), 60 s/user cache. */
+	#[NoAdminRequired]
+	public function widgetSnapshot(): JSONResponse
+	{
+		$uid = \OCP\Server::get(\OCP\IUserSession::class)->getUser()?->getUID();
+		if ($uid === null) return new JSONResponse(['error' => 'unauthenticated'], 401);
+		$cache = \OCP\Server::get(\OCP\ICacheFactory::class)->createDistributed('carecheck_wsnap');
+		$key = $uid . ':toursToday';
+		if (($hit = $cache->get($key)) !== null) return new JSONResponse($hit);
+		$status = $this->toursToday()->getData();
+		$payload = ['status' => $status,
+			'serverNow' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM)];
+		$cache->set($key, $payload, 60);
+		return new JSONResponse($payload);
+	}
+
 }

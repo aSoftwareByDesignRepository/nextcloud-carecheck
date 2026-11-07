@@ -124,4 +124,5 @@ return [
 		['name' => 'companionApi#clientVoiceNotes', 'url' => '/api/v1/clients/{id}/voicenotes', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
 		['name' => 'companionApi#clientPhotoFile', 'url' => '/api/v1/clients/{id}/photos/{photoId}', 'verb' => 'GET', 'requirements' => ['id' => '\d+', 'photoId' => '\d+']],
 	],
+		['name' => 'companionApi#widgetSnapshot', 'url' => '/api/widget-snapshot', 'verb' => 'GET'],
 ];
