@@ -72,7 +72,10 @@ final class PrivacyProposalService
 		];
 		try {
 			$service = \OCP\Server::get(\OCA\PrivacyCheck\Service\SuiteProposalService::class);
-			$activity = $service->proposeActivity($proposal, $actorUid);
+			// Sibling takes a bare uid — the typed `uid:` ref is our wire format,
+			// never forward it (its dept/role gates resolve on the raw string).
+			$bareUid = str_starts_with($actorUid, 'uid:') ? substr($actorUid, 4) : $actorUid;
+			$activity = $service->proposeActivity($proposal, $bareUid);
 		} catch (\Throwable $e) {
 			$this->logger->warning('privacycheck VVT proposal failed', ['exception' => $e]);
 			return ['ok' => false, 'code' => 'sibling_error', 'message' => 'PrivacyCheck rejected the proposal.'];
