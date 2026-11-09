@@ -510,13 +510,14 @@ class CompanionApiController extends Controller
 			$this->license->requireMobileLicense();
 			// Widget-initiated check-ins carry channel=widget (suite spec MH-P24);
 			// allowlist-validate + log provenance — never reject a real stamp.
-			$channel = $this->request->getParam('channel');
+			$rawChannel = $this->request->getParam('channel');
+			$channel = is_string($rawChannel) ? $rawChannel : null;
 			if ($channel !== null && $channel !== '' && $channel !== 'app'
 				&& \in_array($channel, ['widget', 'kiosk', 'api', 'sync'], true)) {
 				$this->logger->info('capture_channel visit-checkin via ' . $channel,
 					['capture_source' => $channel, 'app' => 'carecheck']);
 			}
-			return $this->ok($this->visits->checkin($actor, $this->request->getParams()));
+			return $this->ok($this->visits->checkin($actor, $this->request->getParams(), $channel));
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
@@ -702,6 +703,10 @@ class CompanionApiController extends Controller
 			if (!is_array($status) || ($status['success'] ?? false) !== true) {
 				return $resp;
 			}
+			// D-02: locked deployments force default-redacted widgets — the
+			// client hides the show-values toggle under this flag.
+			$status['redactionLocked'] = \OCP\Server::get(\OCP\IAppConfig::class)
+				->getValueBool('carecheck', 'widget_redaction_locked', false);
 			$payload = [
 				'status' => $status,
 				'serverNow' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM),

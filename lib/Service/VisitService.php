@@ -55,10 +55,16 @@ class VisitService
 
 /**
 	 * Idempotent check-in: creates the visit row in `in_progress`.
+	 * `$channel` is optional capture provenance (suite widget spec MH-P24):
+	 * widget/kiosk/api/sync callers declare it; 'app'/null is the default
+	 * and stays unmarked in the journal payload.
 	 * @param array<string, mixed> $in
 	 */
-	public function checkin(string $actorRef, array $in): array
+	public function checkin(string $actorRef, array $in, ?string $channel = null): array
 	{
+		// Wire callers may also carry `channel` inside $in — an explicit
+		// parameter wins, the bundle value is the fallback.
+		$channel = $channel ?? (isset($in['channel']) && is_string($in['channel']) ? $in['channel'] : null);
 		$idem = BundleValidator::idemKey($in);
 		$existing = $this->findByIdem($actorRef, $idem);
 		if ($existing !== null) {
@@ -105,7 +111,7 @@ class VisitService
 				'visit' => (int)$v->getId(),
 				'ts' => $now->format(\DateTimeInterface::ATOM),
 				'presence_ok' => (int)$v->getPresenceOk(),
-			]);
+			] + $this->captureChannelMeta($channel));
 			// the briefing card is a safety surface — showing it is itself audited
 			$this->journal->append($clientId, 'briefing_shown', $actorRef, ['visit' => (int)$v->getId()]);
 			$this->db->commit();
@@ -125,6 +131,22 @@ class VisitService
 			throw $e;
 		}
 		return $this->serialize($v);
+	}
+
+	/**
+	 * Explicit capture-channel attribution for journal payloads (MH-P24):
+	 * 'app' is the default and stays unmarked; only allowlisted non-default
+	 * channels persist — a crafted bundle cannot write arbitrary strings
+	 * into the compliance journal.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function captureChannelMeta(?string $channel): array
+	{
+		if ($channel === null || !\in_array($channel, ['widget', 'kiosk', 'api', 'sync'], true)) {
+			return [];
+		}
+		return ['capture_source' => $channel];
 	}
 
 	/**
