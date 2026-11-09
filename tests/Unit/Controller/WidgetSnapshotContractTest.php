@@ -46,4 +46,22 @@ final class WidgetSnapshotContractTest extends TestCase
 		$this->assertStringNotContainsString('IUserSession', $src,
 			'session-uid auth locks out paired member devices — actor() is the auth boundary');
 	}
+
+	public function testRedactionLockedFlowsThroughSingleCentralReader(): void
+	{
+		$src = (string)file_get_contents(dirname(__DIR__, 3) . '/lib/Controller/CompanionApiController.php');
+		// The openTours feed is what the companion actually pushes through the
+		// widget bridge — the flag must ride it, not only the snapshot route.
+		$this->assertMatchesRegularExpression(
+			"/'tours'\s*=>\s*\\\$this->tours->actorOpenStops\([^)]*\)[\s\S]*?'redactionLocked'\s*=>\s*\\\$this->redactionLocked\(\)/",
+			$src,
+			'openTours must emit redactionLocked via the central reader — the client derives widgetRedaction.locked from it'
+		);
+		// Exactly one reader of the platform flag — a second local copy would
+		// shadow the deployment value (mirrored-state contract).
+		$this->assertSame(1, substr_count($src, "getValueBool('carecheck', 'widget_redaction_locked'"),
+			'widget_redaction_locked must be read in exactly one place (redactionLocked() helper)');
+		$this->assertSame(2, substr_count($src, '$this->redactionLocked()'),
+			'openTours + widgetSnapshot must both read through redactionLocked()');
+	}
 }

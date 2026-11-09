@@ -135,6 +135,7 @@ class CompanionApiController extends Controller
 			return $this->ok([
 				'tours' => $this->tours->actorOpenStops($actor),
 				'vehicle' => $this->mobility->vehicleFor($actor, $today),
+				'redactionLocked' => $this->redactionLocked(),
 			]);
 		} catch (ApiException $e) {
 			return $this->error($e);
@@ -705,8 +706,7 @@ class CompanionApiController extends Controller
 			}
 			// D-02: locked deployments force default-redacted widgets — the
 			// client hides the show-values toggle under this flag.
-			$status['redactionLocked'] = \OCP\Server::get(\OCP\IAppConfig::class)
-				->getValueBool('carecheck', 'widget_redaction_locked', false);
+			$status['redactionLocked'] = $this->redactionLocked();
 			$payload = [
 				'status' => $status,
 				'serverNow' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM),
@@ -716,6 +716,18 @@ class CompanionApiController extends Controller
 		} catch (ApiException $e) {
 			return $this->error($e);
 		}
+	}
+
+	/**
+	 * D-02 deployment lock — the ONLY reader of the widget-redaction platform
+	 * flag. Every response a companion derives widget redaction from
+	 * (openTours feed, widgetSnapshot) must carry it; local copies would
+	 * shadow the platform value.
+	 */
+	private function redactionLocked(): bool
+	{
+		return \OCP\Server::get(\OCP\IAppConfig::class)
+			->getValueBool('carecheck', 'widget_redaction_locked', false);
 	}
 
 }
