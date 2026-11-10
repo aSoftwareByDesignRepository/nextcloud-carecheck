@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Funkcja na zamówienie",
 	"Companion app" : "Aplikacja towarzysząca",
 	"Companion license" : "Licencja aplikacji towarzyszącej",
-	"Companion requests per minute \/ device" : "Żądania aplikacji na minutę \/ urządzenie",
+	"Companion requests per minute / device" : "Żądania aplikacji na minutę / urządzenie",
 	"Confirm" : "Potwierdź",
 	"Connection failed — check the network and try again." : "Połączenie nie powiodło się — sprawdź sieć i spróbuj ponownie.",
 	"Could not send the draft." : "Nie udało się wysłać wersji roboczej.",
@@ -439,7 +439,7 @@ OC.L10N.register(
 	"Time of day" : "Pora dnia",
 	"Time rule" : "Reguła czasowa",
 	"Time-of-day presets" : "Predefiniowane pory dnia",
-	"To \/ deadline" : "Do \/ termin",
+	"To / deadline" : "Do / termin",
 	"Today" : "Dzisiaj",
 	"Today at a glance — every stop, every caregiver." : "Dzisiaj w skrócie — każdy przystanek, każdy opiekun.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Dzisiejsza trasa w skrócie — offline, zaszyfrowana na urządzeniu.",
@@ -479,5 +479,6 @@ OC.L10N.register(
 	"Window" : "Okno czasowe",
 	"Work" : "Praca",
 	"Zentrale" : "Centrala"
-	}
+	},
+	"nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 );

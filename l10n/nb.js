@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Bestilt funksjon",
 	"Companion app" : "Companion-app",
 	"Companion license" : "Companion-lisens",
-	"Companion requests per minute \/ device" : "Companion-forespørsler per minutt \/ enhet",
+	"Companion requests per minute / device" : "Companion-forespørsler per minutt / enhet",
 	"Confirm" : "Bekreft",
 	"Connection failed — check the network and try again." : "Tilkoblingen mislyktes — sjekk nettverket og prøv igjen.",
 	"Could not send the draft." : "Kladden kunne ikke sendes.",
@@ -439,11 +439,11 @@ OC.L10N.register(
 	"Time of day" : "Tidspunkt på dagen",
 	"Time rule" : "Tidsregel",
 	"Time-of-day presets" : "Forhåndsvalg for tidspunkter",
-	"To \/ deadline" : "Til \/ frist",
+	"To / deadline" : "Til / frist",
 	"Today" : "I dag",
 	"Today at a glance — every stop, every caregiver." : "I dag med ett blikk — hvert stopp, hver omsorgsarbeider.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Dagens rute med ett blikk — offline, kryptert på enheten.",
-	"Toggle navigation menu" : "Slå navigasjonsmeny av\/på",
+	"Toggle navigation menu" : "Slå navigasjonsmeny av/på",
 	"Tolerance min" : "Toleranse min.",
 	"Tolerance minutes" : "Toleranse (minutter)",
 	"Too short." : "For kort.",
@@ -479,5 +479,6 @@ OC.L10N.register(
 	"Window" : "Tidsvindu",
 	"Work" : "Arbeid",
 	"Zentrale" : "Hovedkontor"
-	}
+	},
+	"nplurals=2; plural=(n != 1);"
 );

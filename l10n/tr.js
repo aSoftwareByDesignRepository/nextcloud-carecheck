@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Özel geliştirilen özellik",
 	"Companion app" : "Yardımcı uygulama",
 	"Companion license" : "Yardımcı uygulama lisansı",
-	"Companion requests per minute \/ device" : "Yardımcı uygulama isteği \/ dakika \/ cihaz",
+	"Companion requests per minute / device" : "Yardımcı uygulama isteği / dakika / cihaz",
 	"Confirm" : "Onayla",
 	"Connection failed — check the network and try again." : "Bağlantı başarısız — ağı denetleyip yeniden deneyin.",
 	"Could not send the draft." : "Taslak gönderilemedi.",
@@ -439,11 +439,11 @@ OC.L10N.register(
 	"Time of day" : "Günün saati",
 	"Time rule" : "Zaman kuralı",
 	"Time-of-day presets" : "Günün saati hazır ayarları",
-	"To \/ deadline" : "Bitiş \/ son saat",
+	"To / deadline" : "Bitiş / son saat",
 	"Today" : "Bugün",
 	"Today at a glance — every stop, every caregiver." : "Bir bakışta bugün — her durak, her bakım personeli.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Bugünün turu bir bakışta — çevrimdışı, cihazda şifreli.",
-	"Toggle navigation menu" : "Gezinme menüsünü aç\/kapat",
+	"Toggle navigation menu" : "Gezinme menüsünü aç/kapat",
 	"Tolerance min" : "Tolerans (dk)",
 	"Tolerance minutes" : "Tolerans (dakika)",
 	"Too short." : "Çok kısa.",
@@ -479,5 +479,6 @@ OC.L10N.register(
 	"Window" : "Saat aralığı",
 	"Work" : "İş",
 	"Zentrale" : "Merkez"
-	}
+	},
+	"nplurals=2; plural=(n != 1);"
 );

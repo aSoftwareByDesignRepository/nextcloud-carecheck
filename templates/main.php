@@ -231,7 +231,7 @@ $settingsNav = static function () use ($l): string {
 						<a class="cck-link" data-cck-crm-open href="#" target="_blank" rel="noopener noreferrer" hidden></a>
 						<button type="button" class="cck-btn cck-btn--secondary" data-cck-crm-unlink hidden><?php p($l->t('Remove link')); ?></button>
 					</div>
-					<div data-cck-crm-pick hidden>
+					<div class="cck-form" data-cck-crm-pick hidden>
 						<label class="cck-field"><span class="cck-field__label"><?php p($l->t('Link a company')); ?></span>
 							<input type="search" data-cck-crm-q autocomplete="off" placeholder="<?php p($l->t('Search companies…')); ?>" aria-describedby="cck-crm-results"></label>
 						<ul class="cck-crm-results" data-cck-crm-results role="listbox" aria-label="<?php p($l->t('Matching companies')); ?>"></ul>

@@ -12,7 +12,7 @@ declare(strict_types=1);
  */
 
 $base = __DIR__ . '/../l10n';
-$localeFiles = ['en', 'de', 'da', 'es', 'fr', 'it', 'nb', 'nl', 'pl', 'sv', 'pt_BR', 'pt', 'tr'];
+$localeFiles = ['en', 'de', 'da', 'es', 'fr', 'it', 'nb', 'nl', 'pl', 'sv', 'pt_BR', 'pt', 'tr', 'zh_CN'];
 $catalogs = [];
 
 foreach ($localeFiles as $lang) {
