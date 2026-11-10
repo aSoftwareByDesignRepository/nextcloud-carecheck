@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Beauftragte Funktion",
 	"Companion app" : "Begleit-App",
 	"Companion license" : "Begleit-App-Lizenz",
-	"Companion requests per minute / device" : "Begleit-App-Anfragen pro Minute / Gerät",
+	"Companion requests per minute \/ device" : "Begleit-App-Anfragen pro Minute \/ Gerät",
 	"Confirm" : "Bestätigen",
 	"Connection failed — check the network and try again." : "Verbindung fehlgeschlagen — Netzwerk prüfen und erneut versuchen.",
 	"Could not send the draft." : "Der Entwurf konnte nicht gesendet werden.",
@@ -263,7 +263,7 @@ OC.L10N.register(
 	"No catalog tasks yet." : "Noch keine Katalogaufgaben.",
 	"No clients match the filter." : "Keine Klienten passen zum Filter.",
 	"No clients yet — add the first one above." : "Noch keine Klienten — den ersten oben anlegen.",
-	"No clients yet — add the first one below." : "Noch keine Klienten — erste/n unten hinzufügen.",
+	"No clients yet — add the first one below." : "Noch keine Klienten — erste\/n unten hinzufügen.",
 	"No companies found." : "Keine Unternehmen gefunden.",
 	"No CRM company linked." : "Kein CRM-Unternehmen verknüpft.",
 	"No data." : "Keine Daten.",
@@ -439,7 +439,7 @@ OC.L10N.register(
 	"Time of day" : "Tageszeit",
 	"Time rule" : "Zeitregel",
 	"Time-of-day presets" : "Tageszeit-Vorlagen",
-	"To / deadline" : "Bis / Frist",
+	"To \/ deadline" : "Bis \/ Frist",
 	"Today" : "Heute",
 	"Today at a glance — every stop, every caregiver." : "Heute auf einen Blick — jeder Stopp, jede Pflegekraft.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Heutige Tour auf einen Blick — offline, verschlüsselt auf dem Gerät.",
@@ -479,6 +479,5 @@ OC.L10N.register(
 	"Window" : "Zeitfenster",
 	"Work" : "Arbeit",
 	"Zentrale" : "Zentrale"
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );

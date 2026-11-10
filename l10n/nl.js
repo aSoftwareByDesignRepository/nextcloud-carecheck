@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Functie op aanvraag",
 	"Companion app" : "Companion-app",
 	"Companion license" : "Companion-licentie",
-	"Companion requests per minute / device" : "Companion-verzoeken per minuut / apparaat",
+	"Companion requests per minute \/ device" : "Companion-verzoeken per minuut \/ apparaat",
 	"Confirm" : "Bevestigen",
 	"Connection failed — check the network and try again." : "Verbinding mislukt — controleer het netwerk en probeer opnieuw.",
 	"Could not send the draft." : "Concept kon niet worden verstuurd.",
@@ -439,11 +439,11 @@ OC.L10N.register(
 	"Time of day" : "Dagdeel",
 	"Time rule" : "Tijdregel",
 	"Time-of-day presets" : "Voorinstellingen dagdelen",
-	"To / deadline" : "Tot / deadline",
+	"To \/ deadline" : "Tot \/ deadline",
 	"Today" : "Vandaag",
 	"Today at a glance — every stop, every caregiver." : "Vandaag in één oogopslag — elke stop, elke zorgmedewerker.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "De route van vandaag in één oogopslag — offline, versleuteld op het apparaat.",
-	"Toggle navigation menu" : "Navigatiemenu in-/uitschakelen",
+	"Toggle navigation menu" : "Navigatiemenu in-\/uitschakelen",
 	"Tolerance min" : "Tolerantie (min)",
 	"Tolerance minutes" : "Tolerantie (minuten)",
 	"Too short." : "Te kort.",
@@ -479,6 +479,5 @@ OC.L10N.register(
 	"Window" : "Tijdvak",
 	"Work" : "Werk",
 	"Zentrale" : "Hoofdkantoor"
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );

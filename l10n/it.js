@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Funzione su commissione",
 	"Companion app" : "App companion",
 	"Companion license" : "Licenza companion",
-	"Companion requests per minute / device" : "Richieste companion al minuto / dispositivo",
+	"Companion requests per minute \/ device" : "Richieste companion al minuto \/ dispositivo",
 	"Confirm" : "Conferma",
 	"Connection failed — check the network and try again." : "Connessione non riuscita — controlla la rete e riprova.",
 	"Could not send the draft." : "Impossibile inviare la bozza.",
@@ -236,7 +236,7 @@ OC.L10N.register(
 	"Members" : "Membri",
 	"members" : "Membri",
 	"Members get a pairing code and QR card from Members → Pair. Staff with a Nextcloud account sign in inside the app." : "Gli operatori ricevono codice di associazione e scheda QR in Operatori → Associa. Chi ha un account Nextcloud accede direttamente nell’app.",
-	"Menu" : "Menu",
+	"Menu" : "Menù",
 	"midday" : "mezzogiorno",
 	"midday (min)" : "mezzogiorno (min)",
 	"Minimum companion version" : "Versione minima dell'app companion",
@@ -439,11 +439,11 @@ OC.L10N.register(
 	"Time of day" : "Fascia oraria",
 	"Time rule" : "Regola oraria",
 	"Time-of-day presets" : "Preimpostazioni fasce orarie",
-	"To / deadline" : "A / scadenza",
+	"To \/ deadline" : "A \/ scadenza",
 	"Today" : "Oggi",
 	"Today at a glance — every stop, every caregiver." : "Oggi in sintesi — ogni fermata, ogni operatore.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Il giro di oggi in sintesi — offline, cifrato sul dispositivo.",
-	"Toggle navigation menu" : "Mostra/nascondi il menu di navigazione",
+	"Toggle navigation menu" : "Mostra\/nascondi il menu di navigazione",
 	"Tolerance min" : "Tolleranza (min)",
 	"Tolerance minutes" : "Tolleranza (minuti)",
 	"Too short." : "Troppo corto.",
@@ -479,6 +479,5 @@ OC.L10N.register(
 	"Window" : "Finestra oraria",
 	"Work" : "Lavoro",
 	"Zentrale" : "Sede centrale"
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );

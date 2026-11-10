@@ -103,7 +103,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Fonctionnalité sur commande",
 	"Companion app" : "Application compagnon",
 	"Companion license" : "Licence compagnon",
-	"Companion requests per minute / device" : "Requêtes compagnon par minute / appareil",
+	"Companion requests per minute \/ device" : "Requêtes compagnon par minute \/ appareil",
 	"Confirm" : "Confirmer",
 	"Connection failed — check the network and try again." : "Échec de la connexion — vérifiez le réseau et réessayez.",
 	"Could not send the draft." : "Impossible d'envoyer le brouillon.",
@@ -439,11 +439,11 @@ OC.L10N.register(
 	"Time of day" : "Moment de la journée",
 	"Time rule" : "Règle horaire",
 	"Time-of-day presets" : "Préréglages des moments de la journée",
-	"To / deadline" : "À / échéance",
+	"To \/ deadline" : "À \/ échéance",
 	"Today" : "Aujourd’hui",
 	"Today at a glance — every stop, every caregiver." : "Aujourd’hui en un coup d’œil — chaque arrêt, chaque soignant.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "La tournée du jour en un coup d’œil — hors ligne, chiffrée sur l’appareil.",
-	"Toggle navigation menu" : "Afficher/masquer le menu de navigation",
+	"Toggle navigation menu" : "Afficher\/masquer le menu de navigation",
 	"Tolerance min" : "Tolérance (min)",
 	"Tolerance minutes" : "Tolérance (minutes)",
 	"Too short." : "Trop court.",
@@ -479,6 +479,5 @@ OC.L10N.register(
 	"Window" : "Plage horaire",
 	"Work" : "Travail",
 	"Zentrale" : "Siège"
-	},
-	"nplurals=2; plural=(n > 1);"
+	}
 );
