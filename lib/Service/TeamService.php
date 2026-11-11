@@ -97,6 +97,7 @@ class TeamService
 		$l = new TeamLead();
 		$l->setTeamId($teamId);
 		$l->setUid($uid);
+		$l->setCreatedAt(new \DateTime());
 		try {
 			$this->leads->insert($l);
 		} catch (\OCP\DB\Exception $e) {

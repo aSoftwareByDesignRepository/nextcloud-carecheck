@@ -82,6 +82,58 @@ class Application extends App implements IBootstrap
 			);
 		});
 
+		// ── Config & data transfer (test → production) ──────────────────
+		$context->registerService(\OCA\CareCheck\ConfigTransfer\TransferManifest::class, fn () => new \OCA\CareCheck\ConfigTransfer\TransferManifest());
+		$context->registerService(\OCA\CareCheck\ConfigTransfer\TransferHooks::class, function ($c): \OCA\CareCheck\ConfigTransfer\TransferHooks {
+			return new \OCA\CareCheck\ConfigTransfer\TransferHooks(
+				$c->get(\OCA\CareCheck\Service\AclService::class),
+				$c->get(UpgradeBackupService::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+			);
+		});
+		$context->registerService(\OCA\CareCheck\ConfigTransfer\TransferPendingStore::class, fn ($c) => new \OCA\CareCheck\ConfigTransfer\TransferPendingStore($c->get(IRootFolder::class), $c->get(IConfig::class), 'carecheck'));
+		$context->registerService(\OCA\CareCheck\ConfigTransfer\TransferReceiptStore::class, fn ($c) => new \OCA\CareCheck\ConfigTransfer\TransferReceiptStore($c->get(IConfig::class), 'carecheck'));
+		$context->registerService(\OCA\CareCheck\ConfigTransfer\TransferService::class, function ($c): \OCA\CareCheck\ConfigTransfer\TransferService {
+			return new \OCA\CareCheck\ConfigTransfer\TransferService(
+				$c->get(IDBConnection::class),
+				$c->get(IConfig::class),
+				$c->get(\OCP\IUserManager::class),
+				$c->get(\OCP\IGroupManager::class),
+				$c->get(IRootFolder::class),
+				$c->get(IAppManager::class),
+				$c->get(ILockingProvider::class),
+				$c->get(\OCP\IURLGenerator::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferManifest::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferHooks::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferPendingStore::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferReceiptStore::class),
+				'carecheck',
+				$c->get(\OCP\IAppConfig::class),
+			);
+		});
+		$context->registerService(\OCA\CareCheck\BackgroundJob\TransferApplyJob::class, function ($c): \OCA\CareCheck\BackgroundJob\TransferApplyJob {
+			return new \OCA\CareCheck\BackgroundJob\TransferApplyJob(
+				$c->get(\OCP\AppFramework\Utility\ITimeFactory::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferService::class),
+				$c->get(ILockingProvider::class),
+				$c->get(\OCP\BackgroundJob\IJobList::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+			);
+		});
+		$context->registerService(\OCA\CareCheck\Controller\TransferApiController::class, function ($c): \OCA\CareCheck\Controller\TransferApiController {
+			return new \OCA\CareCheck\Controller\TransferApiController(
+				'carecheck',
+				$c->get(\OCP\IRequest::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferHooks::class),
+				$c->get(\OCA\CareCheck\ConfigTransfer\TransferService::class),
+				$c->get(\OCP\BackgroundJob\IJobList::class),
+				$c->get(\OCP\Security\Bruteforce\IThrottler::class),
+				$c->get(\OCP\IGroupManager::class),
+				$c->get(\OCP\IUserSession::class),
+			);
+		});
+
 		// API routes always answer the JSON envelope — an unhandled exception
 		// must never escape to core's HTML 500 on /api/* surfaces.
 		$context->registerMiddleware(\OCA\CareCheck\Middleware\ApiExceptionMiddleware::class);

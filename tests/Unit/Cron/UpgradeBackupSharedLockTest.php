@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace OCA\CareCheck\Tests\Unit\Cron;
 
+use OCA\CareCheck\BackgroundJob\TransferApplyJob;
 use OCA\CareCheck\Cron\AnchorJob;
 use OCA\CareCheck\Cron\AzcAbsenceSyncJob;
 use OCA\CareCheck\Cron\DocExpiryJob;
@@ -37,6 +38,7 @@ final class UpgradeBackupSharedLockTest extends TestCase
 {
 	/** Every app background job — the whole family is wired into the contract. */
 	private const JOB_CLASSES = [
+		TransferApplyJob::class,
 		AnchorJob::class,
 		AzcAbsenceSyncJob::class,
 		DocExpiryJob::class,

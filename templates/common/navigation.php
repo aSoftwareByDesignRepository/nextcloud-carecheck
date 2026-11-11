@@ -57,6 +57,7 @@ $navItem = static function (string $view, string $icon, string $label): string {
 				<li class="cck-nav__subitem"><a class="cck-nav__sublink" href="#/settings/general" data-cck-subnav="general"><?php p($l->t('General')); ?></a></li>
 				<li class="cck-nav__subitem"><a class="cck-nav__sublink" href="#/settings/companion" data-cck-subnav="companion"><?php p($l->t('Companion app')); ?></a></li>
 				<li class="cck-nav__subitem"><a class="cck-nav__sublink" href="#/settings/access" data-cck-subnav="access"><?php p($l->t('Access')); ?></a></li>
+				<li class="cck-nav__subitem"><a class="cck-nav__sublink" href="#/settings/transfer" data-cck-subnav="transfer"><?php p($l->t('Transfer')); ?></a></li>
 				<li class="cck-nav__subitem"><a class="cck-nav__sublink" href="#/settings/support" data-cck-subnav="support"><?php p($l->t('Support & us')); ?></a></li>
 			</ul>
 		</li>

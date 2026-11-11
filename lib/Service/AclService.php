@@ -65,6 +65,18 @@ class AclService
 			|| in_array($uid, $this->settings->getList('app_admins'), true);
 	}
 
+	/**
+	 * App-admin gate — uniform 404 for non-admins (the door never leaks
+	 * "exists but forbidden"). Used by surfaces only delegated app admins
+	 * may touch (config transfer, admin-only settings writes).
+	 */
+	public function assertAppAdmin(?string $uid = null): void
+	{
+		if (!$this->isAppAdmin($uid)) {
+			throw ApiException::notFound();
+		}
+	}
+
 	/** Dispatch role (Zentrale) — sidebar role badge + coarse capability check. */
 	public function isZentrale(?string $uid = null): bool
 	{

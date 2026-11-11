@@ -92,6 +92,13 @@ return [
 		['name' => 'api#applyLicenseKey', 'url' => '/api/license', 'verb' => 'POST'],
 		['name' => 'api#clearLicenseKey', 'url' => '/api/license', 'verb' => 'DELETE'],
 
+		// ── Config & data transfer (test → production) ──────────────────
+		['name' => 'transfer_api#status', 'url' => '/api/admin/transfer/status', 'verb' => 'GET'],
+		['name' => 'transfer_api#export', 'url' => '/api/admin/transfer/export', 'verb' => 'POST'],
+		['name' => 'transfer_api#preview', 'url' => '/api/admin/transfer/preview', 'verb' => 'POST'],
+		['name' => 'transfer_api#apply', 'url' => '/api/admin/transfer/apply', 'verb' => 'POST'],
+		['name' => 'transfer_api#reconcile', 'url' => '/api/admin/transfer/reconcile', 'verb' => 'POST'],
+
 		// Companion API (device token or NC session/app-password)
 		['name' => 'companionApi#bootstrap', 'url' => '/api/v1/bootstrap', 'verb' => 'GET'],
 		['name' => 'companionApi#toursForDate', 'url' => '/api/v1/tours/{date}', 'verb' => 'GET', 'requirements' => ['date' => '\d{4}-\d{2}-\d{2}']],

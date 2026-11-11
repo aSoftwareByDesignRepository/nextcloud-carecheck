@@ -11,16 +11,20 @@ use OCP\AppFramework\Db\Entity;
  * @method void setTeamId(int|null $teamId)
  * @method string|null getUid()
  * @method void setUid(string|null $uid)
+ * @method \DateTime|null getCreatedAt()
+ * @method void setCreatedAt(\DateTime|null $createdAt)
  */
 class TeamLead extends Entity
 {
 	protected $teamId;
 	protected $uid;
+	protected $createdAt;
 
 	public function __construct()
 	{
 		$this->addType('id', 'integer');
 		$this->addType('teamId', 'integer');
 		$this->addType('uid', 'string');
+		$this->addType('createdAt', 'datetime');
 	}
 }

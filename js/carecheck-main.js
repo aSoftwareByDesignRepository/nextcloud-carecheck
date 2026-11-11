@@ -367,7 +367,7 @@
 	// ---------------- routing ----------------
 	var currentClient = null;
 
-	var SETTINGS_SECTIONS = ['general', 'companion', 'access', 'privacy', 'support'];
+	var SETTINGS_SECTIONS = ['general', 'companion', 'access', 'privacy', 'transfer', 'support'];
 	var mountedSettings = {};
 	// null = unknown (first /api/settings round-trip pending). The access
 	// section stays unmounted until the server confirms admin — DS-2 door.
@@ -396,7 +396,7 @@
 		var id = parseInt(sub, 10);
 		if (view === 'settings') {
 			var sec = SETTINGS_SECTIONS.indexOf(sub) >= 0 ? sub : 'general';
-			if ((sec === 'access' || sec === 'privacy') && settingsAdmin !== true) {
+			if ((sec === 'access' || sec === 'privacy' || sec === 'transfer') && settingsAdmin !== true) {
 				if (settingsAdmin === false) { location.replace('#/settings/general'); return; }
 				sec = 'general';
 			}
@@ -1820,13 +1820,14 @@
 			// DS-2 access door — admin-only section (server enforces too).
 			var isAdmin = r.data.settings.is_app_admin === '1';
 			settingsAdmin = isAdmin;
-			document.querySelectorAll('[data-cck-subnav="access"], [data-cck-subnav="privacy"]').forEach(function (a) {
+			document.querySelectorAll('[data-cck-subnav="access"], [data-cck-subnav="privacy"], [data-cck-subnav="transfer"]').forEach(function (a) {
 				a.hidden = !isAdmin;
 			});
 			var curHash = location.hash.replace(/^#\/?/, '') || '';
-			if (!isAdmin && (curHash === 'settings/access' || curHash === 'settings/privacy')) {
+			var adminSec = curHash === 'settings/access' || curHash === 'settings/privacy' || curHash === 'settings/transfer';
+			if (!isAdmin && adminSec) {
 				location.replace('#/settings/general');
-			} else if (isAdmin && (curHash === 'settings/access' || curHash === 'settings/privacy')) {
+			} else if (isAdmin && adminSec) {
 				route(true); // admin confirmed — mount + show the door now
 				loadTeams();
 			}

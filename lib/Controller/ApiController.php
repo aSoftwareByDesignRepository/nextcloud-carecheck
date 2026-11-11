@@ -662,26 +662,23 @@ class ApiController extends Controller
 				}
 				$raw = is_bool($v) ? ($v ? '1' : '0') : (string)$v;
 				if (in_array($k, SettingsService::LIST_KEYS, true)) {
-					$items = is_array($v) ? $v : (json_decode($raw, true) ?? null);
-					if (!is_array($items)) {
-						$fields[$k] = 'invalid';
-						continue;
-					}
 					// Ghost-proof the lists: every uid/group must still exist.
 					// Pickers submit typed refs (uid:x / group:g) — normalize to
 					// the plain ids these lists store, else every UI save fails.
+					// Parse + canonical form come from the same normaliser the
+					// transfer import uses (NN-08 parity).
+					$itemsRaw = is_array($v) ? json_encode($v, JSON_THROW_ON_ERROR) : $raw;
+					try {
+						$norm = json_decode(
+							SettingsService::normalizeForWrite($k, $itemsRaw),
+							true, 8, JSON_THROW_ON_ERROR,
+						);
+					} catch (\Throwable) {
+						$fields[$k] = 'invalid';
+						continue;
+					}
 					$bad = false;
-					$norm = [];
-					foreach ($items as $item) {
-						if (!is_string($item)) {
-							$bad = true;
-							break;
-						}
-						$item = preg_replace('/^(uid|group):/', '', $item) ?? '';
-						if ($item === '' || str_contains($item, ':')) {
-							$bad = true;
-							break;
-						}
+					foreach ($norm as $item) {
 						$exists = $k === 'allowed_groups'
 							? $this->groups->groupExists($item)
 							: $this->users->userExists($item);
@@ -689,7 +686,6 @@ class ApiController extends Controller
 							$bad = true;
 							break;
 						}
-						$norm[] = $item;
 					}
 					if ($bad) {
 						$fields[$k] = 'invalid';
@@ -698,55 +694,12 @@ class ApiController extends Controller
 					}
 					continue;
 				}
-				if (str_starts_with($k, 'preset_')) {
-					// "HHMM-HHMM" minute ranges — validated so a typo can't
-					// silently break the dispatcher's Tageszeit presets.
-					if (preg_match('/^\d{1,4}-\d{1,4}$/', $raw) === 1) {
-						$validated[$k] = $raw;
-					} else {
-						$fields[$k] = 'invalid';
-					}
-					continue;
-				}
-				if ($k === 'provider_tz') {
-					if (in_array($raw, \DateTimeZone::listIdentifiers(), true)) {
-						$validated[$k] = $raw;
-					} else {
-						$fields[$k] = 'invalid';
-					}
-					continue;
-				}
-				if ($k === 'access_mode') {
-					if (in_array($raw, ['open', 'restricted'], true)) {
-						$validated[$k] = $raw;
-					} else {
-						$fields[$k] = 'invalid';
-					}
-					continue;
-				}
-				// Fail closed on type mismatch — silent coercion hides typos
-				// ("true" → 0 = OFF is a real bug class, see form-bool rule).
-				if ($k === 'gps_enabled') {
-					$low = strtolower($raw);
-					if (in_array($low, ['1', '0', 'true', 'false', 'on', 'off'], true)) {
-						$validated[$k] = in_array($low, ['1', 'true', 'on'], true) ? '1' : '0';
-					} else {
-						$fields[$k] = 'invalid';
-					}
-				} elseif (is_int(SettingsService::DEFAULTS[$k])) {
-					if (preg_match('/^\d+$/', $raw)) {
-						$validated[$k] = $raw;
-					} else {
-						$fields[$k] = 'invalid';
-					}
-				} elseif ($k === 'min_companion_version') {
-					if (preg_match('/^\d+\.\d+\.\d+$/', $raw)) {
-						$validated[$k] = $raw;
-					} else {
-						$fields[$k] = 'invalid';
-					}
-				} else {
-					$validated[$k] = $raw;
+				// One validator for form AND transfer file (NN-08): the stored
+				// value is byte-identical whichever path wrote it.
+				try {
+					$validated[$k] = SettingsService::normalizeForWrite($k, $raw);
+				} catch (\Throwable) {
+					$fields[$k] = 'invalid';
 				}
 			}
 			if ($fields !== []) {

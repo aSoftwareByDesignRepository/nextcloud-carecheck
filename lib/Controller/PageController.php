@@ -21,7 +21,9 @@ use OCP\Util;
 class PageController extends Controller
 {
 	public function __construct(IRequest $request, private AclService $acl, private ShareService $shares,
-		private \OCA\CareCheck\Service\InvoiceDraftPushService $invoiceDraftPush)
+		private \OCA\CareCheck\Service\InvoiceDraftPushService $invoiceDraftPush,
+		private \OCA\CareCheck\ConfigTransfer\TransferReceiptStore $transferReceipts,
+		private \OCP\IGroupManager $groupManager)
 	{
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -51,9 +53,17 @@ class PageController extends Controller
 		Util::addScript(Application::APP_ID, 'carecheck-main');
 		Util::addStyle(Application::APP_ID, 'common/tokens');
 		Util::addStyle(Application::APP_ID, 'app');
+		// Config & data transfer — the section body is rendered into the SPA
+		// settings shell for app admins (main.php gates the include); the
+		// synced js/transfer.js inits on DOMContentLoaded and no-ops without it.
+		Util::addStyle(Application::APP_ID, 'common/transfer');
+		Util::addScript(Application::APP_ID, 'transfer-bridge');
+		Util::addScript(Application::APP_ID, 'transfer');
 		$uid = $this->acl->currentUid();
 		return new TemplateResponse(Application::APP_ID, 'main', [
 			'isAppAdmin' => $this->acl->isAppAdmin($uid),
+			'isSystemAdmin' => $uid !== null && $this->groupManager->isAdmin($uid),
+			'transferLastReceipt' => $this->transferReceipts->lastReceipt(),
 			'isZentrale' => $this->acl->isZentrale($uid),
 			'isBuchhaltung' => $this->acl->isBuchhaltung($uid),
 			'invoicePushAvailable' => $this->invoiceDraftPush->available(),

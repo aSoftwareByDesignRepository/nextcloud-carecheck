@@ -39,6 +39,7 @@ $settingsNav = static function () use ($l): string {
 		'companion' => $l->t('Companion app'),
 		'access' => $l->t('Access'),
 		'privacy' => $l->t('Privacy & register'),
+		'transfer' => $l->t('Transfer'),
 		'support' => $l->t('Support & us'),
 	];
 	$out = '<nav class="cck-chipbar" aria-label="' . htmlspecialchars($l->t('Settings sections'), ENT_QUOTES, 'UTF-8') . '">';
@@ -517,11 +518,19 @@ $settingsNav = static function () use ($l): string {
 			</section>
 		</div>
 
-		<?php foreach (['general', 'companion', 'access', 'privacy', 'support'] as $sec): ?>
+		<?php foreach (['general', 'companion', 'access', 'privacy', 'transfer', 'support'] as $sec): ?>
 		<div class="cck-view" data-cck-view="settings-<?php p($sec); ?>" hidden>
 			<?php print_unescaped($viewHead('settings', $l->t('Settings'), $l->t('Provider-wide configuration — one section per page.'))); ?>
 			<?php print_unescaped($settingsNav()); ?>
-			<div data-cck-settings-section="<?php p($sec); ?>"></div>
+			<div data-cck-settings-section="<?php p($sec); ?>"><?php
+				// Transfer is server-rendered (not a lazy <template>): the
+				// synced js/transfer.js binds on DOMContentLoaded, before any
+				// hash route could clone a template. Admin-only like access —
+				// non-admins get no markup at all, the API collapses to 404.
+				if ($sec === 'transfer' && !empty($_['isAppAdmin'])) {
+					include __DIR__ . '/parts/settings/transfer.php';
+				}
+			?></div>
 		</div>
 		<?php endforeach; ?>
 

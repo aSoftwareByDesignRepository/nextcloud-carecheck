@@ -88,4 +88,102 @@ class SettingsService
 	{
 		$this->config->setValueString(Constants::APP_ID, $key, $value);
 	}
+
+	/**
+	 * Single source of truth for "what the settings API would persist".
+	 * Used by ApiController::saveSettings AND the config-transfer import
+	 * pipeline (NN-08 — a file must never bypass form validation; the
+	 * stored value must be byte-identical to a form write).
+	 *
+	 * Returns the canonical storable string; throws InvalidArgumentException
+	 * for values the settings form would reject, UNKNOWN_SETTING for keys
+	 * that are not a settings key at all.
+	 *
+	 * Static on purpose: validation rules carry no instance state, and the
+	 * real rules must execute even when SettingsService is doubled in tests
+	 * (a stubbed normaliser would silently weaken the form contract).
+	 *
+	 * List keys normalise to a de-duplicated plain-id JSON list (typed
+	 * 'uid:x'/'group:g' picker tokens are stripped, matching saveSettings);
+	 * existence of the ids themselves is the caller's job — the form checks
+	 * userExists/groupExists, the transfer engine resolves `refs`.
+	 */
+	public static function normalizeForWrite(string $key, string $value): string
+	{
+		if (in_array($key, self::LIST_KEYS, true)) {
+			return self::normalizeIdList($value);
+		}
+		if (!array_key_exists($key, self::DEFAULTS)) {
+			throw new \InvalidArgumentException('UNKNOWN_SETTING');
+		}
+		if (str_starts_with($key, 'preset_')) {
+			// "HHMM-HHMM" minute ranges — a typo must not silently break the
+			// dispatcher's Tageszeit presets.
+			if (preg_match('/^\d{1,4}-\d{1,4}$/', $value) === 1) {
+				return $value;
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		if ($key === 'provider_tz') {
+			if (in_array($value, \DateTimeZone::listIdentifiers(), true)) {
+				return $value;
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		if ($key === 'access_mode') {
+			if (in_array($value, ['open', 'restricted'], true)) {
+				return $value;
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		// Fail closed on type mismatch — silent coercion hides typos
+		// ("true" → 0 = OFF is a real bug class, see form-bool rule).
+		if ($key === 'gps_enabled') {
+			$low = strtolower($value);
+			if (in_array($low, ['1', '0', 'true', 'false', 'on', 'off'], true)) {
+				return in_array($low, ['1', 'true', 'on'], true) ? '1' : '0';
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		if (is_int(self::DEFAULTS[$key])) {
+			if (preg_match('/^\d+$/', $value) === 1) {
+				return $value;
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		if ($key === 'min_companion_version') {
+			if (preg_match('/^\d+\.\d+\.\d+$/', $value) === 1) {
+				return $value;
+			}
+			throw new \InvalidArgumentException('INVALID_VALUE');
+		}
+		// Remaining free-form defaults (tsa_url).
+		return $value;
+	}
+
+	/**
+	 * Canonical storable form for a list key: JSON array of non-empty plain
+	 * ids, picker 'uid:'/'group:' prefixes stripped, de-duplicated.
+	 *
+	 * @throws \JsonException|\InvalidArgumentException malformed payload
+	 */
+	private static function normalizeIdList(string $value): string
+	{
+		$list = json_decode($value, true, 8, JSON_THROW_ON_ERROR);
+		if (!is_array($list) || !array_is_list($list)) {
+			throw new \InvalidArgumentException('INVALID_ID_LIST');
+		}
+		$clean = [];
+		foreach ($list as $id) {
+			if (!is_string($id)) {
+				throw new \InvalidArgumentException('INVALID_ID_LIST');
+			}
+			$id = preg_replace('/^(uid|group):/', '', $id) ?? '';
+			if ($id === '' || str_contains($id, ':')) {
+				throw new \InvalidArgumentException('INVALID_ID_LIST');
+			}
+			$clean[] = $id;
+		}
+		return json_encode(array_values(array_unique($clean)), JSON_THROW_ON_ERROR);
+	}
 }
