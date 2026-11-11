@@ -18,6 +18,7 @@
 		{ "id": "settings-companion", "hash": "#/settings/companion", "states": ["current"] },
 		{ "id": "settings-access", "hash": "#/settings/access", "states": ["current"] },
 		{ "id": "settings-privacy", "hash": "#/settings/privacy", "states": ["current"] },
+		{ "id": "settings-transfer", "hash": "#/settings/transfer", "states": ["current"], "dark": true },
 		{ "id": "settings-support", "hash": "#/settings/support", "states": ["current"] },
 		{ "id": "getapp", "hash": "#/getapp", "states": ["current"] }
 	]
