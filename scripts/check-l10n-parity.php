@@ -6,13 +6,18 @@ declare(strict_types=1);
  * Verifies that all locale JSON files contain exactly the same set of msgid keys
  * (and the same key order as en.json).
  *
- * Locales match Check suite family: en, de, da, es, fr, it, nb, nl, pl, sv, pt_BR.
+ * Locales are globbed from l10n/*.json so newly added catalogs are never
+ * silently skipped (zh_TW was missed by a hardcoded list).
  *
  * Usage: php scripts/check-l10n-parity.php
  */
 
 $base = __DIR__ . '/../l10n';
-$localeFiles = ['en', 'de', 'da', 'es', 'fr', 'it', 'nb', 'nl', 'pl', 'sv', 'pt_BR', 'pt', 'tr', 'zh_CN'];
+$localeFiles = array_map(
+	static fn (string $p): string => basename($p, '.json'),
+	glob($base . '/*.json') ?: []
+);
+usort($localeFiles, static fn (string $a, string $b): int => $a === 'en' ? -1 : ($b === 'en' ? 1 : strcmp($a, $b)));
 $catalogs = [];
 
 foreach ($localeFiles as $lang) {

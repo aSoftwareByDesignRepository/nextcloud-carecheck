@@ -9,7 +9,11 @@ declare(strict_types=1);
  */
 
 $base = __DIR__ . '/../l10n';
-$localeFiles = ['en', 'de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR', 'pt', 'tr', 'zh_CN'];
+$localeFiles = array_map(
+	static fn (string $p): string => basename($p, '.json'),
+	glob($base . '/*.json') ?: []
+);
+usort($localeFiles, static fn (string $a, string $b): int => $a === 'en' ? -1 : ($b === 'en' ? 1 : strcmp($a, $b)));
 
 /**
  * @return list<string>
