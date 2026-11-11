@@ -201,12 +201,55 @@ test.describe('TRANSFER_SURFACE', () => {
 		await expect(page.locator('#cck-transfer-last')).toBeVisible({ timeout: 30_000 });
 		const last = await page.locator('#cck-transfer-last').innerText();
 		expect(last.trim().length).toBeGreaterThan(10);
+		// mode renders as a localized label — never the raw stored enum
+		// (raw_enum_label_unlocalized: 'merge'/'replace' verbatim on receipts)
+		expect(last).toContain('Merge');
+		expect(last).not.toMatch(/·\s*(merge|replace)\b/);
+	});
+
+	test('import form stays inside the sheet at 320px (no mid-word clip)', async ({ page }) => {
+		// clipped_text_horizontal_overflow learned-assert: a fieldset flex item
+		// does not shrink below content size — the mode radios + replace hint
+		// used to clip mid-word at the sheet's right edge. Assert geometry, not
+		// pixels: nothing inside the card may paint past its inner edges and the
+		// page may not gain horizontal scroll.
+		await page.setViewportSize({ width: 320, height: 800 });
+		await gotoTransfer(page);
+		const clips = await page.locator('#cck-transfer-import-card').evaluate((card) => {
+			const cardR = card.getBoundingClientRect();
+			const bad = [];
+			for (const el of card.querySelectorAll('fieldset, legend, label, span, p, input, div')) {
+				const r = el.getBoundingClientRect();
+				if (r.width === 0 || r.height === 0) { continue; }
+				if (r.right > cardR.right + 1 || r.left < cardR.left - 1) {
+					bad.push(`${el.tagName}.${String(el.className)} rect ${r.left.toFixed(0)}-${r.right.toFixed(0)} outside card ${cardR.left.toFixed(0)}-${cardR.right.toFixed(0)}`);
+				}
+				if (el.children.length === 0 && el.scrollWidth > el.clientWidth + 1) {
+					bad.push(`${el.tagName}.${String(el.className)} scrollWidth ${el.scrollWidth} > clientWidth ${el.clientWidth}`);
+				}
+			}
+			return bad;
+		});
+		expect(clips, 'content overflowing the transfer card').toEqual([]);
+		const docOverflow = await page.evaluate(
+			() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+		expect(docOverflow, 'page-level horizontal overflow').toBeLessThanOrEqual(1);
 	});
 });
 
 test.describe('TRANSFER_L10N_ZH_HANT', () => {
 	test('zh_TW renders translated transfer UI (no EN fallback, no raw keys)', async ({ page }) => {
+		// Seed a deterministic receipt so the Last-transfer line renders even on
+		// a fresh fixture — this leg must prove the mode label is localized.
+		let prevReceipts = '';
+		try { prevReceipts = occ('config:app:get carecheck transfer_receipts'); } catch { /* unset */ }
+		const seed = JSON.stringify([{
+			id: 'e2e-zh-receipt', at: '2026-11-11T22:00:00Z', actor: 'cck_smoke',
+			mode: 'merge', result: 'applied',
+			counts: { created: 1, updated: 0, skipped: 0, deleted: 0 }, snapshotId: null,
+		}]);
 		try {
+			occ(`config:app:set carecheck transfer_receipts --value='${seed}'`);
 			occ('user:setting cck_smoke core lang zh_TW');
 			await page.context().setExtraHTTPHeaders({ 'Accept-Language': 'zh-TW,zh;q=0.9' });
 			await login(page, CREDS);
@@ -218,10 +261,18 @@ test.describe('TRANSFER_L10N_ZH_HANT', () => {
 			expect(exportCard).not.toContain('Download encrypted transfer file');
 			const importCard = await page.locator('#cck-transfer-import-card').innerText();
 			expect(importCard).not.toContain('Import configuration');
+			// Last-transfer receipt renders the localized mode label — never the
+			// raw stored enum (raw_enum_label_unlocalized)
+			const last = await page.locator('#cck-transfer-last').innerText();
+			expect(last).toContain('合併');
+			expect(last).not.toMatch(/·\s*(merge|replace)\b/);
 			mkdirSync(CRAFT, { recursive: true });
 			await page.screenshot({ path: `${CRAFT}/cck-settings-transfer-zhtw-desktop.png` });
 		} finally {
 			occ('user:setting cck_smoke core lang en');
+			if (prevReceipts) {
+				occ(`config:app:set carecheck transfer_receipts --value='${prevReceipts}'`);
+			}
 		}
 	});
 });
