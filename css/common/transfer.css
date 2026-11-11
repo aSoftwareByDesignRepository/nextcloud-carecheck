@@ -66,6 +66,14 @@
 	box-sizing: border-box;
 	background: var(--color-main-background, #fff);
 	color: var(--color-main-text, #222);
+	/* Column flex so the footer is a layout child pinned inside the dialog's
+	   own client box — never scrollable shell overflow (apply action must
+	   always paint, required_field_or_step_undiscoverable). Body absorbs the
+	   overflow; overflow:auto on the shell stays only as last-resort fallback
+	   (e.g. single-child dialogs without __body). */
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
 }
 /* NC core ships an HTML5 shim (server.css: article, aside, dialog, …
    { display:block }) — an author rule that beats the UA closed-dialog
@@ -75,8 +83,18 @@ dialog.cck-dialog:not([open]) {
 	display: none !important;
 }
 .cck-dialog::backdrop { background: color-mix(in srgb, var(--color-main-text, #222) 45%, transparent); }
-.cck-dialog__body { padding: var(--cck-space-5, 20px); max-height: 65vh; overflow: auto; }
+/* min-height:0 lets the body shrink below its content height so it becomes
+   the scroller; without it flex min-height:auto keeps the body content-sized
+   and the footer overflows the shell again. 65vh stays the body's own cap. */
+.cck-dialog__body {
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: var(--cck-space-5, 20px);
+	max-height: 65vh;
+	overflow: auto;
+}
 .cck-dialog__footer {
+	flex: 0 0 auto;
 	padding: var(--cck-space-4, 16px) var(--cck-space-5, 20px);
 	border-top: 1px solid var(--color-border, #c8c8c8);
 	display: flex;
