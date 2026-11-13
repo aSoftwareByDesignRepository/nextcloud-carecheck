@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.3 — 2026-11-13
+
+### Added
+
+- Config & data transfer — encrypted test→prod pack with settings page
+- Widget-snapshot endpoint wired end-to-end
+- Turkish locale; zh_CN and zh-Hant/zh_TW catalogs — complete translations
+  across the full language set
+- App Store screenshot links in info.xml and refreshed captures
+
+### Fixed
+
+- Deactivated accounts are never offered or assignable
+- Suite: bare uid for privacycheck proposeActivity
+- Widgets: emit redactionLocked on the openTours feed (D-02 consumer path)
+- Intake: archived-client tour planning, device revoke UI, horizon confirm
+- Dialogs: full-bleed sheet counter-rule and margin:auto on pack dialogs —
+  the NC core reset no longer uncenters top-layer dialogs
+- Transfer pack re-sync: per-request schema cache, file-input specificity,
+  sheet clip, positional t() interpolation, localized receipt mode
+- Select chevrons restored on .cck-team-sel (background-color, not shorthand)
+
 ## 0.4.2 — 2026-11-02
 
 ### Added
