@@ -23,7 +23,8 @@ class PageController extends Controller
 	public function __construct(IRequest $request, private AclService $acl, private ShareService $shares,
 		private \OCA\CareCheck\Service\InvoiceDraftPushService $invoiceDraftPush,
 		private \OCA\CareCheck\ConfigTransfer\TransferReceiptStore $transferReceipts,
-		private \OCP\IGroupManager $groupManager)
+		private \OCP\IGroupManager $groupManager,
+		private \OCA\CareCheck\Service\LicenseService $license)
 	{
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -51,6 +52,8 @@ class PageController extends Controller
 		Util::addStyle(Application::APP_ID, 'common/view-components');
 		Util::addScript(Application::APP_ID, 'qr');
 		Util::addScript(Application::APP_ID, 'carecheck-main');
+		Util::addScript(Application::APP_ID, 'common/license-page');
+		Util::addStyle(Application::APP_ID, 'common/license-page');
 		Util::addStyle(Application::APP_ID, 'common/tokens');
 		Util::addStyle(Application::APP_ID, 'app');
 		// Config & data transfer — the section body is rendered into the SPA
@@ -67,6 +70,7 @@ class PageController extends Controller
 			'isZentrale' => $this->acl->isZentrale($uid),
 			'isBuchhaltung' => $this->acl->isBuchhaltung($uid),
 			'invoicePushAvailable' => $this->invoiceDraftPush->available(),
+			'licenseSummary' => $this->license->getLicenseSummary(),
 		]);
 	}
 

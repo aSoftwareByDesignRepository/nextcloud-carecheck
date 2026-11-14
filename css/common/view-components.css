@@ -243,7 +243,7 @@ button.cck-stat-tile:hover, button.cck-stat-tile:focus-visible {
 	margin: var(--cck-space-4, 16px) 0 0;
 }
 .cck-pagination__info { font-variant-numeric: var(--cck-tab-num, tabular-nums); color: var(--cck-muted, var(--color-text-maxcontrast)); }
-@media (max-width: 479.98px) {
+@media (max-width: 480px) {
 	.cck-pagination { flex-wrap: wrap; }
 	.cck-pagination > * { flex: 1 1 auto; }
 	.cck-pagination__info { text-align: center; order: -1; flex-basis: 100%; }

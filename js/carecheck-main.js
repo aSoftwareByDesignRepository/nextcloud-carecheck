@@ -1721,50 +1721,6 @@
 			return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>';
 		}).join('') || '<dd class="cck-empty">' + esc(tr('No data.')) + '</dd>';
 	}
-	function loadLicense() {
-		var panel = document.querySelector('[data-cck-license-panel]');
-		var dl = document.querySelector('[data-cck-license-state]');
-		api('/api/license').then(function (r) {
-			if (!r.success) { panel.hidden = true; return; }
-			panel.hidden = false;
-			var lic = (r.data && r.data.license) || null;
-			dlPairs(dl, lic === null ? [[tr('State'), tr('No license — companion app is locked')]] : [
-				[tr('State'), lic.active ? tr('Active') : tr('Inactive')],
-				[tr('Mobile seats'), String(lic.mobileSeats)],
-				[tr('Seats in use'), String(r.data.seatsUsed)],
-				[tr('Valid until'), lic.validUntil || '—'],
-				[tr('Customer'), lic.customerId || '—'],
-				[tr('Key applied'), lic.keyAppliedAt || '—'],
-			]);
-		});
-	}
-	// Settings section bodies live in <template>s — delegated handlers bind clones.
-	document.addEventListener('submit', function (e) {
-		var f = e.target;
-		if (f && f.hasAttribute && f.hasAttribute('data-cck-license-form')) {
-			e.preventDefault();
-			withBusy(submitBtn(f), function () {
-				return api('/api/license', { method: 'POST', body: JSON.stringify({ license_key: f.elements.license_key.value }) })
-					.then(function (r) {
-						if (r.success) { clearFormErrors(f); f.reset(); notify(tr('License applied.')); loadLicense(); }
-						else { reportForm(f, r); }
-					});
-			});
-		}
-	});
-	document.addEventListener('click', function (e) {
-		var b = e.target && e.target.closest ? e.target.closest('[data-cck-license-clear]') : null;
-		if (b) {
-			confirmAsk(tr('Remove the license? The companion app locks for everyone.'), tr('Remove license'))
-				.then(function (yes) {
-					if (!yes) { return; }
-					api('/api/license', { method: 'DELETE' }).then(function (r) {
-						notify(r.success ? tr('License removed.') : (r.message || tr('Invalid value.')), !r.success);
-						loadLicense();
-					});
-				});
-		}
-	});
 	// Machine tokens must never reach the UI — map before render.
 	var LICENSE_STATE = { none: 'No license — companion app is locked', active: 'Active', inactive: 'Inactive' };
 	function loadDiagnostics() {
@@ -1806,7 +1762,7 @@
 	}
 	function loadSettings() {
 		PRESETS = null; // keep the tour editor presets in sync after edits
-		if (mountedSettings.companion) { loadLicense(); loadDiagnostics(); }
+		if (mountedSettings.companion) { loadDiagnostics(); }
 		var p = api('/api/settings').then(function (r) {
 			if (!r.success) { return; }
 			document.querySelectorAll('[data-cck-settings-form]').forEach(function (f) {

@@ -1,0 +1,732 @@
+/*
+ * Check family — canonical license page (canonical source in _shared/license-page).
+ * SYNCED FILE — never edit the in-app copy; edit the source and re-run
+ * sync_license_page.py. cck is substituted with the app prefix at sync time.
+ *
+ * Self-contained: every class lives under .cck-license-page so the block looks
+ * identical whether it is a standalone admin page or a settings section.
+ * Token vars (--cck-*) fall back to the canonical values so the page renders
+ * correctly even in apps without a full token block.
+ *
+ * Design: ArbeitszeitCheck admin-license page (the family reference).
+ *
+ * @license AGPL-3.0-or-later
+ */
+
+.cck-license-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cck-space-5, 1.25rem);
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+}
+
+/* ── Screen-reader-only + live regions ───────────────────────── */
+.cck-license-sr-only,
+.cck-license-page .cck-license-sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+/* ── Visible feedback banner ─────────────────────────────────── */
+.cck-license-feedback {
+	margin: 0;
+	padding: var(--cck-space-3, 0.75rem) var(--cck-space-4, 1rem);
+	border-radius: var(--cck-radius-sm, 8px);
+	border: 1px solid var(--color-border);
+	font-size: var(--cck-fs-sm, 0.875rem);
+	line-height: var(--cck-line-base, 1.5);
+}
+
+.cck-license-feedback--success {
+	border-color: var(--color-success-text, var(--color-success));
+	background: color-mix(in srgb, var(--color-success-text, var(--color-success)) 12%, var(--color-main-background));
+	color: var(--color-main-text);
+}
+
+.cck-license-feedback--error {
+	border-color: var(--color-error-text, var(--color-error));
+	background: color-mix(in srgb, var(--color-error-text, var(--color-error)) 12%, var(--color-main-background));
+	color: var(--color-main-text);
+}
+
+/* ── Callouts ────────────────────────────────────────────────── */
+.cck-license-callout {
+	display: flex;
+	gap: var(--cck-space-3, 0.75rem);
+	margin: 0;
+	padding: var(--cck-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-inline-start: 4px solid var(--color-primary-element);
+	border-radius: var(--cck-radius-md, 10px);
+	background: var(--color-main-background);
+}
+
+.cck-license-callout--info {
+	border-inline-start-color: var(--color-primary-element);
+	background: color-mix(in srgb, var(--color-primary-element) 7%, var(--color-main-background));
+}
+
+.cck-license-callout--warning {
+	border-inline-start-color: var(--color-warning-text, var(--color-warning));
+	background: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 12%, var(--color-main-background));
+}
+
+.cck-license-callout--danger {
+	border-inline-start-color: var(--color-error-text, var(--color-error));
+	background: color-mix(in srgb, var(--color-error-text, var(--color-error)) 10%, var(--color-main-background));
+}
+
+.cck-license-callout__title {
+	margin: 0 0 var(--cck-space-1, 0.25rem);
+	font-size: var(--cck-fs-md, 1rem);
+	font-weight: 600;
+}
+
+.cck-license-callout__text {
+	margin: 0;
+	line-height: var(--cck-line-base, 1.5);
+}
+
+.cck-license-callout__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cck-space-3, 0.75rem);
+	margin-top: var(--cck-space-3, 0.75rem);
+}
+
+/* ── Stat tiles (design-system §3.5) ─────────────────────────── */
+.cck-license-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+	gap: var(--cck-space-3, 0.75rem);
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	min-width: 0;
+	list-style: none;
+}
+
+.cck-license-stat-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: flex-start;
+	gap: 0.25rem;
+	min-height: 6.5rem;
+	min-width: 0;
+	margin: 0;
+	padding: var(--cck-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-inline-start: 3px solid var(--color-border-maxcontrast, var(--color-border));
+	border-radius: var(--cck-radius-md, 10px);
+	background: var(--color-main-background);
+	text-align: left;
+	color: inherit;
+}
+
+.cck-license-stat-tile--primary { border-inline-start-color: var(--color-primary-element); }
+.cck-license-stat-tile--success { border-inline-start-color: var(--color-success-text, var(--color-success)); }
+.cck-license-stat-tile--warning { border-inline-start-color: var(--color-warning-text, var(--color-warning)); }
+.cck-license-stat-tile--neutral { border-inline-start-color: var(--color-border); }
+
+.cck-license-stat-tile__label {
+	margin: 0;
+	font-size: var(--cck-fs-xs, 0.8125rem);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+.cck-license-stat-tile__value {
+	margin: 0;
+	font-size: clamp(1.25rem, 2vw, 1.6rem);
+	font-weight: 700;
+	line-height: var(--cck-line-tight, 1.2);
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+.cck-license-stat-tile__sep {
+	margin-inline: 0.15em;
+	font-weight: 500;
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+.cck-license-stat-tile__meta {
+	margin: 0;
+	font-size: var(--cck-fs-xs, 0.8125rem);
+	line-height: 1.4;
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+.cck-license-stat__meta-label { font-weight: 600; }
+
+/* Usage meter */
+.cck-license-meter {
+	height: 0.375rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--color-main-text) 8%, transparent);
+	overflow: hidden;
+	margin-top: auto;
+}
+
+.cck-license-meter__fill {
+	height: 100%;
+	border-radius: inherit;
+	background: var(--color-primary-element);
+	transition: width 0.25s ease;
+}
+
+.cck-license-meter__fill--full {
+	background: var(--color-warning-text, var(--color-warning));
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cck-license-meter__fill { transition: none; }
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.cck-license-badge {
+	display: inline-block;
+	padding: 0.25rem 0.65rem;
+	border-radius: 999px;
+	font-size: var(--cck-fs-xs, 0.8125rem);
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.cck-license-badge--success {
+	background: color-mix(in srgb, var(--color-success-text, var(--color-success)) 18%, var(--color-main-background));
+	color: var(--color-success-text, var(--color-success));
+}
+
+.cck-license-badge--warning {
+	background: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 22%, var(--color-main-background));
+	color: var(--color-warning-text, var(--color-warning));
+}
+
+/* ── Section cards ───────────────────────────────────────────── */
+.cck-license-card {
+	margin: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--cck-radius-md, 12px);
+	background: var(--color-main-background);
+	min-width: 0;
+}
+
+.cck-license-card__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--cck-space-3, 0.75rem);
+	padding: var(--cck-space-4, 1rem) var(--cck-space-4, 1rem) 0;
+}
+
+.cck-license-card__title {
+	margin: 0;
+	font-size: var(--cck-fs-lg, 1.125rem);
+	font-weight: 700;
+}
+
+.cck-license-card__lead {
+	margin: var(--cck-space-1, 0.25rem) 0 0;
+	font-size: var(--cck-fs-sm, 0.875rem);
+	line-height: var(--cck-line-base, 1.5);
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+.cck-license-card__header-actions {
+	flex: 0 0 auto;
+}
+
+.cck-license-card__body {
+	padding: var(--cck-space-4, 1rem);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.cck-license-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
+	min-height: var(--cck-touch, 44px);
+	min-width: 44px;
+	padding: 0.5rem 1rem;
+	border: 2px solid transparent;
+	border-radius: var(--cck-radius-sm, 8px);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.cck-license-btn--primary {
+	background: var(--color-primary-element);
+	color: var(--color-primary-element-text, var(--color-primary-text));
+	border-color: var(--color-primary-element);
+}
+
+.cck-license-btn--secondary {
+	background: var(--color-main-background);
+	color: var(--color-main-text);
+	border-color: var(--color-border-maxcontrast, var(--color-border));
+}
+
+.cck-license-btn--danger {
+	background: var(--color-element-error, var(--color-error));
+	color: var(--color-primary-element-text, var(--color-primary-text));
+	border-color: var(--color-element-error, var(--color-error));
+}
+
+.cck-license-btn--sm {
+	min-height: var(--cck-touch, 44px);
+	padding: 0.375rem 0.875rem;
+	font-size: var(--cck-fs-sm, 0.875rem);
+}
+
+.cck-license-btn:hover { filter: brightness(0.95); }
+
+.cck-license-btn:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+}
+
+.cck-license-btn--danger:hover,
+.cck-license-btn--danger:focus-visible {
+	filter: brightness(0.92);
+	outline: 3px solid color-mix(in srgb, var(--color-element-error, var(--color-error)) 55%, transparent);
+	outline-offset: 2px;
+}
+
+.cck-license-btn:disabled,
+.cck-license-btn[aria-disabled='true'] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.cck-license-btn--icon {
+	padding: 0.5rem;
+}
+
+.cck-license-btn--icon svg {
+	width: 1.125rem;
+	height: 1.125rem;
+	display: block;
+}
+
+/* ── Form elements ───────────────────────────────────────────── */
+.cck-license-field__label {
+	display: block;
+	margin: 0 0 var(--cck-space-2, 0.5rem);
+	font-weight: 600;
+	font-size: var(--cck-fs-sm, 0.875rem);
+}
+
+.cck-license-field__hint {
+	margin: var(--cck-space-2, 0.5rem) 0 0;
+	font-size: var(--cck-fs-sm, 0.875rem);
+	line-height: var(--cck-line-base, 1.5);
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+.cck-license-input,
+.cck-license-page .cck-license-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: var(--cck-space-3, 0.75rem);
+	border: 2px solid var(--color-border-maxcontrast, var(--color-border));
+	border-radius: var(--cck-radius-sm, 8px);
+	background: var(--color-main-background);
+	color: var(--color-main-text);
+	font: inherit;
+}
+
+.cck-license-input:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+	border-color: var(--color-primary-element);
+}
+
+.cck-license-input:disabled,
+.cck-license-input[aria-disabled='true'] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.cck-license-key-input {
+	min-height: 6rem;
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--cck-fs-sm, 0.875rem);
+	line-height: 1.45;
+	resize: vertical;
+}
+
+.cck-license-instance-box {
+	margin-top: var(--cck-space-4, 1rem);
+	padding: var(--cck-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-radius: var(--cck-radius-sm, 8px);
+	background: color-mix(in srgb, var(--color-primary-element) 6%, var(--color-main-background));
+}
+
+.cck-license-instance-box .cck-license-field__label { margin-bottom: 0; }
+
+.cck-license-instance-id {
+	display: block;
+	margin-top: var(--cck-space-2, 0.5rem);
+	padding: var(--cck-space-2, 0.5rem) var(--cck-space-3, 0.75rem);
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--cck-fs-sm, 0.875rem);
+	word-break: break-all;
+	background: var(--color-main-background);
+	border-radius: var(--cck-radius-sm, 8px);
+	border: 1px solid var(--color-border);
+}
+
+.cck-license-form__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cck-space-3, 0.75rem);
+	margin-top: var(--cck-space-4, 1rem);
+}
+
+/* ── Current license details ─────────────────────────────────── */
+.cck-license-status {
+	margin-top: var(--cck-space-5, 1.25rem);
+	padding-top: var(--cck-space-5, 1.25rem);
+	border-top: 1px solid var(--color-border);
+}
+
+/* Neutralise Nextcloud core server.css definition-list styling. */
+.cck-license-status__grid dt,
+.cck-license-status__grid dd {
+	display: block;
+	width: auto;
+	padding: 0;
+	text-align: start;
+	white-space: normal;
+}
+
+.cck-license-status__title {
+	font-size: var(--cck-fs-md, 1rem);
+	font-weight: 600;
+	margin: 0 0 var(--cck-space-3, 0.75rem);
+}
+
+.cck-license-status__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: var(--cck-space-4, 1rem);
+	margin: 0;
+}
+
+.cck-license-status__item dt {
+	font-size: var(--cck-fs-xs, 0.8125rem);
+	font-weight: 600;
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+	margin: 0 0 var(--cck-space-1, 0.25rem);
+}
+
+.cck-license-status__item dd {
+	margin: 0;
+	font-size: var(--cck-fs-md, 1rem);
+	word-break: break-word;
+}
+
+.cck-license-status__purchase {
+	margin: var(--cck-space-4, 1rem) 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cck-space-3, 0.75rem);
+}
+
+.cck-license-expiry-callout { margin-top: var(--cck-space-4, 1rem); }
+.cck-license-no-key-callout { margin-bottom: 0; }
+
+/* ── Seat picker combobox ────────────────────────────────────── */
+.cck-license-seat-picker { margin-bottom: var(--cck-space-5, 1.25rem); }
+
+.cck-license-search-wrap {
+	position: relative;
+	max-width: 32rem;
+}
+
+.cck-license-search-input { width: 100%; }
+
+.cck-license-seat-count {
+	margin: var(--cck-space-2, 0.5rem) 0 0;
+	font-size: var(--cck-fs-sm, 0.875rem);
+	font-weight: 600;
+}
+
+.cck-license-seats-full-hint {
+	color: var(--color-warning-text, var(--color-warning));
+	font-weight: 500;
+}
+
+.cck-license-assign-btn { margin-top: var(--cck-space-3, 0.75rem); }
+
+.cck-license-batch-result { margin-top: var(--cck-space-3, 0.75rem); }
+
+.cck-seat-search-results {
+	list-style: none;
+	position: absolute;
+	z-index: 20;
+	left: 0;
+	right: 0;
+	margin: var(--cck-space-1, 0.25rem) 0 0;
+	padding: 0;
+	border: 2px solid var(--color-border);
+	border-radius: var(--cck-radius-sm, 8px);
+	background: var(--color-main-background);
+	max-height: 14rem;
+	overflow-y: auto;
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+}
+
+.cck-seat-search-results li { margin: 0; }
+
+.cck-seat-search-results li[role='option'] {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: var(--cck-touch, 44px);
+	padding: var(--cck-space-3, 0.75rem) var(--cck-space-4, 1rem);
+	color: var(--color-main-text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.cck-seat-search-results li[role='option']:hover {
+	background: var(--color-background-hover);
+}
+
+.cck-seat-search-results li[role='option'][aria-selected='true'],
+.cck-seat-search-results li[role='option'].is-active {
+	background: color-mix(in srgb, var(--color-primary-element) 14%, transparent);
+	box-shadow: inset 3px 0 0 var(--color-primary-element);
+}
+
+.cck-seat-search-results__label {
+	display: flex;
+	align-items: center;
+	gap: var(--cck-space-3, 0.75rem);
+	width: 100%;
+	cursor: pointer;
+}
+
+.cck-seat-search-results__check {
+	width: 1.1rem;
+	height: 1.1rem;
+	margin: 0;
+	flex: 0 0 auto;
+}
+
+.cck-seat-search-results__empty {
+	padding: var(--cck-space-3, 0.75rem) var(--cck-space-4, 1rem);
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+	font-size: var(--cck-fs-sm, 0.875rem);
+}
+
+/* ── Seats / devices tables ──────────────────────────────────── */
+.cck-license-seats-table-wrap { margin-top: var(--cck-space-3, 0.75rem); }
+
+/* Self-contained table styling: NC core server.css sets
+   table { white-space: nowrap; border-collapse: separate }. */
+.cck-license-seats-table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	white-space: normal;
+}
+
+.cck-license-seats-table th,
+.cck-license-seats-table td {
+	padding: var(--cck-space-3, 0.75rem) var(--cck-space-4, 1rem);
+	text-align: start;
+	vertical-align: middle;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.cck-license-seats-table thead th {
+	font-weight: 600;
+	font-size: var(--cck-fs-sm, 0.875rem);
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+	background: var(--color-background-dark, var(--color-background-hover));
+}
+
+.cck-license-seats-table tbody tr:last-child td { border-bottom: none; }
+.cck-license-seats-table tbody tr:hover { background: var(--color-background-hover); }
+
+.cck-license-seats-table td.actions-cell {
+	text-align: end;
+	white-space: nowrap;
+}
+
+.cck-license-table-actions {
+	display: inline-flex;
+	gap: var(--cck-space-2, 0.5rem);
+}
+
+.cck-license-user-id {
+	font-size: var(--cck-fs-xs, 0.8125rem);
+	padding: 0.1rem 0.35rem;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--color-main-text) 6%, transparent);
+}
+
+/* ── Empty states ────────────────────────────────────────────── */
+.cck-license-empty-state {
+	padding: var(--cck-space-5, 1.25rem) var(--cck-space-4, 1rem);
+	text-align: center;
+}
+
+.cck-license-empty-state__title {
+	margin: 0 0 var(--cck-space-1, 0.25rem);
+	font-weight: 600;
+}
+
+.cck-license-empty-state__text {
+	margin: 0;
+	font-size: var(--cck-fs-sm, 0.875rem);
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+}
+
+/* ── Devices card ────────────────────────────────────────────── */
+.cck-license-terminal-summary {
+	margin: 0 0 var(--cck-space-4, 1rem);
+	font-size: var(--cck-fs-md, 1rem);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.cck-license-terminal-form { margin-bottom: var(--cck-space-4, 1rem); }
+
+.cck-license-terminal-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+	gap: var(--cck-space-4, 1rem);
+}
+
+.cck-license-terminal-field { min-width: 0; }
+
+.cck-license-token-value {
+	display: block;
+	margin: 0 0 var(--cck-space-4, 1rem);
+	padding: var(--cck-space-3, 0.75rem);
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--cck-fs-sm, 0.875rem);
+	word-break: break-all;
+	white-space: pre-wrap;
+	background: color-mix(in srgb, var(--color-main-text) 5%, var(--color-main-background));
+	border: 1px solid var(--color-border);
+	border-radius: var(--cck-radius-sm, 8px);
+	max-height: 10rem;
+	overflow-y: auto;
+}
+
+/* ── Confirmation / token modals ─────────────────────────────── */
+.cck-license-modal::backdrop {
+	background: var(--cck-scrim, color-mix(in srgb, var(--color-main-text) 45%, transparent));
+}
+
+.cck-license-modal {
+	margin: auto;
+	padding: var(--cck-space-5, 1.25rem);
+	max-width: min(28rem, calc(100vw - 2rem));
+	width: 100%;
+	border: 2px solid var(--color-primary-element);
+	border-radius: var(--cck-radius-lg, 12px);
+	background: var(--color-main-background);
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+	box-sizing: border-box;
+}
+
+.cck-license-modal h3 {
+	margin: 0 0 var(--cck-space-2, 0.5rem);
+	font-size: var(--cck-fs-lg, 1.125rem);
+}
+
+.cck-license-modal__hint {
+	color: var(--cck-muted, var(--color-text-maxcontrast));
+	margin: 0 0 var(--cck-space-4, 1rem);
+	line-height: var(--cck-line-base, 1.5);
+}
+
+.cck-license-modal__actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--cck-space-3, 0.75rem);
+}
+
+body.cck-license-modal-open { overflow: hidden; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+	.cck-license-stat-grid { grid-template-columns: 1fr; }
+	.cck-license-status__grid { grid-template-columns: 1fr; }
+
+	.cck-license-form__actions .cck-license-btn,
+	.cck-license-modal__actions .cck-license-btn {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
+}
+
+/* Mobile table → labeled rows (design-system §3.7) */
+@media (max-width: 768.98px) {
+	.cck-license-seats-table thead { display: none; }
+
+	.cck-license-seats-table,
+	.cck-license-seats-table tbody,
+	.cck-license-seats-table tr,
+	.cck-license-seats-table td { display: block; width: 100%; }
+
+	.cck-license-seats-table tr {
+		border: 1px solid var(--color-border);
+		border-radius: var(--cck-radius-sm, 8px);
+		margin-bottom: var(--cck-space-3, 0.75rem);
+		padding: var(--cck-space-2, 0.5rem) 0;
+	}
+
+	.cck-license-seats-table td {
+		border-bottom: none;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--cck-space-3, 0.75rem);
+	}
+
+	.cck-license-seats-table td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		font-size: var(--cck-fs-xs, 0.8125rem);
+		color: var(--cck-muted, var(--color-text-maxcontrast));
+	}
+
+	.cck-license-seats-table td.actions-cell { text-align: start; }
+}
+
+@media (forced-colors: active) {
+	.cck-license-stat-tile,
+	.cck-license-modal,
+	.cck-license-card { border-color: CanvasText; }
+
+	.cck-license-meter__fill { background: Highlight; }
+}

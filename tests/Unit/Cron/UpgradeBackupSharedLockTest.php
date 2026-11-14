@@ -97,7 +97,6 @@ final class UpgradeBackupSharedLockTest extends TestCase
 	private function invokeRun(object $job, $argument = null): void
 	{
 		$m = new \ReflectionMethod($job, 'run');
-		$m->setAccessible(true);
 		$m->invoke($job, $argument);
 	}
 

@@ -37,6 +37,7 @@ $settingsNav = static function () use ($l): string {
 	$items = [
 		'general' => $l->t('General'),
 		'companion' => $l->t('Companion app'),
+		'license' => $l->t('License'),
 		'access' => $l->t('Access'),
 		'privacy' => $l->t('Privacy & register'),
 		'transfer' => $l->t('Transfer'),
@@ -518,7 +519,7 @@ $settingsNav = static function () use ($l): string {
 			</section>
 		</div>
 
-		<?php foreach (['general', 'companion', 'access', 'privacy', 'transfer', 'support'] as $sec): ?>
+		<?php foreach (['general', 'companion', 'license', 'access', 'privacy', 'transfer', 'support'] as $sec): ?>
 		<div class="cck-view" data-cck-view="settings-<?php p($sec); ?>" hidden>
 			<?php print_unescaped($viewHead('settings', $l->t('Settings'), $l->t('Provider-wide configuration — one section per page.'))); ?>
 			<?php print_unescaped($settingsNav()); ?>
@@ -529,6 +530,9 @@ $settingsNav = static function () use ($l): string {
 				// non-admins get no markup at all, the API collapses to 404.
 				if ($sec === 'transfer' && !empty($_['isAppAdmin'])) {
 					include __DIR__ . '/parts/settings/transfer.php';
+				}
+				if ($sec === 'license' && !empty($_['isAppAdmin'])) {
+					include __DIR__ . '/parts/settings/license.php';
 				}
 			?></div>
 		</div>
@@ -595,20 +599,6 @@ $settingsNav = static function () use ($l): string {
 </template>
 <template data-cck-settings-tpl="companion">
 	<div class="cck-settings-stack">
-		<section class="cck-panel" data-cck-license-panel hidden>
-			<h2><?php p($l->t('Companion license')); ?></h2>
-			<p class="cck-hint"><?php p($l->t('The web app is free — the license unlocks companion-app seats only.')); ?></p>
-			<dl class="cck-license-state" data-cck-license-state></dl>
-			<form data-cck-license-form class="cck-form-col">
-				<label><?php p($l->t('License key')); ?>
-					<textarea name="license_key" rows="4" maxlength="4000" placeholder="CCK2-…" aria-label="<?php p($l->t('License key')); ?>"></textarea>
-				</label>
-				<div class="cck-form">
-					<button type="submit" class="cck-btn cck-btn--primary"><?php p($l->t('Apply license')); ?></button>
-					<button type="button" data-cck-license-clear class="cck-btn cck-btn--secondary"><?php p($l->t('Remove license')); ?></button>
-				</div>
-			</form>
-		</section>
 		<form data-cck-settings-form="companion" class="cck-form-col cck-panel">
 			<h2><?php p($l->t('Companion app')); ?></h2>
 			<label><?php p($l->t('Fallback seat cap (license is authoritative)')); ?> <input type="number" name="seat_limit" min="1" max="999"></label>
