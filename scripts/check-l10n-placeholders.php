@@ -9,11 +9,21 @@ declare(strict_types=1);
  */
 
 $base = __DIR__ . '/../l10n';
-$localeFiles = array_map(
-	static fn (string $p): string => basename($p, '.json'),
-	glob($base . '/*.json') ?: []
-);
-usort($localeFiles, static fn (string $a, string $b): int => $a === 'en' ? -1 : ($b === 'en' ? 1 : strcmp($a, $b)));
+$localeFiles = ['en', 'de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR', 'pt', 'tr', 'zh_CN', 'zh_TW'];
+
+// Guard the roster's input domain both ways: a shipped l10n/<locale>.json
+// that is not rostered must FAIL (silent-skip blindness), and a rostered
+// locale whose catalog is missing FAILS below in the load loop.
+$shipped = [];
+foreach (glob($base . '/*.json') ?: [] as $jsonFile) {
+	$shipped[] = basename($jsonFile, '.json');
+}
+$unrostered = array_values(array_diff($shipped, $localeFiles));
+if ($unrostered !== []) {
+	sort($unrostered);
+	fwrite(STDERR, 'Shipped catalogs missing from placeholder roster: ' . implode(', ', $unrostered) . "\n");
+	exit(1);
+}
 
 /**
  * @return list<string>
@@ -64,7 +74,19 @@ foreach ($enT as $key => $enVal) {
 		}
 
 		$valPrintf = tcPrintfPlaceholders($val);
-		if ($enPrintf !== $valPrintf) {
+		// Positional placeholders (%1$s, %2$d …) bind by index, so word-order
+		// reorders (Turkish SOV etc.) are legitimate — compare as a multiset.
+		// Non-positional sequences still compare strictly: %s %d swapped is a
+		// real bug the multiset would hide.
+		$enCmp = $enPrintf;
+		$valCmp = $valPrintf;
+		if ($enPrintf !== [] && $valPrintf !== []
+			&& preg_grep('/^%\d+\$/', $enPrintf, PREG_GREP_INVERT) === []
+			&& preg_grep('/^%\d+\$/', $valPrintf, PREG_GREP_INVERT) === []) {
+			sort($enCmp);
+			sort($valCmp);
+		}
+		if ($enCmp !== $valCmp) {
 			$failed = true;
 			fwrite(STDERR, "{$lang}.json printf placeholder mismatch for key: $key\n");
 			fwrite(STDERR, '  expected: ' . implode(', ', $enPrintf) . "\n");
@@ -72,6 +94,8 @@ foreach ($enT as $key => $enVal) {
 		}
 
 		$valNamed = tcNamedPlaceholders($val);
+		sort($enNamed);
+		sort($valNamed);
 		if ($enNamed !== $valNamed) {
 			$failed = true;
 			fwrite(STDERR, "{$lang}.json named placeholder mismatch for key: $key\n");

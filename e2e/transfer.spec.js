@@ -129,6 +129,52 @@ test.describe('TRANSFER_SURFACE', () => {
 		await expect(dlg).not.toBeVisible();
 	});
 
+	test('danger-ink surfaces resolve error-text token, not the dead #e9322d literal', async ({ page }) => {
+		// contrast_below_wcag_aa family sweep (sbdlicenseops r10): the pre-heal
+		// pack led every danger-ink site with --color-element-error, which is
+		// undefined on NC31 → browsers fell back to the literal #e9322d at
+		// ~3.0:1 on the surface. The healed donor leads with --color-error-text.
+		// Assert all three named sites: (a) not the dead literal, (b) ≥4.5:1
+		// vs their own effective background.
+		await gotoTransfer(page);
+		const measure = (sel) => page.locator(sel).first().evaluate((el) => {
+			const rgb = (s) => (s.match(/[\d.]+/g) || []).map(Number).slice(0, 3);
+			const lum = ([r, g, b]) => {
+				const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+				return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+			};
+			let node = el;
+			let bg = 'rgba(0, 0, 0, 0)';
+			while (node && node !== document.documentElement) {
+				const c = getComputedStyle(node).backgroundColor;
+				if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') { bg = c; break; }
+				node = node.parentElement;
+			}
+			const fg = rgb(getComputedStyle(el).color);
+			const bgr = rgb(bg);
+			const l1 = Math.max(lum(fg), lum(bgr));
+			const l2 = Math.min(lum(fg), lum(bgr));
+			return { fg: fg.join(','), bg: bgr.join(','), ratio: (l1 + 0.05) / (l2 + 0.05) };
+		});
+		const assertInk = async (sel, name) => {
+			const m = await measure(sel);
+			expect(m.fg, `${name} resolves the dead --color-element-error literal`).not.toBe('233,50,45');
+			expect(m.ratio, `${name} ${m.fg} on ${m.bg} below WCAG AA 4.5:1`).toBeGreaterThanOrEqual(4.5);
+		};
+		// site 1: danger choice-card title (static replace-mode option)
+		await assertInk('.cck-choice-card--danger .cck-choice-card__title', 'choice-card--danger title');
+		// sites 2+3 live on the replace preview: replace emits an is-danger
+		// verdict AND a security group entry for every wiped table, so the
+		// group is guaranteed to render here (merge emits it only on diffs)
+		await runPreview(page, 'replace');
+		const secGroup = page.locator('.cck-transfer-group.is-security summary');
+		await expect(secGroup.first()).toBeVisible();
+		await assertInk('.cck-transfer-group.is-security summary', 'is-security summary');
+		await expect(page.locator('#cck-transfer-report-verdict.is-danger')).toBeVisible();
+		await assertInk('#cck-transfer-report-verdict.is-danger', 'verdict.is-danger');
+		await page.locator('#cck-transfer-cancel').click();
+	});
+
 	test('wrong passphrase gives typed, localized error (no raw code)', async ({ page }) => {
 		await gotoTransfer(page);
 		await page.setInputFiles('#cck-transfer-file', {

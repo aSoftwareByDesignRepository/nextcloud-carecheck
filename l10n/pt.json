@@ -1,6 +1,6 @@
 {
 	"translations": {
-		"%1$d of %2$d device slots in use.": "%1$d de %2$d espaços para dispositivos em uso.",
+		"%1$d of %2$d device slots in use.": "%1$d de %2$d lugares para dispositivos em uso.",
 		"%1$d of %2$d seats assigned": "%1$d de %2$d lugares atribuídos",
 		"%d row(s) need a value on this instance": "%d linha(s) precisam de um valor nesta instância",
 		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "%d linha(s) ignorada(s) e %d referência(s) por resolver — vê os grupos abaixo.",
@@ -43,7 +43,7 @@
 		"Aktuell ist kein weiterer Besuch geplant.": "De momento não está planeada mais nenhuma visita.",
 		"All": "Todos",
 		"All clients": "Todos os clientes",
-		"All device slots are in use. Revoke a device or upgrade your license.": "Todos os espaços para dispositivos estão em uso. Revoga um dispositivo ou aumenta a tua licença.",
+		"All device slots are in use. Revoke a device or upgrade your license.": "Todos os lugares para dispositivos estão em uso. Revoga um dispositivo ou aumenta a tua licença.",
 		"All members": "Todos os membros",
 		"All mobile seats are assigned. Remove a user or upgrade your license.": "Todos os lugares móveis são atribuídos. Remova um utilizador ou atualize a sua licença.",
 		"All tasks": "Todas as tarefas",
@@ -369,7 +369,7 @@
 		"Packages and terms:": "Pacotes e condições:",
 		"Pair a device": "Emparelhar um dispositivo",
 		"Pair code": "Código de emparelhamento",
-		"Pair devices from the linked administration area. Each paired device uses one license slot.": "Emparelha dispositivos a partir da área de administração ligada. Cada dispositivo emparelhado usa um espaço de licença.",
+		"Pair devices from the linked administration area. Each paired device uses one license slot.": "Emparelha dispositivos a partir da área de administração ligada. Cada dispositivo emparelhado usa um lugar de licença.",
 		"Paired devices": "Dispositivos emparelhados",
 		"Pairing card": "Cartão de emparelhamento",
 		"Pairing code: ": "Código de emparelhamento: ",

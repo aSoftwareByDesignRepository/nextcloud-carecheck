@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- License settings section — shared license-page pack (apply/clear dialogs,
+  device-slot display) on the white-on-slate icon family
+- E2E coverage for the license surface and the transfer danger-ink contrast
+
+### Fixed
+
+- License page HTTP 500 — bare `$l->t()` on printf/plural msgids crashed
+  `vsprintf`; pack now round-trips argument-bearing strings through the
+  sentinel format
+- License subnav dead route — `#/settings/license` fell back to general
+  because the router section roster omitted `license`
+- Transfer danger-ink surfaces resolved a dead `#e9322d` literal; now on
+  `--color-error-text` (WCAG AA ≥4.5:1)
+- Polish catalog: 'Organisation licencja' kept the German label; now
+  'Licencja organizacji' family wording
+
 ## 0.4.3 — 2026-11-13
 
 ### Added

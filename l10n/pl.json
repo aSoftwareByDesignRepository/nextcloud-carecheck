@@ -1,6 +1,6 @@
 {
 	"translations": {
-		"%1$d of %2$d device slots in use.": "Użyto %1$d z %2$d miejsc na urządzenia.",
+		"%1$d of %2$d device slots in use.": "Użyto %1$d z %2$d miejsc dla urządzeń.",
 		"%1$d of %2$d seats assigned": "%1$d z %2$d miejsc przypisanych",
 		"%d row(s) need a value on this instance": "%d wierszy wymaga wartości na tej instancji",
 		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "Pominięto %d wierszy i nierozwiązano %d odwołań — zobacz grupy poniżej.",
@@ -43,7 +43,7 @@
 		"Aktuell ist kein weiterer Besuch geplant.": "Obecnie nie zaplanowano kolejnych wizyt.",
 		"All": "Wszystko",
 		"All clients": "Wszyscy klienci",
-		"All device slots are in use. Revoke a device or upgrade your license.": "Wszystkie miejsca na urządzenia są zajęte. Odwołaj urządzenie albo rozszerz licencję.",
+		"All device slots are in use. Revoke a device or upgrade your license.": "Wszystkie miejsca dla urządzeń są zajęte. Odwołaj urządzenie albo rozszerz licencję.",
 		"All members": "Wszyscy pracownicy",
 		"All mobile seats are assigned. Remove a user or upgrade your license.": "Wszystkie miejsca mobilne są przypisane. Usuń użytkownika lub uaktualnij licencję.",
 		"All tasks": "Wszystkie zadania",
@@ -363,7 +363,7 @@
 		"Open support page": "Otwórz stronę wsparcia",
 		"Open — every Nextcloud user": "Otwarte — każdy użytkownik Nextcloud",
 		"Organisation": "Organizacja",
-		"Organisation license": "Organisation licencja",
+		"Organisation license": "Licencja organizacji",
 		"Other": "Inne",
 		"Outbox backlog": "Zaległość w skrzynce nadawczej",
 		"Packages and terms:": "Pakiety i warunki:",

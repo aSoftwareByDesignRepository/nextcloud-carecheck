@@ -367,7 +367,7 @@
 	// ---------------- routing ----------------
 	var currentClient = null;
 
-	var SETTINGS_SECTIONS = ['general', 'companion', 'access', 'privacy', 'transfer', 'support'];
+	var SETTINGS_SECTIONS = ['general', 'companion', 'license', 'access', 'privacy', 'transfer', 'support'];
 	var mountedSettings = {};
 	// null = unknown (first /api/settings round-trip pending). The access
 	// section stays unmounted until the server confirms admin — DS-2 door.
@@ -396,7 +396,7 @@
 		var id = parseInt(sub, 10);
 		if (view === 'settings') {
 			var sec = SETTINGS_SECTIONS.indexOf(sub) >= 0 ? sub : 'general';
-			if ((sec === 'access' || sec === 'privacy' || sec === 'transfer') && settingsAdmin !== true) {
+			if ((sec === 'license' || sec === 'access' || sec === 'privacy' || sec === 'transfer') && settingsAdmin !== true) {
 				if (settingsAdmin === false) { location.replace('#/settings/general'); return; }
 				sec = 'general';
 			}
@@ -526,7 +526,7 @@
 				: tours.map(function (t) {
 				var tDone = t.stops.filter(function (s) { return s.status === 'done' || s.status === 'skipped'; }).length;
 				return '<section class="cck-tour"><header class="cck-tour__head"><h2>' + esc(tourLabel(t)) + '</h2>' +
-					'<span class="cck-tour__progress">' + tDone + '/' + t.stops.length + ' ' + esc(tr('done')) + '</span></header><ul>' +
+					'<span class="cck-tour__progress">' + tDone + '/' + t.stops.length + ' ' + esc(tr('Done')) + '</span></header><ul>' +
 					t.stops.map(function (s) {
 						var badge = s.timeKind === 'deadline' ? tr('by') + ' ' + fmtMin(s.winEnd)
 							: s.timeKind === 'fixed' ? tr('at') + ' ' + fmtMin(s.winStart)
@@ -1776,11 +1776,11 @@
 			// DS-2 access door — admin-only section (server enforces too).
 			var isAdmin = r.data.settings.is_app_admin === '1';
 			settingsAdmin = isAdmin;
-			document.querySelectorAll('[data-cck-subnav="access"], [data-cck-subnav="privacy"], [data-cck-subnav="transfer"]').forEach(function (a) {
+			document.querySelectorAll('[data-cck-subnav="license"], [data-cck-subnav="access"], [data-cck-subnav="privacy"], [data-cck-subnav="transfer"]').forEach(function (a) {
 				a.hidden = !isAdmin;
 			});
 			var curHash = location.hash.replace(/^#\/?/, '') || '';
-			var adminSec = curHash === 'settings/access' || curHash === 'settings/privacy' || curHash === 'settings/transfer';
+			var adminSec = curHash === 'settings/license' || curHash === 'settings/access' || curHash === 'settings/privacy' || curHash === 'settings/transfer';
 			if (!isAdmin && adminSec) {
 				location.replace('#/settings/general');
 			} else if (isAdmin && adminSec) {
