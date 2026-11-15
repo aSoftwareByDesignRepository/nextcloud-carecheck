@@ -478,7 +478,7 @@ OC.L10N.register(
 	"Search staff" : "Personeel zoeken",
 	"Search staff…" : "Personeel zoeken…",
 	"Searching…" : "Zoeken…",
-	"Seat assigned." : "Seat toegewezen.",
+	"Seat assigned." : "Plaats toegewezen.",
 	"Seat removed." : "Plaats verwijderd.",
 	"Seats in use" : "Plekken in gebruik",
 	"Secrets are never included." : "Geheimen worden nooit meegenomen.",
