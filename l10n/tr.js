@@ -169,6 +169,7 @@ OC.L10N.register(
 	"Digest sent" : "Özet gönderildi",
 	"Display name" : "Görünen ad",
 	"Done" : "Tamam",
+	"done" : "tamamlandı",
 	"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance." : "Tüm ayarları, katalogları ve iş verilerini tek şifreli dosya olarak indirin — ardından üretim ortamınıza içe aktarın.",
 	"Download encrypted transfer file" : "Şifreli aktarım dosyasını indir",
 	"Draft" : "Taslak",

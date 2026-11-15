@@ -169,6 +169,7 @@ OC.L10N.register(
 	"Digest sent" : "Overzicht verzonden",
 	"Display name" : "Weergavenaam",
 	"Done" : "Klaar",
+	"done" : "klaar",
 	"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance." : "Download alle instellingen, catalogi en bedrijfsgegevens als één versleuteld bestand — en importeer het op uw productie-instantie.",
 	"Download encrypted transfer file" : "Versleuteld overdrachtsbestand downloaden",
 	"Draft" : "Concept",

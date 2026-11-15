@@ -169,6 +169,7 @@ OC.L10N.register(
 	"Digest sent" : "Sammendrag sendt",
 	"Display name" : "Vist navn",
 	"Done" : "Ferdig",
+	"done" : "ferdig",
 	"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance." : "Last ned alle innstillinger, kataloger og forretningsdata som én kryptert fil — og importer den på produksjonsinstansen din.",
 	"Download encrypted transfer file" : "Last ned kryptert overføringsfil",
 	"Draft" : "Utkast",

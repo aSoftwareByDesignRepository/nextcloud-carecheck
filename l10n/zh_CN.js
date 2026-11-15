@@ -169,6 +169,7 @@ OC.L10N.register(
 	"Digest sent" : "摘要已发送",
 	"Display name" : "显示名称",
 	"Done" : "完成",
+	"done" : "已完成",
 	"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance." : "将全部设置、目录和业务数据下载为一个加密文件——然后导入到生产实例。",
 	"Download encrypted transfer file" : "下载加密传输文件",
 	"Draft" : "草稿",

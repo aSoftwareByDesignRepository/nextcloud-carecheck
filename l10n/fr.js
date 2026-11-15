@@ -169,6 +169,7 @@ OC.L10N.register(
 	"Digest sent" : "Synthèse envoyée",
 	"Display name" : "Nom d'affichage",
 	"Done" : "Terminé",
+	"done" : "terminé",
 	"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance." : "Téléchargez tous les réglages, catalogues et données métier dans un seul fichier chiffré — puis importez-le sur votre instance de production.",
 	"Download encrypted transfer file" : "Télécharger le fichier de transfert chiffré",
 	"Draft" : "Brouillon",
