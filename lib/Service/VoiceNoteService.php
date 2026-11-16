@@ -29,6 +29,10 @@ use OCP\TaskProcessing\TaskTypes\AudioToText;
  * audio2text provider the note stays `pending` — honest state, never
  * silently dropped.
  */
+	// unique-conflict:ok — blob_key is bin2hex(random_bytes(16)) (derived key,
+	// collision impossible); the insert runs inside a transaction whose catch
+	// rolls back and removes the written blob; later writes update status/
+	// transcript/task columns only — never the unique column.
 class VoiceNoteService
 {
 	/** ~10 min of compressed speech — generous cap, still bounded. */

@@ -21,6 +21,10 @@ use OCP\IDBConnection;
  * Every participant id is scope-checked for the acting worker before
  * insert; idempotent on (actor_ref, idem_key) for offline retries.
  */
+	// unique-conflict:ok — session/participant inserts sit inside a transaction
+	// whose catch checks REASON_UNIQUE_CONSTRAINT_VIOLATION and re-reads the
+	// winner via findByIdem (idempotent replay); flagged sites update attended/
+	// status/closed_at — non-unique columns.
 class GroupSessionService
 {
 	public function __construct(

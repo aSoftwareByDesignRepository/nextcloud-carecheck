@@ -27,6 +27,9 @@ use OCP\IDBConnection;
  * - list/read/delete are scope-checked and access-audited; stores and
  *   deletes are journaled (append-only evidence).
  */
+	// unique-conflict:ok — blob_key is bin2hex(random_bytes(16)) (derived key);
+	// the insert runs inside a transaction whose catch rolls back and removes
+	// the written blob — same construction as VoiceNoteService.
 class PhotoService
 {
 	/** Hard cap — clinical snapshots, not RAW archives. */

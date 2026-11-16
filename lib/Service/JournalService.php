@@ -16,6 +16,10 @@ use OCP\IDBConnection;
  * simultaneous writers (Zweierpflege) serialize instead of forking the chain.
  * Callers must invoke append() inside an already-open transaction.
  */
+	// unique-conflict:ok — append() requires the caller's open transaction and
+	// serialises seq minting on the client's row lock (SELECT ... FOR UPDATE
+	// on cck_client, then on the journal head); the cck_j_cl_seq_uq window is
+	// lock-closed, not catch-closed.
 class JournalService
 {
 	private const GENESIS = 'GENESIS';

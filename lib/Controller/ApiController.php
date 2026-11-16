@@ -34,6 +34,11 @@ use OCP\IDBConnection;
 use OCP\IRequest;
 
 /** Zentrale web API — session + CSRF (NC default), staff-role scoped. */
+	// unique-conflict:ok — flagged sites insert/update template stops,
+	// templates, members, task-catalog rows and non-unique notice/visit
+	// columns (state/acked/status); unique-table mutations are delegated to
+	// services carrying reason-checked catches (TourService, VisitService,
+	// ClientDocService, GroupSessionService).
 class ApiController extends Controller
 {
 	use ApiControllerTrait;

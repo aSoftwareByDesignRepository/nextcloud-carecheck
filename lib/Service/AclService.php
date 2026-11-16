@@ -27,6 +27,9 @@ use OCP\IUserSession;
  * active break-glass grant, or a Zentrale-class role on the web.
  * Every out-of-scope probe collapses to the uniform 404 payload.
  */
+	// unique-conflict:ok — flagged writes update pairs.last_seen and append
+	// audit rows (cck_audit has no unique index); no cck_tlead/cck_pair unique-
+	// column write exists in this file — mapper-name attribution only.
 class AclService
 {
 	public function __construct(

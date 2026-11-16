@@ -22,6 +22,10 @@ use OCP\IDBConnection;
  * (UNIQUE(template_id,date)), published-only, and resync is stop-granular:
  * only stops without in_progress/final visits are rewritten.
  */
+	// unique-conflict:ok — the materialize insert carries a REASON_UNIQUE catch
+	// (concurrent generators replay as no-op); remaining flagged sites write
+	// cck_stop/cck_client rows or the NULL-template demo tour — none can violate
+	// cck_tr_tpl_date_uq.
 class TourService
 {
 	public function __construct(
@@ -116,7 +120,17 @@ class TourService
 		$t->setStatus('open');
 		$t->setRevision(1);
 		$t->setCreatedAt(new \DateTime());
-		$t = $this->tours->insert($t);
+		try {
+			$t = $this->tours->insert($t);
+		} catch (\OCP\DB\Exception $e) {
+			// Two generators raced the same (template_id, date) — the pre-check
+			// in generateForDate is check-then-act, so the unique index is the
+			// real guard: the loser replays as a no-op instead of 500ing.
+			if ($e->getReason() !== \OCP\DB\Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+				throw $e;
+			}
+			return 0;
+		}
 
 		$n = 0;
 		foreach ($tplStops as $s) {

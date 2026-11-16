@@ -23,6 +23,10 @@ use OCP\IUserManager;
  * means unscoped — visible to full staff only, never to team leads
  * (a lead must not see an unassigned client "by default").
  */
+	// unique-conflict:ok — flagged sites write cck_team/cck_client/cck_member
+	// (mapper-name attribution to cck_tlead); the real cck_tlead insert in
+	// addLead() already carries a REASON_UNIQUE_CONSTRAINT_VIOLATION catch
+	// that treats the collision as an applied no-op.
 class TeamService
 {
 	public function __construct(

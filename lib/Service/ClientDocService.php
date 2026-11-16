@@ -29,6 +29,10 @@ use OCP\Files\NotFoundException;
  * deduped by idem key; `reminded_on` prevents repeat sweeps for the same
  * expiry day even if notices get resolved.
  */
+	// unique-conflict:ok — flagged sites write cck_doc (no unique index) and a
+	// post-catch docs->update that marks an already-detected duplicate; the only
+	// cck_notice insert sits inside a REASON_UNIQUE_CONSTRAINT_VIOLATION catch
+	// that re-reads the winner.
 class ClientDocService
 {
 	/** Days before expiry the warning fires. */

@@ -24,6 +24,10 @@ use OCP\IDBConnection;
  * actor-scoped idempotency, server-derived fields, plan-snapshot binding,
  * geo toggle enforcement, sig validation, atomic bundle+journal commit.
  */
+	// unique-conflict:ok — flagged sites insert cck_breakglass and update
+	// notices/stops non-unique columns (state, resolution, status); the real
+	// cck_visit idem-key inserts already converge via REASON_UNIQUE catches
+	// that re-read and replay the winner (see checkin paths above).
 class VisitService
 {
 	public function __construct(

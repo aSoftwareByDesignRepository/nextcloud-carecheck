@@ -26,6 +26,10 @@ use OCP\Lock\ILockingProvider;
  * Only token hashes are stored. Both paths claim one CCK2 mobile seat;
  * redemption is rate-limited per network subject.
  */
+	// unique-conflict:ok — pair inserts run inside LockGuard::run (cck-seat-*)
+	// which the gate cannot see; token_hash is a per-request random value
+	// (NULL at code-issue time) and the redeem claim is a CAS update
+	// (WHERE code_used=0); remaining writes set revoked only.
 class PairService
 {
 	public function __construct(

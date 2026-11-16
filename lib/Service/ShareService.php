@@ -18,6 +18,9 @@ use OCA\CareCheck\Exception\ApiException;
  * upcoming tour windows + whether today's visit happened — enough for a
  * worried relative ("war jemand da?"), never task/medical detail.
  */
+	// unique-conflict:ok — token_hash derives from bin2hex(random_bytes(24))
+	// (192-bit derived key, no user-controlled collision surface — azc ruling);
+	// remaining writes update revoked/last_access_at only, never the unique col.
 class ShareService
 {
 	public function __construct(
