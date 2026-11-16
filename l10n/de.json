@@ -2,14 +2,8 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "%1$d von %2$d Geräteplätzen belegt.",
 		"%1$d of %2$d seats assigned": "%1$d von %2$d Sitzen belegt",
-		"%d row(s) need a value on this instance": "%d Zeile(n) benötigen einen Wert auf dieser Instanz",
-		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "%d Zeile(n) übersprungen und %d Verweis(e) unaufgelöst — siehe die Gruppen unten.",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s ist auf Ihrer Nextcloud kostenlos (AGPL). Fehler und Ideen über GitHub bleiben willkommen — das gehört zur kostenlosen Open-Source-Pflege. Wenn Ihre Organisation planbare Hilfe mit Rechnung braucht — oder offizielle Mobile-Lizenzen — wählen Sie unten eine Option:",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s ist auf Ihrer Nextcloud kostenlos (AGPL). Fehler und Ideen über GitHub bleiben willkommen — das gehört zur kostenlosen Open-Source-Pflege. Wenn Ihre Organisation planbare Hilfe mit Rechnung braucht, wählen Sie unten eine Option:",
-		"(%d env-bound value(s) emptied)": "(%d instanzgebundene Werte geleert)",
-		"(%d filtered)": "(%d gefiltert)",
-		"(%d secret(s) redacted)": "(%d Geheimnis(se) geschwärzt)",
-		"(%d unresolved ref)": "(%d unaufgelöste Verweise)",
 		"(opens in a new tab)": "(öffnet in neuem Tab)",
 		"(unknown — skipped)": "(unbekannt — übersprungen)",
 		"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update.": "Ein Lizenzschlüssel ist hinterlegt, aber dieser Server kann die Signatur nicht mit dem öffentlichen Herstellerschlüssel prüfen. Die Begleit-Apps lehnen die Lizenz ab, bis der Schlüssel mit dem passenden Signierschlüssel erstellt wurde. Hinterlege eine korrekt signierte Lizenz erneut oder kontaktiere den Support, falls das nach einem App-Update weiterhin auftritt.",
@@ -204,7 +198,7 @@
 		"Find staff by name or qualification.": "Personal nach Name oder Qualifikation suchen.",
 		"Find tasks by code, label or required qualification.": "Aufgaben nach Code, Bezeichnung oder benötigter Qualifikation suchen.",
 		"Fixed": "Fix",
-		"Format: %1$s followed by a signed payload. One key per organisation.": "Format: %1$s gefolgt von einer signierten Nutzlast. Ein Schlüssel pro Organisation.",
+		"Format: %1$s followed by a signed payload. One key per organisation.": "Format: %1$s gefolgt von einer signierten Payload. Ein Schlüssel pro Organisation.",
 		"Fri": "Fr",
 		"From": "Von",
 		"GPS check-in evidence": "GPS-Nachweis beim Check-in",
@@ -588,7 +582,6 @@
 		"Voice note added": "Sprachnotiz hinzugefügt",
 		"Voice note transcribed": "Sprachnotiz transkribiert",
 		"Waiting for the job…": "Warte auf den Job …",
-		"Warning: %d row(s) will be permanently deleted, then the file data is loaded.": "Warnung: %d Zeile(n) werden endgültig gelöscht, danach werden die Dateidaten geladen.",
 		"Wed": "Mi",
 		"Weekdays": "Wochentage",
 		"Weekly templates — stops materialize into daily tours.": "Wochenvorlagen — Stopps materialisieren sich zu Tagestouren.",
@@ -646,6 +639,39 @@
 		"the mobile companion app": "die mobile Begleit-App",
 		"uncovered": "unbesetzt",
 		"undo via snapshot": "per Snapshot rückgängig machen",
-		"will be skipped": "wird übersprungen"
-	}
+		"will be skipped": "wird übersprungen",
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 Zeile übersprungen.",
+			"%n Zeilen übersprungen."
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 Verweis unaufgelöst — siehe die Gruppen unten.",
+			"%n Verweise unaufgelöst — siehe die Gruppen unten."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 Zeile benötigt einen Wert auf dieser Instanz",
+			"%n Zeilen benötigen einen Wert auf dieser Instanz"
+		],
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 instanzgebundener Wert geleert)",
+			"(%n instanzgebundene Werte geleert)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 gefiltert)",
+			"(%n gefiltert)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 Geheimnis geschwärzt)",
+			"(%n Geheimnisse geschwärzt)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 unaufgelöster Verweis)",
+			"(%n unaufgelöste Verweise)"
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Warnung: 1 Zeile wird endgültig gelöscht, danach werden die Dateidaten geladen.",
+			"Warnung: %n Zeilen werden endgültig gelöscht, danach werden die Dateidaten geladen."
+		]
+	},
+	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

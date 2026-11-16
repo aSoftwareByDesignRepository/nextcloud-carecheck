@@ -3,14 +3,8 @@ OC.L10N.register(
 	{
 	"%1$d of %2$d device slots in use." : "%1$d af %2$d enhedspladser i brug.",
 	"%1$d of %2$d seats assigned" : "%1$d af %2$d pladser tildelt",
-	"%d row(s) need a value on this instance" : "%d række(r) kræver en værdi på denne instans",
-	"%d row(s) skipped and %d reference(s) unresolved — see the groups below." : "%d række(r) sprunget over og %d reference(r) uopløst — se grupperne nedenfor.",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:" : "%s forbliver gratis (AGPL) på jeres Nextcloud. Fejlrapporter og idéer på GitHub er stadig velkomne — det hører til den gratis open source-vedligeholdelse. Hvis jeres organisation har brug for hjælp på faktura — eller officielle mobillicenser — vælg en mulighed nedenfor:",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:" : "%s forbliver gratis (AGPL) på jeres Nextcloud. Fejlrapporter og idéer på GitHub er stadig velkomne — det hører til den gratis open source-vedligeholdelse. Hvis jeres organisation har brug for hjælp på faktura, vælg en mulighed nedenfor:",
-	"(%d env-bound value(s) emptied)" : "(%d instansbundne værdier tømt)",
-	"(%d filtered)" : "(%d filtreret)",
-	"(%d secret(s) redacted)" : "(%d hemmelighed(er) sløret)",
-	"(%d unresolved ref)" : "(%d uopløst reference)",
 	"(opens in a new tab)" : "(åbner i et nyt faneblad)",
 	"(unknown — skipped)" : "(ukendt — sprunget over)",
 	"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update." : "Der er gemt en licensnøgle, men denne server kan ikke verificere signaturen med leverandørens offentlige nøgle. Companion-apps afviser licensen, indtil nøglen er signet med den matchende leverandørnøgle. Anvend en korrekt signeret licens igen, eller kontakt support, hvis problemet fortsætter efter en app-opdatering.",
@@ -413,7 +407,7 @@ OC.L10N.register(
 	"PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck." : "PrivacyCheck fører dit GDPR-behandlingsregister (VVT) og konsekvensanalyserne. Ét klik opretter et færdigt udkast for CareCheck — en databeskyttelsesansvarlig gennemgår og udgiver det i PrivacyCheck.",
 	"Private Zusatzleistung" : "Privat tillægsydelse",
 	"Product page" : "Produktside",
-	"Provide this ID when ordering a license so the key can be bound to this server." : "Angiv dette ID, Når bestiller en licens, så nøglen kan knyttes til denne server.",
+	"Provide this ID when ordering a license so the key can be bound to this server." : "Angiv dette ID, når du afgiver en licensordre, så nøglen kan knyttes til denne server.",
 	"Provider timezone" : "Udbyderens tidszone",
 	"Provider-wide configuration — one section per page." : "Konfiguration på tværs af udbyderen — ét afsnit pr. side.",
 	"Publish plan" : "Offentliggør plan",
@@ -589,7 +583,6 @@ OC.L10N.register(
 	"Voice note added" : "Talebesked tilføjet",
 	"Voice note transcribed" : "Talebesked transskriberet",
 	"Waiting for the job…" : "Venter på jobbet…",
-	"Warning: %d row(s) will be permanently deleted, then the file data is loaded." : "Advarsel: %d række(r) slettes permanent, derefter indlæses fildataene.",
 	"Wed" : "Ons",
 	"Weekdays" : "Ugedage",
 	"Weekly templates — stops materialize into daily tours." : "Ugeskabeloner — stop bliver til daglige ruter.",
@@ -647,6 +640,15 @@ OC.L10N.register(
 	"the mobile companion app" : "mobil-companion-appen",
 	"uncovered" : "ubesat",
 	"undo via snapshot" : "fortryd via snapshot",
-	"will be skipped" : "springes over"
-	}
+	"will be skipped" : "springes over",
+	"_1 row skipped._::_%n rows skipped._" : ["1 række sprunget over.","%n rækker sprunget over."],
+	"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._" : ["1 reference uopløst — se grupperne nedenfor.","%n referencer uopløst — se grupperne nedenfor."],
+	"_1 row needs a value on this instance_::_%n rows need a value on this instance_" : ["1 række kræver en værdi på denne instans","%n rækker kræver en værdi på denne instans"],
+	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 instansbunden værdi tømt)","(%n instansbundne værdier tømt)"],
+	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtreret)","(%n filtrerede)"],
+	"_(1 secret redacted)_::_(%n secrets redacted)_" : ["(1 hemmelighed sløret)","(%n hemmeligheder sløret)"],
+	"_(1 unresolved ref)_::_(%n unresolved refs)_" : ["(1 uopløst reference)","(%n uopløste referencer)"],
+	"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._" : ["Advarsel: 1 række slettes permanent, derefter indlæses fildataene.","Advarsel: %n rækker slettes permanent, derefter indlæses fildataene."]
+	},
+	"nplurals=2; plural=(n != 1);"
 );

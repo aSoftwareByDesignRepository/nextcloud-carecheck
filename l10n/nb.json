@@ -2,14 +2,8 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "%1$d av %2$d enhetsplasser i bruk.",
 		"%1$d of %2$d seats assigned": "%1$d av %2$d plasser tildelt",
-		"%d row(s) need a value on this instance": "%d rad(er) trenger en verdi på denne instansen",
-		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "%d rad(er) hoppet over og %d referanse(r) uløst — se gruppene nedenfor.",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s forblir gratis (AGPL) på deres Nextcloud. Feilrapporter og idéer på GitHub er fortsatt velkomne — det er en del av det frie vedlikeholdet av åpen kildekode. Hvis organisasjonen deres trenger hjelp på faktura — eller offisielle mobillisenser — velg et alternativ nedenfor:",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s forblir gratis (AGPL) på deres Nextcloud. Feilrapporter og idéer på GitHub er fortsatt velkomne — det er en del av det frie vedlikeholdet av åpen kildekode. Hvis organisasjonen deres trenger hjelp på faktura, velg et alternativ nedenfor:",
-		"(%d env-bound value(s) emptied)": "(%d instansbundne verdier tømt)",
-		"(%d filtered)": "(%d filtrert)",
-		"(%d secret(s) redacted)": "(%d hemmeligheter sladdet)",
-		"(%d unresolved ref)": "(%d uløste referanser)",
 		"(opens in a new tab)": "(åpnes i ny fane)",
 		"(unknown — skipped)": "(ukjent — hoppet over)",
 		"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update.": "En lisensnøkkel er lagret, men denne serveren kan ikke verifisere signaturen med leverandørens offentlige nøkkel. Følge-appene avviser lisensen til nøkkelen er signert med den samsvarende leverandørsignernøkkelen. Bruk en korrekt signert lisens på nytt, eller kontakt brukerstøtte hvis problemet vedvarer etter en app-oppdatering.",
@@ -132,7 +126,7 @@
 		"Copied.": "Kopiert.",
 		"Copy token": "Kopier token",
 		"Could not assign seat.": "Kunne ikke tildele plass.",
-		"Could not generate a pairing code.": "Kunne ikke generere parkoden.",
+		"Could not generate a pairing code.": "Kunne ikke generere paringskoden.",
 		"Could not register device.": "Kunne ikke registrere enheten.",
 		"Could not remove license.": "Kunne ikke fjerne lisens.",
 		"Could not remove seat.": "Kunne ikke fjerne plass.",
@@ -144,7 +138,7 @@
 		"Create first tour": "Opprett første runde",
 		"Create team": "Opprett lag",
 		"Cron": "Cron",
-		"Current license": "Gjeldende lisens",
+		"Current license": "Nåværende lisens",
 		"Customer": "Kunde",
 		"Customer ID": "Kunde-ID",
 		"CustomerCheck is not installed — CRM linking is unavailable.": "CustomerCheck er ikke installert — CRM-kobling er utilgjengelig.",
@@ -210,7 +204,7 @@
 		"GPS check-in evidence": "GPS-bevis ved innsjekking",
 		"General": "Generelt",
 		"Generate": "Generer",
-		"Generate a new pairing code for this device? The old code stops working immediately.": "Generere en ny parkode for denne enheten? Den gamle koden slutter å fungere umiddelbart.",
+		"Generate a new pairing code for this device? The old code stops working immediately.": "Generere en ny paringskode for denne enheten? Den gamle koden slutter å fungere umiddelbart.",
 		"Generate code": "Generer kode",
 		"Generate tours now": "Generer runder nå",
 		"Get it on Google Play": "Last ned på Google Play",
@@ -302,8 +296,8 @@
 		"Needs action": "Krever handling",
 		"Network error. Please try again.": "Nettverksfeil. Prøv igjen.",
 		"Network problem — check your connection and try again.": "Nettverksproblem — sjekk tilkoblingen og prøv igjen.",
-		"New pairing code": "Ny parkode",
-		"New pairing code generated.": "Ny parkode generert.",
+		"New pairing code": "Ny paringskode",
+		"New pairing code generated.": "Ny paringskode generert.",
 		"New team": "Nytt team",
 		"New tour template": "Ny tursmal",
 		"Next day": "Neste dag",
@@ -412,7 +406,7 @@
 		"PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck.": "PrivacyCheck fører ditt GDPR-behandlingsregister (VVT) og konsekvensvurderingene. Ett klikk oppretter et ferdig utkast for CareCheck — en personvernansvarlig gjennomgår og publiserer det i PrivacyCheck.",
 		"Private Zusatzleistung": "Privat tilleggstjeneste",
 		"Product page": "Produktside",
-		"Provide this ID when ordering a license so the key can be bound to this server.": "Oppgi denne ID-en når bestiller en lisens, så nøkkelen kan knyttes til denne serveren.",
+		"Provide this ID when ordering a license so the key can be bound to this server.": "Oppgi denne ID-en når du bestiller en lisens, så nøkkelen kan knyttes til denne serveren.",
 		"Provider timezone": "Tilbyderens tidssone",
 		"Provider-wide configuration — one section per page.": "Konfigurasjon for hele tilbyderen — én seksjon per side.",
 		"Publish plan": "Publiser plan",
@@ -588,7 +582,6 @@
 		"Voice note added": "Talemelding lagt til",
 		"Voice note transcribed": "Talemelding transkribert",
 		"Waiting for the job…": "Venter på jobben…",
-		"Warning: %d row(s) will be permanently deleted, then the file data is loaded.": "Advarsel: %d rad(er) slettes permanent, deretter lastes fildataene inn.",
 		"Wed": "Ons",
 		"Weekdays": "Ukedager",
 		"Weekly templates — stops materialize into daily tours.": "Ukesmaler — stopp blir til daglige ruter.",
@@ -646,6 +639,39 @@
 		"the mobile companion app": "mobilfølge-appen",
 		"uncovered": "ubesatt",
 		"undo via snapshot": "angre via øyeblikksbilde",
-		"will be skipped": "hoppes over"
-	}
+		"will be skipped": "hoppes over",
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 rad hoppet over.",
+			"%n rader hoppet over."
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 referanse uløst — se gruppene nedenfor.",
+			"%n referanser uløst — se gruppene nedenfor."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 rad trenger en verdi på denne instansen",
+			"%n rader trenger en verdi på denne instansen"
+		],
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 instansbundet verdi tømt)",
+			"(%n instansbundne verdier tømt)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 filtrert)",
+			"(%n filtrerte)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 hemmelighet sladdet)",
+			"(%n hemmeligheter sladdet)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 uløst referanse)",
+			"(%n uløste referanser)"
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Advarsel: 1 rad slettes permanent, deretter lastes fildataene inn.",
+			"Advarsel: %n rader slettes permanent, deretter lastes fildataene inn."
+		]
+	},
+	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

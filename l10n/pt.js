@@ -3,14 +3,8 @@ OC.L10N.register(
 	{
 	"%1$d of %2$d device slots in use." : "%1$d de %2$d lugares para dispositivos em uso.",
 	"%1$d of %2$d seats assigned" : "%1$d de %2$d lugares atribuídos",
-	"%d row(s) need a value on this instance" : "%d linha(s) precisam de um valor nesta instância",
-	"%d row(s) skipped and %d reference(s) unresolved — see the groups below." : "%d linha(s) ignorada(s) e %d referência(s) por resolver — vê os grupos abaixo.",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:" : "O %s continua gratuito (AGPL) no seu Nextcloud. Relatórios de erros e ideias no GitHub continuam bem-vindos — faz parte da manutenção open source gratuita. Se a sua organização precisar de ajuda faturável — ou licenças móveis oficiais — escolha uma opção abaixo:",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:" : "O %s continua gratuito (AGPL) no seu Nextcloud. Relatórios de erros e ideias no GitHub continuam bem-vindos — faz parte da manutenção open source gratuita. Se a sua organização precisar de ajuda faturável, escolha uma opção abaixo:",
-	"(%d env-bound value(s) emptied)" : "(%d valor(es) ligados à instância esvaziados)",
-	"(%d filtered)" : "(%d filtrada(s))",
-	"(%d secret(s) redacted)" : "(%d segredo(s) ocultado(s))",
-	"(%d unresolved ref)" : "(%d referência(s) por resolver)",
 	"(opens in a new tab)" : "(abre num novo separador)",
 	"(unknown — skipped)" : "(desconhecido — ignorado)",
 	"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update." : "Está guardada uma chave de licença, mas este servidor não consegue verificar a assinatura com a chave pública do fornecedor. As aplicações complementares rejeitarão a licença até a chave ser assinada com a chave de assinatura do fornecedor correspondente. Volta a aplicar uma licença corretamente assinada ou contacta o suporte se persistir após uma atualização da aplicação.",
@@ -589,7 +583,6 @@ OC.L10N.register(
 	"Voice note added" : "Nota de voz adicionada",
 	"Voice note transcribed" : "Nota de voz transcrita",
 	"Waiting for the job…" : "À espera da tarefa…",
-	"Warning: %d row(s) will be permanently deleted, then the file data is loaded." : "Aviso: %d linha(s) serão eliminadas permanentemente e, depois, os dados do ficheiro serão carregados.",
 	"Wed" : "Qua",
 	"Weekdays" : "Dias úteis",
 	"Weekly templates — stops materialize into daily tours." : "Modelos semanais — as paragens tornam-se rondas diárias.",
@@ -647,6 +640,15 @@ OC.L10N.register(
 	"the mobile companion app" : "a aplicação complementar móvel",
 	"uncovered" : "sem cobertura",
 	"undo via snapshot" : "anular via instantâneo",
-	"will be skipped" : "será ignorado"
-	}
+	"will be skipped" : "será ignorado",
+	"_1 row skipped._::_%n rows skipped._" : ["1 linha ignorada.","%n linhas ignoradas."],
+	"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._" : ["1 referência por resolver — vê os grupos abaixo.","%n referências por resolver — vê os grupos abaixo."],
+	"_1 row needs a value on this instance_::_%n rows need a value on this instance_" : ["1 linha precisa de um valor nesta instância","%n linhas precisam de um valor nesta instância"],
+	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 valor ligado à instância esvaziado)","(%n valores ligados à instância esvaziados)"],
+	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtrada)","(%n filtradas)"],
+	"_(1 secret redacted)_::_(%n secrets redacted)_" : ["(1 segredo ocultado)","(%n segredos ocultados)"],
+	"_(1 unresolved ref)_::_(%n unresolved refs)_" : ["(1 referência por resolver)","(%n referências por resolver)"],
+	"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._" : ["Aviso: 1 linha será eliminada permanentemente e, depois, os dados do ficheiro serão carregados.","Aviso: %n linhas serão eliminadas permanentemente e, depois, os dados do ficheiro serão carregados."]
+	},
+	"nplurals=2; plural=(n > 1);"
 );

@@ -2,14 +2,8 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "%1$d emplacements d’appareil sur %2$d utilisés.",
 		"%1$d of %2$d seats assigned": "%1$d sur %2$d postes assignés",
-		"%d row(s) need a value on this instance": "%d ligne(s) nécessitent une valeur sur cette instance",
-		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "%d ligne(s) ignorée(s) et %d référence(s) non résolue(s) — voir les groupes ci-dessous.",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s reste gratuit (AGPL) sur votre Nextcloud. Signalements de bugs et idées restent les bienvenus sur GitHub — cela fait partie du maintien open source. Si votre organisation a besoin d’une aide facturable — ou de licences mobiles officielles — choisissez une option ci-dessous :",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s reste gratuit (AGPL) sur votre Nextcloud. Signalements de bugs et idées restent les bienvenus sur GitHub — cela fait partie du maintien open source. Si votre organisation a besoin d’une aide facturable, choisissez une option ci-dessous :",
-		"(%d env-bound value(s) emptied)": "(%d valeur(s) liées à l’instance vidée(s))",
-		"(%d filtered)": "(%d filtrée(s))",
-		"(%d secret(s) redacted)": "(%d secret(s) masqué(s))",
-		"(%d unresolved ref)": "(%d référence(s) non résolue(s))",
 		"(opens in a new tab)": "(s'ouvre dans un nouvel onglet)",
 		"(unknown — skipped)": "(inconnu — ignoré)",
 		"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update.": "Une clé de licence est enregistrée, mais ce serveur ne peut pas vérifier sa signature avec la clé publique du fournisseur. Les applications compagnon rejetteront la licence tant que la clé n’aura pas été signée avec la clé de signature du fournisseur correspondante. Applique à nouveau une licence correctement signée, ou contacte le support si le problème persiste après une mise à jour de l’application.",
@@ -588,7 +582,6 @@
 		"Voice note added": "Note vocale ajoutée",
 		"Voice note transcribed": "Note vocale transcrite",
 		"Waiting for the job…": "En attente du traitement…",
-		"Warning: %d row(s) will be permanently deleted, then the file data is loaded.": "Avertissement : %d ligne(s) seront définitivement supprimées, puis les données du fichier seront chargées.",
 		"Wed": "Mer",
 		"Weekdays": "Jours de la semaine",
 		"Weekly templates — stops materialize into daily tours.": "Modèles hebdomadaires — les arrêts deviennent des tournées quotidiennes.",
@@ -646,6 +639,39 @@
 		"the mobile companion app": "l’application compagnon mobile",
 		"uncovered": "non couvert",
 		"undo via snapshot": "annuler via un instantané",
-		"will be skipped": "sera ignoré"
-	}
+		"will be skipped": "sera ignoré",
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 ligne ignorée.",
+			"%n lignes ignorées."
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 référence non résolue — voir les groupes ci-dessous.",
+			"%n références non résolues — voir les groupes ci-dessous."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 ligne nécessite une valeur sur cette instance",
+			"%n lignes nécessitent une valeur sur cette instance"
+		],
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 valeur liée à l’instance vidée)",
+			"(%n valeurs liées à l’instance vidées)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 filtrée)",
+			"(%n filtrées)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 secret masqué)",
+			"(%n secrets masqués)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 référence non résolue)",
+			"(%n références non résolues)"
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Avertissement : 1 ligne sera définitivement supprimée, puis les données du fichier seront chargées.",
+			"Avertissement : %n lignes seront définitivement supprimées, puis les données du fichier seront chargées."
+		]
+	},
+	"pluralForm": "nplurals=2; plural=(n > 1);"
 }

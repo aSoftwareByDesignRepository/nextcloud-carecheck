@@ -2,14 +2,8 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "Użyto %1$d z %2$d miejsc dla urządzeń.",
 		"%1$d of %2$d seats assigned": "%1$d z %2$d miejsc przypisanych",
-		"%d row(s) need a value on this instance": "%d wierszy wymaga wartości na tej instancji",
-		"%d row(s) skipped and %d reference(s) unresolved — see the groups below.": "Pominięto %d wierszy i nierozwiązano %d odwołań — zobacz grupy poniżej.",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s pozostaje bezpłatna (AGPL) na Państwa Nextcloud. Zgłoszenia błędów i pomysły na GitHubie są nadal mile widziane — to część darmowego utrzymania open source. Jeśli Państwa organizacja potrzebuje pomocy z fakturą — albo oficjalnych licencji mobilnych — proszę wybrać opcję poniżej:",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s pozostaje bezpłatna (AGPL) na Państwa Nextcloud. Zgłoszenia błędów i pomysły na GitHubie są nadal mile widziane — to część darmowego utrzymania open source. Jeśli Państwa organizacja potrzebuje pomocy z fakturą, proszę wybrać opcję poniżej:",
-		"(%d env-bound value(s) emptied)": "(%d opróżnione wartości związane z instancją)",
-		"(%d filtered)": "(%d odfiltrowane)",
-		"(%d secret(s) redacted)": "(%d ukryte sekrety)",
-		"(%d unresolved ref)": "(%d nierozwiązane odwołania)",
 		"(opens in a new tab)": "(otwiera się w nowej karcie)",
 		"(unknown — skipped)": "(nieznane — pominięto)",
 		"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update.": "Klucz licencyjny jest zapisany, ale ten serwer nie może zweryfikować jego podpisu kluczem publicznym dostawcy. Aplikacje towarzyszące odrzucą licencję, dopóki klucz nie zostanie podpisany pasującym kluczem podpisującym dostawcy. Zastosuj ponownie poprawnie podpisaną licencję albo skontaktuj się z pomocą, jeśli problem nadal występuje po aktualizacji aplikacji.",
@@ -144,7 +138,7 @@
 		"Create first tour": "Utwórz pierwszy obchód",
 		"Create team": "Utwórz zespół",
 		"Cron": "Cron",
-		"Current license": "Aktualna licencja",
+		"Current license": "Bieżąca licencja",
 		"Customer": "Klientka",
 		"Customer ID": "ID klienta",
 		"CustomerCheck is not installed — CRM linking is unavailable.": "CustomerCheck nie jest zainstalowana — powiązanie CRM jest niedostępne.",
@@ -412,7 +406,7 @@
 		"PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck.": "PrivacyCheck prowadzi rejestr czynności przetwarzania (VVT) oraz oceny skutków. Jedno kliknięcie tworzy gotowy szkic dla CareCheck — odpowiedzialny za prywatność przegląda i publikuje go w PrivacyCheck.",
 		"Private Zusatzleistung": "Prywatna usługa dodatkowa",
 		"Product page": "Strona produktu",
-		"Provide this ID when ordering a license so the key can be bound to this server.": "Podaj ten identyfikator przy zamawianiu licencji, aby klucz mógł zostać powiązany z tym serwerem.",
+		"Provide this ID when ordering a license so the key can be bound to this server.": "Podaj ten identyfikator przy zamówieniu licencji, aby klucz mógł zostać powiązany z tym serwerem.",
 		"Provider timezone": "Strefa czasowa usługodawcy",
 		"Provider-wide configuration — one section per page.": "Konfiguracja dla całego usługodawcy — jedna sekcja na stronę.",
 		"Publish plan": "Opublikuj plan",
@@ -588,7 +582,6 @@
 		"Voice note added": "Notatka głosowa dodana",
 		"Voice note transcribed": "Notatka głosowa transkrybowana",
 		"Waiting for the job…": "Oczekiwanie na zadanie…",
-		"Warning: %d row(s) will be permanently deleted, then the file data is loaded.": "Ostrzeżenie: %d wierszy zostanie trwale usuniętych, a następnie dane z pliku zostaną wczytane.",
 		"Wed": "Śr",
 		"Weekdays": "Dni tygodnia",
 		"Weekly templates — stops materialize into daily tours.": "Szablony tygodniowe — przystanki stają się codziennymi trasami.",
@@ -646,6 +639,47 @@
 		"the mobile companion app": "mobilna aplikacja towarzysząca",
 		"uncovered": "nieobsadzony",
 		"undo via snapshot": "cofnij za pomocą migawki",
-		"will be skipped": "zostanie pominięte"
-	}
+		"will be skipped": "zostanie pominięte",
+		"_1 row skipped._::_%n rows skipped._": [
+			"Pominięto 1 wiersz.",
+			"Pominięto %n wiersze.",
+			"Pominięto %n wierszy."
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"Nierozwiązano 1 odwołanie — zobacz grupy poniżej.",
+			"Nierozwiązano %n odwołania — zobacz grupy poniżej.",
+			"Nierozwiązano %n odwołań — zobacz grupy poniżej."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 wiersz wymaga wartości na tej instancji",
+			"%n wiersze wymagają wartości na tej instancji",
+			"%n wierszy wymaga wartości na tej instancji"
+		],
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 opróżniona wartość związana z instancją)",
+			"(%n opróżnione wartości związane z instancją)",
+			"(%n opróżnionych wartości związanych z instancją)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 odfiltrowany)",
+			"(%n odfiltrowane)",
+			"(%n odfiltrowanych)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 ukryty sekret)",
+			"(%n ukryte sekrety)",
+			"(%n ukrytych sekretów)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 nierozwiązane odwołanie)",
+			"(%n nierozwiązane odwołania)",
+			"(%n nierozwiązanych odwołań)"
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Ostrzeżenie: 1 wiersz zostanie trwale usunięty, a następnie dane z pliku zostaną wczytane.",
+			"Ostrzeżenie: %n wiersze zostaną trwale usunięte, a następnie dane z pliku zostaną wczytane.",
+			"Ostrzeżenie: %n wierszy zostanie trwale usuniętych, a następnie dane z pliku zostaną wczytane."
+		]
+	},
+	"pluralForm": "nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 }

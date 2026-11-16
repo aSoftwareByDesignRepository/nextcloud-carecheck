@@ -3,14 +3,8 @@ OC.L10N.register(
 	{
 	"%1$d of %2$d device slots in use." : "%1$d av %2$d enhetsplatser används.",
 	"%1$d of %2$d seats assigned" : "%1$d av %2$d platser tilldelade",
-	"%d row(s) need a value on this instance" : "%d rad(er) behöver ett värde på den här instansen",
-	"%d row(s) skipped and %d reference(s) unresolved — see the groups below." : "%d rad(er) hoppades över och %d referens(er) är olösta — se grupperna nedan.",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:" : "%s fortsätter vara gratis (AGPL) på er Nextcloud. Buggrapporter och idéer på GitHub är fortfarande välkomna — det ingår i det fria underhållet av öppen källkod. Om er organisation behöver hjälp mot faktura — eller officiella mobillicenser — välj ett alternativ nedan:",
 	"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:" : "%s fortsätter vara gratis (AGPL) på er Nextcloud. Buggrapporter och idéer på GitHub är fortfarande välkomna — det ingår i det fria underhållet av öppen källkod. Om er organisation behöver hjälp mot faktura väljer du ett alternativ nedan:",
-	"(%d env-bound value(s) emptied)" : "(%d instansbundna värden tömda)",
-	"(%d filtered)" : "(%d filtrerade)",
-	"(%d secret(s) redacted)" : "(%d hemligheter maskerade)",
-	"(%d unresolved ref)" : "(%d olösta referenser)",
 	"(opens in a new tab)" : "(öppnas i en ny flik)",
 	"(unknown — skipped)" : "(okänd — hoppades över)",
 	"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update." : "En licensnyckel är lagrad, men den här servern kan inte verifiera signaturen med leverantörens publika nyckel. Kompanjonapparna avvisar licensen tills nyckeln signerats med den matchande leverantörssigneringsnyckeln. Applicera en korrekt signerad licens igen eller kontakta supporten om det kvarstår efter en appuppdatering.",
@@ -145,7 +139,7 @@ OC.L10N.register(
 	"Create first tour" : "Skapa första ronden",
 	"Create team" : "Skapa team",
 	"Cron" : "Cron",
-	"Current license" : "Aktuell licens",
+	"Current license" : "Nuvarande licens",
 	"Customer" : "Kund",
 	"Customer ID" : "Kund-ID",
 	"CustomerCheck is not installed — CRM linking is unavailable." : "CustomerCheck är inte installerat — CRM-länkning är inte tillgänglig.",
@@ -413,7 +407,7 @@ OC.L10N.register(
 	"PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck." : "PrivacyCheck för ditt GDPR-register (VVT) och konsekvensbedömningarna. Ett klick skapar ett färdigt utkast för CareCheck — en integritetsansvarig granskar och publicerar det i PrivacyCheck.",
 	"Private Zusatzleistung" : "Privat tilläggstjänst",
 	"Product page" : "Produktsida",
-	"Provide this ID when ordering a license so the key can be bound to this server." : "Ange detta ID när beställer en licens så att nyckeln kan bindas till den här servern.",
+	"Provide this ID when ordering a license so the key can be bound to this server." : "Ange detta ID vid licensorder så att nyckeln kan bindas till den här servern.",
 	"Provider timezone" : "Vårdgivarens tidszon",
 	"Provider-wide configuration — one section per page." : "Konfiguration för hela vårdgivaren — en sektion per sida.",
 	"Publish plan" : "Publicera plan",
@@ -589,7 +583,6 @@ OC.L10N.register(
 	"Voice note added" : "Röstanteckning tillagd",
 	"Voice note transcribed" : "Röstanteckning transkriberad",
 	"Waiting for the job…" : "Väntar på jobbet…",
-	"Warning: %d row(s) will be permanently deleted, then the file data is loaded." : "Varning: %d rad(er) raderas permanent, sedan läses filens data in.",
 	"Wed" : "Ons",
 	"Weekdays" : "Veckodagar",
 	"Weekly templates — stops materialize into daily tours." : "Veckomallar — stopp blir dagliga rundor.",
@@ -647,6 +640,15 @@ OC.L10N.register(
 	"the mobile companion app" : "den mobila kompanjonappen",
 	"uncovered" : "obemannad",
 	"undo via snapshot" : "ångra via ögonblicksbild",
-	"will be skipped" : "kommer att hoppas över"
-	}
+	"will be skipped" : "kommer att hoppas över",
+	"_1 row skipped._::_%n rows skipped._" : ["1 rad hoppades över.","%n rader hoppades över."],
+	"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._" : ["1 referens är olöst — se grupperna nedan.","%n referenser är olösta — se grupperna nedan."],
+	"_1 row needs a value on this instance_::_%n rows need a value on this instance_" : ["1 rad behöver ett värde på den här instansen","%n rader behöver ett värde på den här instansen"],
+	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 instansbundet värde tömt)","(%n instansbundna värden tömda)"],
+	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtrerad)","(%n filtrerade)"],
+	"_(1 secret redacted)_::_(%n secrets redacted)_" : ["(1 hemlighet maskerad)","(%n hemligheter maskerade)"],
+	"_(1 unresolved ref)_::_(%n unresolved refs)_" : ["(1 olöst referens)","(%n olösta referenser)"],
+	"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._" : ["Varning: 1 rad raderas permanent, sedan läses filens data in.","Varning: %n rader raderas permanent, sedan läses filens data in."]
+	},
+	"nplurals=2; plural=(n != 1);"
 );
