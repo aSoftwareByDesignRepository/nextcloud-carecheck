@@ -72,8 +72,7 @@ class VisitService
 		$idem = BundleValidator::idemKey($in);
 		$existing = $this->findByIdem($actorRef, $idem);
 		if ($existing !== null) {
-			return $this->serialize($existing)
-				+ ['briefing' => $this->briefing((int)$existing->getClientId())]; // idempotent replay → same visit
+			return $this->checkinResponse($existing); // idempotent replay → same visit
 		}
 		$clientId = $this->clientId($in);
 		$this->acl->assertClientScope($actorRef, $clientId);
@@ -129,12 +128,12 @@ class VisitService
 				// UNIQUE(actor_ref, idem_key). Re-read and replay — same response.
 				$dup = $this->findByIdem($actorRef, $idem);
 				if ($dup !== null) {
-					return $this->serialize($dup);
+					return $this->checkinResponse($dup);
 				}
 			}
 			throw $e;
 		}
-		return $this->serialize($v);
+		return $this->checkinResponse($v);
 	}
 
 	/**
@@ -603,10 +602,22 @@ class VisitService
 		return (int)$raw;
 	}
 
+	/**
+	 * Checkin response = the visit row + the briefing safety card (MH-07b).
+	 * ONE helper for all three return paths — fresh insert, idempotent
+	 * replay, unique-collision dup — so the wire shape can never drift
+	 * between them: the companion renders the briefing before knocking and
+	 * links media through CheckinResult.visitId on every path.
+	 */
+	private function checkinResponse(Visit $v): array
+	{
+		return $this->serialize($v) + ['briefing' => $this->briefing((int)$v->getClientId())];
+	}
+
 	private function serialize(Visit $v): array
 	{
 		return [
-			'id' => (int)$v->getId(), 'clientId' => (int)$v->getClientId(), 'tstopId' => $v->getTstopId() !== null ? (int)$v->getTstopId() : null,
+			'id' => (int)$v->getId(), 'visitId' => (int)$v->getId(), 'clientId' => (int)$v->getClientId(), 'tstopId' => $v->getTstopId() !== null ? (int)$v->getTstopId() : null,
 			'status' => $v->getStatus(), 'checkinTs' => $v->getCheckinTs()?->format(\DateTimeInterface::ATOM),
 			'checkoutTs' => $v->getCheckoutTs()?->format(\DateTimeInterface::ATOM), 'durationSec' => $v->getDurationSec(),
 			'sigState' => $v->getSigState(), 'qualMismatch' => (int)$v->getQualMismatch() === 1,
