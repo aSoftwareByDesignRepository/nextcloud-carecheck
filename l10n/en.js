@@ -648,7 +648,15 @@ OC.L10N.register(
 	"You do not have the rights for this action." : "You do not have the rights for this action.",
 	"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned." : "You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.",
 	"Your license expires within 30 days. Contact your vendor to renew." : "Your license expires within 30 days. Contact your vendor to renew.",
-	"Zentrale" : "Head office"
+	"Zentrale" : "Head office",
+	"1 setting" : "1 setting",
+	"%n settings" : "%n settings",
+	"1 row" : "1 row",
+	"%n rows" : "%n rows",
+	"_1 row_::_%n rows_" : ["1 row","%n rows"],
+	"_1 setting_::_%n settings_" : ["1 setting","%n settings"],
+	"This will update %1$s and %2$s — nothing is deleted." : "This will update %1$s and %2$s — nothing is deleted.",
+	"Import applied. %1$s and %2$s written." : "Import applied. %1$s and %2$s written."
 	},
 	"nplurals=2; plural=(n != 1);"
 );
