@@ -162,7 +162,6 @@
 		"Digest sent": "Sammanfattning skickad",
 		"Display name": "Visningsnamn",
 		"Done": "Klart",
-		"done": "klar",
 		"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance.": "Ladda ner alla inställningar, kataloger och affärsdata som en krypterad fil — importera den sedan på din produktionsinstans.",
 		"Download encrypted transfer file": "Ladda ner krypterad överföringsfil",
 		"Draft": "Utkast",
@@ -428,7 +427,7 @@
 		"Remove lead": "Ta bort teamledare",
 		"Remove license": "Ta bort licens",
 		"Remove link": "Ta bort länk",
-		"Remove mobile seat": "Ta bort mobil plats",
+		"Remove mobile seat": "Ta bort mobilplats",
 		"Remove mobile seat for this person?": "Ta bort mobilplatsen för den här personen?",
 		"Remove stop": "Ta bort stopp",
 		"Remove the license? The companion app locks for everyone.": "Ta bort licensen? Kompanjonappen låses för alla.",
@@ -595,6 +594,38 @@
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Du valde %1$d personer men endast %2$d platser återstår. Endast lediga platser tilldelas.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Din licens går ut inom 30 dagar. Kontakta din leverantör för att förnya.",
 		"Zentrale": "Huvudkontor",
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 instansbundet värde tömt)",
+			"(%n instansbundna värden tömda)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 filtrerad)",
+			"(%n filtrerade)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 hemlighet maskerad)",
+			"(%n hemligheter maskerade)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 olöst referens)",
+			"(%n olösta referenser)"
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 referens är olöst — se grupperna nedan.",
+			"%n referenser är olösta — se grupperna nedan."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 rad behöver ett värde på den här instansen",
+			"%n rader behöver ett värde på den här instansen"
+		],
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 rad hoppades över.",
+			"%n rader hoppades över."
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Varning: 1 rad raderas permanent, sedan läses filens data in.",
+			"Varning: %n rader raderas permanent, sedan läses filens data in."
+		],
 		"acknowledged": "bekräftat",
 		"add and update; nothing is deleted": "lägg till och uppdatera; inget raderas",
 		"afternoon": "eftermiddag",
@@ -604,6 +635,7 @@
 		"by": "senast",
 		"clients": "klienter",
 		"custom time…": "egen tid…",
+		"done": "klar",
 		"e.g. Johanna Meier": "t.ex. Johanna Meier",
 		"e.g. Personal hygiene": "t.ex. Personlig hygien",
 		"e.g. Team North": "t.ex. Team Nord",
@@ -639,39 +671,7 @@
 		"the mobile companion app": "den mobila kompanjonappen",
 		"uncovered": "obemannad",
 		"undo via snapshot": "ångra via ögonblicksbild",
-		"will be skipped": "kommer att hoppas över",
-		"_1 row skipped._::_%n rows skipped._": [
-			"1 rad hoppades över.",
-			"%n rader hoppades över."
-		],
-		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
-			"1 referens är olöst — se grupperna nedan.",
-			"%n referenser är olösta — se grupperna nedan."
-		],
-		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
-			"1 rad behöver ett värde på den här instansen",
-			"%n rader behöver ett värde på den här instansen"
-		],
-		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
-			"(1 instansbundet värde tömt)",
-			"(%n instansbundna värden tömda)"
-		],
-		"_(1 filtered)_::_(%n filtered)_": [
-			"(1 filtrerad)",
-			"(%n filtrerade)"
-		],
-		"_(1 secret redacted)_::_(%n secrets redacted)_": [
-			"(1 hemlighet maskerad)",
-			"(%n hemligheter maskerade)"
-		],
-		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
-			"(1 olöst referens)",
-			"(%n olösta referenser)"
-		],
-		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
-			"Varning: 1 rad raderas permanent, sedan läses filens data in.",
-			"Varning: %n rader raderas permanent, sedan läses filens data in."
-		]
+		"will be skipped": "kommer att hoppas över"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

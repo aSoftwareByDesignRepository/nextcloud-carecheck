@@ -162,7 +162,6 @@
 		"Digest sent": "Oversigt sendt",
 		"Display name": "Vist navn",
 		"Done": "Færdig",
-		"done": "gjort",
 		"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance.": "Download alle indstillinger, kataloger og forretningsdata som én krypteret fil — og importér den på din produktionsinstans.",
 		"Download encrypted transfer file": "Download krypteret overførselsfil",
 		"Draft": "Kladde",
@@ -428,7 +427,7 @@
 		"Remove lead": "Fjern teamleder",
 		"Remove license": "Fjern licens",
 		"Remove link": "Fjern link",
-		"Remove mobile seat": "Fjern mobil plads",
+		"Remove mobile seat": "Fjern mobilplads",
 		"Remove mobile seat for this person?": "Fjern mobilplads for denne person?",
 		"Remove stop": "Fjern stop",
 		"Remove the license? The companion app locks for everyone.": "Fjern licensen? Companion-appen låses for alle.",
@@ -595,6 +594,38 @@
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Du valgte %1$d personer, men kun %2$d pladser er tilbage. Kun ledige pladser tildeles.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Dine licens udløber inden for 30 dage. kontakt din leverandør for at forny.",
 		"Zentrale": "Hovedkontor",
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 instansbunden værdi tømt)",
+			"(%n instansbundne værdier tømt)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 filtreret)",
+			"(%n filtrerede)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 hemmelighed sløret)",
+			"(%n hemmeligheder sløret)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 uopløst reference)",
+			"(%n uopløste referencer)"
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 reference uopløst — se grupperne nedenfor.",
+			"%n referencer uopløst — se grupperne nedenfor."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 række kræver en værdi på denne instans",
+			"%n rækker kræver en værdi på denne instans"
+		],
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 række sprunget over.",
+			"%n rækker sprunget over."
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Advarsel: 1 række slettes permanent, derefter indlæses fildataene.",
+			"Advarsel: %n rækker slettes permanent, derefter indlæses fildataene."
+		],
 		"acknowledged": "bekræftet",
 		"add and update; nothing is deleted": "tilføj og opdatér; intet slettes",
 		"afternoon": "eftermiddag",
@@ -604,6 +635,7 @@
 		"by": "senest",
 		"clients": "klienter",
 		"custom time…": "brugerdefineret tid…",
+		"done": "gjort",
 		"e.g. Johanna Meier": "f.eks. Johanna Meier",
 		"e.g. Personal hygiene": "f.eks. Personlig hygiejne",
 		"e.g. Team North": "f.eks. Team Nord",
@@ -639,39 +671,7 @@
 		"the mobile companion app": "mobil-companion-appen",
 		"uncovered": "ubesat",
 		"undo via snapshot": "fortryd via snapshot",
-		"will be skipped": "springes over",
-		"_1 row skipped._::_%n rows skipped._": [
-			"1 række sprunget over.",
-			"%n rækker sprunget over."
-		],
-		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
-			"1 reference uopløst — se grupperne nedenfor.",
-			"%n referencer uopløst — se grupperne nedenfor."
-		],
-		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
-			"1 række kræver en værdi på denne instans",
-			"%n rækker kræver en værdi på denne instans"
-		],
-		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
-			"(1 instansbunden værdi tømt)",
-			"(%n instansbundne værdier tømt)"
-		],
-		"_(1 filtered)_::_(%n filtered)_": [
-			"(1 filtreret)",
-			"(%n filtrerede)"
-		],
-		"_(1 secret redacted)_::_(%n secrets redacted)_": [
-			"(1 hemmelighed sløret)",
-			"(%n hemmeligheder sløret)"
-		],
-		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
-			"(1 uopløst reference)",
-			"(%n uopløste referencer)"
-		],
-		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
-			"Advarsel: 1 række slettes permanent, derefter indlæses fildataene.",
-			"Advarsel: %n rækker slettes permanent, derefter indlæses fildataene."
-		]
+		"will be skipped": "springes over"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

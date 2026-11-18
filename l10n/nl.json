@@ -39,7 +39,7 @@
 		"All clients": "Alle cliënten",
 		"All device slots are in use. Revoke a device or upgrade your license.": "Alle apparaatplaatsen zijn in gebruik. Trek een apparaat in of upgrade je licentie.",
 		"All members": "Alle leden",
-		"All mobile seats are assigned. Remove a user or upgrade your license.": "Alle Mobile-plaatsen zijn toegewezen. Verwijder een gebruiker of upgrade uw licentie.",
+		"All mobile seats are assigned. Remove a user or upgrade your license.": "Alle mobiele plaatsen zijn toegewezen. Verwijder een gebruiker of upgrade uw licentie.",
 		"All tasks": "Alle taken",
 		"Allowed groups": "Toegestane groepen",
 		"Allowed users": "Toegestane gebruikers",
@@ -162,7 +162,6 @@
 		"Digest sent": "Overzicht verzonden",
 		"Display name": "Weergavenaam",
 		"Done": "Klaar",
-		"done": "klaar",
 		"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance.": "Download alle instellingen, catalogi en bedrijfsgegevens als één versleuteld bestand — en importeer het op uw productie-instantie.",
 		"Download encrypted transfer file": "Versleuteld overdrachtsbestand downloaden",
 		"Draft": "Concept",
@@ -322,7 +321,7 @@
 		"No members match the filter.": "Geen leden komen overeen met het filter.",
 		"No members yet — add the first one above.": "Nog geen leden — voeg de eerste hierboven toe.",
 		"No members yet — add the first one below.": "Nog geen leden — voeg het eerste hieronder toe.",
-		"No mobile seats assigned yet.": "Nog geen Mobile-plaatsen toegewezen.",
+		"No mobile seats assigned yet.": "Nog geen mobiele plaatsen toegewezen.",
 		"No notices match the filter.": "Geen meldingen komen overeen met het filter.",
 		"No paired devices.": "Geen gekoppelde apparaten.",
 		"No photos yet.": "Nog geen foto's.",
@@ -595,6 +594,38 @@
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "U selecteerde %1$d personen maar er zijn nog maar %2$d plaatsen. Alleen vrije plaatsen worden toegewezen.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Je licentie verloopt binnen 30 dagen. Neem contact op met je leverancier om te verlengen.",
 		"Zentrale": "Hoofdkantoor",
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 installatiegebonden waarde geleegd)",
+			"(%n installatiegebonden waarden geleegd)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 gefilterd)",
+			"(%n gefilterd)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 geheim gemaskeerd)",
+			"(%n geheimen gemaskeerd)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 onopgeloste verwijzing)",
+			"(%n onopgeloste verwijzingen)"
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 verwijzing onopgelost — zie de groepen hieronder.",
+			"%n verwijzingen onopgelost — zie de groepen hieronder."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 rij heeft een waarde nodig op deze installatie",
+			"%n rijen hebben een waarde nodig op deze installatie"
+		],
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 rij overgeslagen.",
+			"%n rijen overgeslagen."
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Waarschuwing: 1 rij wordt definitief verwijderd, daarna worden de bestandsgegevens geladen.",
+			"Waarschuwing: %n rijen worden definitief verwijderd, daarna worden de bestandsgegevens geladen."
+		],
 		"acknowledged": "bevestigd",
 		"add and update; nothing is deleted": "toevoegen en bijwerken; niets wordt verwijderd",
 		"afternoon": "middag",
@@ -604,6 +635,7 @@
 		"by": "voor",
 		"clients": "cliënten",
 		"custom time…": "eigen tijdstip…",
+		"done": "klaar",
 		"e.g. Johanna Meier": "bijv. Johanna Meier",
 		"e.g. Personal hygiene": "bijv. Persoonlijke hygiëne",
 		"e.g. Team North": "bijv. Team Noord",
@@ -639,39 +671,7 @@
 		"the mobile companion app": "de mobiele companion-app",
 		"uncovered": "onafgedekt",
 		"undo via snapshot": "ongedaan maken via momentopname",
-		"will be skipped": "wordt overgeslagen",
-		"_1 row skipped._::_%n rows skipped._": [
-			"1 rij overgeslagen.",
-			"%n rijen overgeslagen."
-		],
-		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
-			"1 verwijzing onopgelost — zie de groepen hieronder.",
-			"%n verwijzingen onopgelost — zie de groepen hieronder."
-		],
-		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
-			"1 rij heeft een waarde nodig op deze installatie",
-			"%n rijen hebben een waarde nodig op deze installatie"
-		],
-		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
-			"(1 installatiegebonden waarde geleegd)",
-			"(%n installatiegebonden waarden geleegd)"
-		],
-		"_(1 filtered)_::_(%n filtered)_": [
-			"(1 gefilterd)",
-			"(%n gefilterd)"
-		],
-		"_(1 secret redacted)_::_(%n secrets redacted)_": [
-			"(1 geheim gemaskeerd)",
-			"(%n geheimen gemaskeerd)"
-		],
-		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
-			"(1 onopgeloste verwijzing)",
-			"(%n onopgeloste verwijzingen)"
-		],
-		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
-			"Waarschuwing: 1 rij wordt definitief verwijderd, daarna worden de bestandsgegevens geladen.",
-			"Waarschuwing: %n rijen worden definitief verwijderd, daarna worden de bestandsgegevens geladen."
-		]
+		"will be skipped": "wordt overgeslagen"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

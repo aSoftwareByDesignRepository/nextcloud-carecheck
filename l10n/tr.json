@@ -124,7 +124,7 @@
 		"Confirm": "Onayla",
 		"Connection failed — check the network and try again.": "Bağlantı başarısız — ağı denetleyip yeniden deneyin.",
 		"Copied.": "Kopyalandı.",
-		"Copy token": "Belirteci kopyala",
+		"Copy token": "Tokenı kopyala",
 		"Could not assign seat.": "Lisans hakkı atanamadı.",
 		"Could not generate a pairing code.": "Eşleştirme kodu oluşturulamadı.",
 		"Could not register device.": "Cihaz kaydedilemedi.",
@@ -162,7 +162,6 @@
 		"Digest sent": "Özet gönderildi",
 		"Display name": "Görünen ad",
 		"Done": "Tamam",
-		"done": "tamamlandı",
 		"Download all settings, catalogues and business data as one encrypted file — then import it on your production instance.": "Tüm ayarları, katalogları ve iş verilerini tek şifreli dosya olarak indirin — ardından üretim ortamınıza içe aktarın.",
 		"Download encrypted transfer file": "Şifreli aktarım dosyasını indir",
 		"Draft": "Taslak",
@@ -530,7 +529,7 @@
 		"This file was exported from a newer app version. Update this app first.": "Bu dosya daha yeni bir uygulama sürümünden dışa aktarıldı. Önce uygulamayı güncelleyin.",
 		"This file was exported from this instance.": "Bu dosya bu ortamdan dışa aktarıldı.",
 		"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.": "Bu sunucunun Nextcloud örnek kimliği (destek / satış referansı için). Lisanslar örneğe bağlı değildir.",
-		"This token is shown only once. Paste it into the companion app on the device.": "Bu belirteç yalnızca bir kez gösterilir. Cihazdaki eşlik uygulamasına yapıştır.",
+		"This token is shown only once. Paste it into the companion app on the device.": "Bu token yalnızca bir kez gösterilir. Cihazdaki eşlik uygulamasına yapıştır.",
 		"This will update %d settings and %d rows — nothing is deleted.": "Bu işlem %d ayarı ve %d satırı güncelleyecek — hiçbir şey silinmeyecek.",
 		"Thu": "Per",
 		"Time of day": "Günün saati",
@@ -595,6 +594,38 @@
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "%1$d kişi seçtiniz ancak yalnızca %2$d lisans hakkı kaldı. Yalnızca boş lisans hakları atanır.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Lisansınız 30 gün içinde sona eriyor. Yenilemek için tedarikçinize başvurun.",
 		"Zentrale": "Merkez",
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 örneğe bağlı değer boşaltıldı)",
+			"(%n örneğe bağlı değer boşaltıldı)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(1 filtrelendi)",
+			"(%n filtrelendi)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(1 sır gizlendi)",
+			"(%n sır gizlendi)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 çözümlenemeyen başvuru)",
+			"(%n çözümlenemeyen başvuru)"
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 başvuru çözümlenemedi — aşağıdaki gruplara bakın.",
+			"%n başvuru çözümlenemedi — aşağıdaki gruplara bakın."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"1 satırın bu örnekte bir değere ihtiyacı var",
+			"%n satırın bu örnekte bir değere ihtiyacı var"
+		],
+		"_1 row skipped._::_%n rows skipped._": [
+			"1 satır atlandı.",
+			"%n satır atlandı."
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Uyarı: 1 satır kalıcı olarak silinecek, ardından dosya verileri yüklenecek.",
+			"Uyarı: %n satır kalıcı olarak silinecek, ardından dosya verileri yüklenecek."
+		],
 		"acknowledged": "onaylandı",
 		"add and update; nothing is deleted": "ekle ve güncelle; hiçbir şey silinmez",
 		"afternoon": "öğleden sonra",
@@ -604,6 +635,7 @@
 		"by": "en geç",
 		"clients": "bakım verilen kişi",
 		"custom time…": "özel saat…",
+		"done": "tamamlandı",
 		"e.g. Johanna Meier": "örn. Ayşe Yılmaz",
 		"e.g. Personal hygiene": "örn. Kişisel hijyen",
 		"e.g. Team North": "örn. Kuzey Ekibi",
@@ -639,39 +671,7 @@
 		"the mobile companion app": "mobil eşlik uygulaması",
 		"uncovered": "karşılanmadı",
 		"undo via snapshot": "anlık görüntüyle geri al",
-		"will be skipped": "atlanacak",
-		"_1 row skipped._::_%n rows skipped._": [
-			"1 satır atlandı.",
-			"%n satır atlandı."
-		],
-		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
-			"1 başvuru çözümlenemedi — aşağıdaki gruplara bakın.",
-			"%n başvuru çözümlenemedi — aşağıdaki gruplara bakın."
-		],
-		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
-			"1 satırın bu örnekte bir değere ihtiyacı var",
-			"%n satırın bu örnekte bir değere ihtiyacı var"
-		],
-		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
-			"(1 örneğe bağlı değer boşaltıldı)",
-			"(%n örneğe bağlı değer boşaltıldı)"
-		],
-		"_(1 filtered)_::_(%n filtered)_": [
-			"(1 filtrelendi)",
-			"(%n filtrelendi)"
-		],
-		"_(1 secret redacted)_::_(%n secrets redacted)_": [
-			"(1 sır gizlendi)",
-			"(%n sır gizlendi)"
-		],
-		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
-			"(1 çözümlenemeyen başvuru)",
-			"(%n çözümlenemeyen başvuru)"
-		],
-		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
-			"Uyarı: 1 satır kalıcı olarak silinecek, ardından dosya verileri yüklenecek.",
-			"Uyarı: %n satır kalıcı olarak silinecek, ardından dosya verileri yüklenecek."
-		]
+		"will be skipped": "atlanacak"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }
