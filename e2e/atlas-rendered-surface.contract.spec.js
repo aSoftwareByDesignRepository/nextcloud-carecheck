@@ -54,6 +54,7 @@ const SURFACES = [
 	['#/settings/general', 'settings general'],
 	['#/settings/companion', 'settings companion'],
 	['#/settings/access', 'settings access'],
+	['#/settings/license', 'settings license'],
 	['#/settings/privacy', 'settings privacy'],
 	['#/settings/transfer', 'settings transfer'],
 	['#/settings/support', 'settings support'],
