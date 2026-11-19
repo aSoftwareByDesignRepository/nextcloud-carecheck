@@ -135,7 +135,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Commissioned feature",
 	"Companion app" : "Companion app",
 	"Companion license" : "Companion license",
-	"Companion requests per minute / device" : "Companion requests per minute / device",
+	"Companion requests per minute \/ device" : "Companion requests per minute \/ device",
 	"Config changes" : "Config changes",
 	"Confirm" : "Confirm",
 	"Connection failed — check the network and try again." : "Connection failed — check the network and try again.",
@@ -579,14 +579,14 @@ OC.L10N.register(
 	"This file is older than the last import on this instance." : "This file is older than the last import on this instance.",
 	"This file was exported from a newer app version. Update this app first." : "This file was exported from a newer app version. Update this app first.",
 	"This file was exported from this instance." : "This file was exported from this instance.",
-	"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound." : "This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.",
+	"This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound." : "This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound.",
 	"This token is shown only once. Paste it into the companion app on the device." : "This token is shown only once. Paste it into the companion app on the device.",
 	"This will update %d settings and %d rows — nothing is deleted." : "This will update %d settings and %d rows — nothing is deleted.",
 	"Thu" : "Thu",
 	"Time of day" : "Time of day",
 	"Time rule" : "Time rule",
 	"Time-of-day presets" : "Time-of-day presets",
-	"To / deadline" : "To / deadline",
+	"To \/ deadline" : "To \/ deadline",
 	"Today" : "Today",
 	"Today at a glance — every stop, every caregiver." : "Today at a glance — every stop, every caregiver.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Today’s tour at a glance — offline, encrypted on the device.",
@@ -617,7 +617,7 @@ OC.L10N.register(
 	"Unknown" : "Unknown",
 	"Unknown tables skipped" : "Unknown tables skipped",
 	"Unnamed device" : "Unnamed device",
-	"Unresolved users / groups" : "Unresolved users / groups",
+	"Unresolved users \/ groups" : "Unresolved users \/ groups",
 	"Until" : "Until",
 	"Update tour template" : "Update tour template",
 	"Upload failed." : "Upload failed.",
@@ -657,6 +657,5 @@ OC.L10N.register(
 	"_1 setting_::_%n settings_" : ["1 setting","%n settings"],
 	"This will update %1$s and %2$s — nothing is deleted." : "This will update %1$s and %2$s — nothing is deleted.",
 	"Import applied. %1$s and %2$s written." : "Import applied. %1$s and %2$s written."
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );
