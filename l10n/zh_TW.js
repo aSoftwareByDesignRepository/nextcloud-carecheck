@@ -135,7 +135,7 @@ OC.L10N.register(
 	"Commissioned feature" : "委託開發功能",
 	"Companion app" : "配套應用",
 	"Companion license" : "配套授權",
-	"Companion requests per minute \/ device" : "配套應用每分鐘請求數\/裝置",
+	"Companion requests per minute / device" : "配套應用每分鐘請求數/裝置",
 	"Config changes" : "配置變更",
 	"Confirm" : "確認",
 	"Connection failed — check the network and try again." : "連線失敗——請檢查網路後重試。",
@@ -579,14 +579,14 @@ OC.L10N.register(
 	"This file is older than the last import on this instance." : "此檔案早於此執行個體的上次匯入。",
 	"This file was exported from a newer app version. Update this app first." : "此檔案由更新版本的應用匯出。請先更新本應用。",
 	"This file was exported from this instance." : "此檔案匯出自本執行個體。",
-	"This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound." : "此伺服器的 Nextcloud 執行個體 ID（供支援\/銷售參考）。授權不綁定執行個體。",
+	"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound." : "此伺服器的 Nextcloud 執行個體 ID（供支援/銷售參考）。授權不綁定執行個體。",
 	"This token is shown only once. Paste it into the companion app on the device." : "此權杖僅顯示一次。請將其貼上到裝置上的配套應用程式中。",
 	"This will update %d settings and %d rows — nothing is deleted." : "這將更新 %d 項設定與 %d 列資料——不會刪除任何內容。",
 	"Thu" : "週四",
 	"Time of day" : "時段",
 	"Time rule" : "時間規則",
 	"Time-of-day presets" : "時段預設",
-	"To \/ deadline" : "至 \/ 期限",
+	"To / deadline" : "至 / 期限",
 	"Today" : "今天",
 	"Today at a glance — every stop, every caregiver." : "今日一覽——每個站點、每位護理員。",
 	"Today’s tour at a glance — offline, encrypted on the device." : "今日巡訪一覽——離線可用，在裝置上加密。",
@@ -617,7 +617,7 @@ OC.L10N.register(
 	"Unknown" : "未知",
 	"Unknown tables skipped" : "已跳過未知表",
 	"Unnamed device" : "未命名裝置",
-	"Unresolved users \/ groups" : "無法解析的使用者\/組",
+	"Unresolved users / groups" : "無法解析的使用者/組",
 	"Until" : "至",
 	"Update tour template" : "更新巡訪模板",
 	"Upload failed." : "上傳失敗。",
@@ -657,5 +657,6 @@ OC.L10N.register(
 	"_1 setting_::_%n settings_" : ["%n 項設定"],
 	"This will update %1$s and %2$s — nothing is deleted." : "這將更新 %1$s 與 %2$s——不會刪除任何內容。",
 	"Import applied. %1$s and %2$s written." : "匯入已套用。已寫入 %1$s 與 %2$s。"
-	}
+	},
+	"nplurals=1; plural=0;"
 );

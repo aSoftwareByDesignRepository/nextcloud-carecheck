@@ -135,7 +135,7 @@ OC.L10N.register(
 	"Commissioned feature" : "委托开发功能",
 	"Companion app" : "配套应用",
 	"Companion license" : "配套许可证",
-	"Companion requests per minute \/ device" : "配套应用每分钟请求数\/设备",
+	"Companion requests per minute / device" : "配套应用每分钟请求数/设备",
 	"Config changes" : "配置变更",
 	"Confirm" : "确认",
 	"Connection failed — check the network and try again." : "连接失败——请检查网络后重试。",
@@ -579,14 +579,14 @@ OC.L10N.register(
 	"This file is older than the last import on this instance." : "此文件早于此实例的上次导入。",
 	"This file was exported from a newer app version. Update this app first." : "此文件由更新版本的应用导出。请先更新本应用。",
 	"This file was exported from this instance." : "此文件导出自本实例。",
-	"This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound." : "此服务器的 Nextcloud 实例 ID（供支持\/销售参考）。许可证不绑定实例。",
+	"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound." : "此服务器的 Nextcloud 实例 ID（供支持/销售参考）。许可证不绑定实例。",
 	"This token is shown only once. Paste it into the companion app on the device." : "此令牌仅显示一次。请将其粘贴到设备上的配套应用中。",
 	"This will update %d settings and %d rows — nothing is deleted." : "这将更新 %d 项设置和 %d 行数据——不会删除任何内容。",
 	"Thu" : "周四",
 	"Time of day" : "时段",
 	"Time rule" : "时间规则",
 	"Time-of-day presets" : "时段预设",
-	"To \/ deadline" : "至 \/ 期限",
+	"To / deadline" : "至 / 期限",
 	"Today" : "今天",
 	"Today at a glance — every stop, every caregiver." : "今日一览——每个站点、每位护理员。",
 	"Today’s tour at a glance — offline, encrypted on the device." : "今日巡访一览——离线可用，在设备上加密。",
@@ -617,7 +617,7 @@ OC.L10N.register(
 	"Unknown" : "未知",
 	"Unknown tables skipped" : "已跳过未知表",
 	"Unnamed device" : "未命名设备",
-	"Unresolved users \/ groups" : "无法解析的用户\/组",
+	"Unresolved users / groups" : "无法解析的用户/组",
 	"Until" : "至",
 	"Update tour template" : "更新巡访模板",
 	"Upload failed." : "上传失败。",
@@ -657,5 +657,6 @@ OC.L10N.register(
 	"_1 setting_::_%n settings_" : ["%n 项设置"],
 	"This will update %1$s and %2$s — nothing is deleted." : "这将更新 %1$s 和 %2$s——不会删除任何内容。",
 	"Import applied. %1$s and %2$s written." : "导入已应用。已写入 %1$s 和 %2$s。"
-	}
+	},
+	"nplurals=1; plural=0;"
 );

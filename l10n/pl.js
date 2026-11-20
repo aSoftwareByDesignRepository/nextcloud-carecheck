@@ -135,7 +135,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Funkcja na zamówienie",
 	"Companion app" : "Aplikacja towarzysząca",
 	"Companion license" : "Licencja aplikacji towarzyszącej",
-	"Companion requests per minute \/ device" : "Żądania aplikacji na minutę \/ urządzenie",
+	"Companion requests per minute / device" : "Żądania aplikacji na minutę / urządzenie",
 	"Config changes" : "Zmiany konfiguracji",
 	"Confirm" : "Potwierdź",
 	"Connection failed — check the network and try again." : "Połączenie nie powiodło się — sprawdź sieć i spróbuj ponownie.",
@@ -579,14 +579,14 @@ OC.L10N.register(
 	"This file is older than the last import on this instance." : "Ten plik jest starszy niż ostatni import na tej instancji.",
 	"This file was exported from a newer app version. Update this app first." : "Ten plik wyeksportowano z nowszej wersji aplikacji. Najpierw zaktualizuj aplikację.",
 	"This file was exported from this instance." : "Ten plik wyeksportowano z tej instancji.",
-	"This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound." : "ID instancji Nextcloud tego serwera (dla wsparcia \/ sprzedaży). Licencje nie są powiązane z instancją.",
+	"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound." : "ID instancji Nextcloud tego serwera (dla wsparcia / sprzedaży). Licencje nie są powiązane z instancją.",
 	"This token is shown only once. Paste it into the companion app on the device." : "Ten token jest wyświetlany tylko raz. Wklej go w aplikacji towarzyszącej na urządzeniu.",
 	"This will update %d settings and %d rows — nothing is deleted." : "Spowoduje to aktualizację %d ustawień i %d wierszy — nic nie zostanie usunięte.",
 	"Thu" : "Cz",
 	"Time of day" : "Pora dnia",
 	"Time rule" : "Reguła czasowa",
 	"Time-of-day presets" : "Predefiniowane pory dnia",
-	"To \/ deadline" : "Do \/ termin",
+	"To / deadline" : "Do / termin",
 	"Today" : "Dzisiaj",
 	"Today at a glance — every stop, every caregiver." : "Dzisiaj w skrócie — każdy przystanek, każdy opiekun.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "Dzisiejsza trasa w skrócie — offline, zaszyfrowana na urządzeniu.",
@@ -617,7 +617,7 @@ OC.L10N.register(
 	"Unknown" : "Nieznany",
 	"Unknown tables skipped" : "Pominięto nieznane tabele",
 	"Unnamed device" : "Urządzenie bez nazwy",
-	"Unresolved users \/ groups" : "Nierozpoznani użytkownicy \/ grupy",
+	"Unresolved users / groups" : "Nierozpoznani użytkownicy / grupy",
 	"Until" : "Do",
 	"Update tour template" : "Zaktualizuj szablon trasy",
 	"Upload failed." : "Przesyłanie nie powiodło się.",
@@ -657,5 +657,6 @@ OC.L10N.register(
 	"_1 setting_::_%n settings_" : ["1 ustawienie","%n ustawienia","%n ustawień"],
 	"This will update %1$s and %2$s — nothing is deleted." : "Spowoduje to aktualizację %1$s i %2$s — nic nie zostanie usunięte.",
 	"Import applied. %1$s and %2$s written." : "Import zastosowany. Zapisano %1$s i %2$s."
-	}
+	},
+	"nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 );

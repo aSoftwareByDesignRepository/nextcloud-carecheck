@@ -135,7 +135,7 @@ OC.L10N.register(
 	"Commissioned feature" : "Funcionalidade por encomenda",
 	"Companion app" : "App complementar",
 	"Companion license" : "Licença complementar",
-	"Companion requests per minute \/ device" : "Pedidos da app por minuto \/ dispositivo",
+	"Companion requests per minute / device" : "Pedidos da app por minuto / dispositivo",
 	"Config changes" : "Alterações de configuração",
 	"Confirm" : "Confirmar",
 	"Connection failed — check the network and try again." : "Falha de ligação — verifique a rede e tente novamente.",
@@ -579,14 +579,14 @@ OC.L10N.register(
 	"This file is older than the last import on this instance." : "Este ficheiro é mais antigo do que a última importação nesta instância.",
 	"This file was exported from a newer app version. Update this app first." : "Este ficheiro foi exportado de uma versão mais recente da app. Atualize primeiro a app.",
 	"This file was exported from this instance." : "Este ficheiro foi exportado desta instância.",
-	"This server’s Nextcloud instance ID (for support \/ sales reference). Licenses are not instance-bound." : "ID de instância Nextcloud deste servidor (referência para suporte \/ vendas). As licenças não estão vinculadas à instância.",
+	"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound." : "ID de instância Nextcloud deste servidor (referência para suporte / vendas). As licenças não estão vinculadas à instância.",
 	"This token is shown only once. Paste it into the companion app on the device." : "Este token só é mostrado uma vez. Cole-o na aplicação complementar no dispositivo.",
 	"This will update %d settings and %d rows — nothing is deleted." : "Isto irá atualizar %d definições e %d linhas — nada será eliminado.",
 	"Thu" : "Qui",
 	"Time of day" : "Período do dia",
 	"Time rule" : "Regra horária",
 	"Time-of-day presets" : "Predefinições de períodos do dia",
-	"To \/ deadline" : "Até \/ prazo",
+	"To / deadline" : "Até / prazo",
 	"Today" : "Hoje",
 	"Today at a glance — every stop, every caregiver." : "Hoje num relance — cada paragem, cada cuidador.",
 	"Today’s tour at a glance — offline, encrypted on the device." : "A ronda de hoje num relance — offline, encriptada no dispositivo.",
@@ -617,7 +617,7 @@ OC.L10N.register(
 	"Unknown" : "Desconhecido",
 	"Unknown tables skipped" : "Tabelas desconhecidas ignoradas",
 	"Unnamed device" : "Dispositivo sem nome",
-	"Unresolved users \/ groups" : "Utilizadores \/ grupos não resolvidos",
+	"Unresolved users / groups" : "Utilizadores / grupos não resolvidos",
 	"Until" : "Até",
 	"Update tour template" : "Atualizar modelo de rota",
 	"Upload failed." : "O carregamento falhou.",
@@ -657,5 +657,6 @@ OC.L10N.register(
 	"_1 setting_::_%n settings_" : ["1 definição","%n definições"],
 	"This will update %1$s and %2$s — nothing is deleted." : "Isto irá atualizar %1$s e %2$s — nada será eliminado.",
 	"Import applied. %1$s and %2$s written." : "Importação aplicada. %1$s e %2$s escritas."
-	}
+	},
+	"nplurals=2; plural=(n > 1);"
 );
