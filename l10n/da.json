@@ -2,10 +2,14 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "%1$d af %2$d enhedspladser i brug.",
 		"%1$d of %2$d seats assigned": "%1$d af %2$d pladser tildelt",
+		"%n rows": "%n rækker",
+		"%n settings": "%n indstillinger",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s forbliver gratis (AGPL) på jeres Nextcloud. Fejlrapporter og idéer på GitHub er stadig velkomne — det hører til den gratis open source-vedligeholdelse. Hvis jeres organisation har brug for hjælp på faktura — eller officielle mobillicenser — vælg en mulighed nedenfor:",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s forbliver gratis (AGPL) på jeres Nextcloud. Fejlrapporter og idéer på GitHub er stadig velkomne — det hører til den gratis open source-vedligeholdelse. Hvis jeres organisation har brug for hjælp på faktura, vælg en mulighed nedenfor:",
 		"(opens in a new tab)": "(åbner i et nyt faneblad)",
 		"(unknown — skipped)": "(ukendt — sprunget over)",
+		"1 row": "1 række",
+		"1 setting": "1 indstilling",
 		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
 			"(1 instansbunden værdi tømt)",
 			"(%n instansbundne værdier tømt)"
@@ -33,6 +37,14 @@
 		"_1 row skipped._::_%n rows skipped._": [
 			"1 række sprunget over.",
 			"%n rækker sprunget over."
+		],
+		"_1 row_::_%n rows_": [
+			"1 række",
+			"%n rækker"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 indstilling",
+			"%n indstillinger"
 		],
 		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
 			"Advarsel: 1 række slettes permanent, derefter indlæses fildataene.",
@@ -274,6 +286,7 @@
 		"Icon": "Ikon",
 		"Icon (emoji, optional)": "Ikon (emoji, valgfri)",
 		"Icon (optional)": "Ikon (valgfrit)",
+		"Import applied. %1$s and %2$s written.": "Import anvendt. %1$s og %2$s skrevet.",
 		"Import applied. %d settings and %d rows written.": "Import anvendt. %d indstillinger og %d rækker skrevet.",
 		"Import configuration": "Importér konfiguration",
 		"Import failed — nothing was changed.": "Import mislykkedes — intet blev ændret.",
@@ -604,6 +617,7 @@
 		"This file was exported from this instance.": "Denne fil blev eksporteret fra denne instans.",
 		"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.": "Denne servers Nextcloud-instans-ID (til support-/salgsreference). Licenser er ikke bundet til en instans.",
 		"This token is shown only once. Paste it into the companion app on the device.": "Dette token vises kun én gang. Indsæt det i companion-appen på enheden.",
+		"This will update %1$s and %2$s — nothing is deleted.": "Dette opdaterer %1$s og %2$s — intet slettes.",
 		"This will update %d settings and %d rows — nothing is deleted.": "Dette opdaterer %d indstillinger og %d rækker — intet slettes.",
 		"Thu": "Tor",
 		"Time of day": "Tidspunkt på dagen",
@@ -671,21 +685,7 @@
 		"You do not have the rights for this action.": "Du har ikke rettigheder til denne handling.",
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Du valgte %1$d personer, men kun %2$d pladser er tilbage. Kun ledige pladser tildeles.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Dine licens udløber inden for 30 dage. kontakt din leverandør for at forny.",
-		"Zentrale": "Hovedkontor",
-		"1 setting": "1 indstilling",
-		"%n settings": "%n indstillinger",
-		"1 row": "1 række",
-		"%n rows": "%n rækker",
-		"_1 row_::_%n rows_": [
-			"1 række",
-			"%n rækker"
-		],
-		"_1 setting_::_%n settings_": [
-			"1 indstilling",
-			"%n indstillinger"
-		],
-		"This will update %1$s and %2$s — nothing is deleted.": "Dette opdaterer %1$s og %2$s — intet slettes.",
-		"Import applied. %1$s and %2$s written.": "Import anvendt. %1$s og %2$s skrevet."
+		"Zentrale": "Hovedkontor"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

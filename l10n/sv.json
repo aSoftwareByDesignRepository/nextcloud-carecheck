@@ -2,10 +2,14 @@
 	"translations": {
 		"%1$d of %2$d device slots in use.": "%1$d av %2$d enhetsplatser används.",
 		"%1$d of %2$d seats assigned": "%1$d av %2$d platser tilldelade",
+		"%n rows": "%n rader",
+		"%n settings": "%n inställningar",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s fortsätter vara gratis (AGPL) på er Nextcloud. Buggrapporter och idéer på GitHub är fortfarande välkomna — det ingår i det fria underhållet av öppen källkod. Om er organisation behöver hjälp mot faktura — eller officiella mobillicenser — välj ett alternativ nedan:",
 		"%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s fortsätter vara gratis (AGPL) på er Nextcloud. Buggrapporter och idéer på GitHub är fortfarande välkomna — det ingår i det fria underhållet av öppen källkod. Om er organisation behöver hjälp mot faktura väljer du ett alternativ nedan:",
 		"(opens in a new tab)": "(öppnas i en ny flik)",
 		"(unknown — skipped)": "(okänd — hoppades över)",
+		"1 row": "1 rad",
+		"1 setting": "1 inställning",
 		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
 			"(1 instansbundet värde tömt)",
 			"(%n instansbundna värden tömda)"
@@ -33,6 +37,14 @@
 		"_1 row skipped._::_%n rows skipped._": [
 			"1 rad hoppades över.",
 			"%n rader hoppades över."
+		],
+		"_1 row_::_%n rows_": [
+			"1 rad",
+			"%n rader"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 inställning",
+			"%n inställningar"
 		],
 		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
 			"Varning: 1 rad raderas permanent, sedan läses filens data in.",
@@ -274,6 +286,7 @@
 		"Icon": "Ikon",
 		"Icon (emoji, optional)": "Ikon (emoji, valfri)",
 		"Icon (optional)": "Ikon (valfri)",
+		"Import applied. %1$s and %2$s written.": "Importen har tillämpats. %1$s och %2$s skrivna.",
 		"Import applied. %d settings and %d rows written.": "Importen har tillämpats. %d inställningar och %d rader skrivna.",
 		"Import configuration": "Importera konfiguration",
 		"Import failed — nothing was changed.": "Importen misslyckades — inget ändrades.",
@@ -604,6 +617,7 @@
 		"This file was exported from this instance.": "Den här filen exporterades från den här instansen.",
 		"This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.": "Den här serverns Nextcloud-instans-ID (för support-/försäljningsreferens). Licenser är inte instansbundna.",
 		"This token is shown only once. Paste it into the companion app on the device.": "Denna token visas bara en gång. Klistra in den i kompanjonappen på enheten.",
+		"This will update %1$s and %2$s — nothing is deleted.": "Detta uppdaterar %1$s och %2$s — inget raderas.",
 		"This will update %d settings and %d rows — nothing is deleted.": "Detta uppdaterar %d inställningar och %d rader — inget raderas.",
 		"Thu": "Tor",
 		"Time of day": "Tid på dagen",
@@ -671,21 +685,7 @@
 		"You do not have the rights for this action.": "Du har inte behörighet för den här åtgärden.",
 		"You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Du valde %1$d personer men endast %2$d platser återstår. Endast lediga platser tilldelas.",
 		"Your license expires within 30 days. Contact your vendor to renew.": "Din licens går ut inom 30 dagar. Kontakta din leverantör för att förnya.",
-		"Zentrale": "Huvudkontor",
-		"1 setting": "1 inställning",
-		"%n settings": "%n inställningar",
-		"1 row": "1 rad",
-		"%n rows": "%n rader",
-		"_1 row_::_%n rows_": [
-			"1 rad",
-			"%n rader"
-		],
-		"_1 setting_::_%n settings_": [
-			"1 inställning",
-			"%n inställningar"
-		],
-		"This will update %1$s and %2$s — nothing is deleted.": "Detta uppdaterar %1$s och %2$s — inget raderas.",
-		"Import applied. %1$s and %2$s written.": "Importen har tillämpats. %1$s och %2$s skrivna."
+		"Zentrale": "Huvudkontor"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

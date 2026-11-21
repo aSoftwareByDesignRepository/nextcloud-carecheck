@@ -2,10 +2,14 @@
   "translations": {
     "%1$d of %2$d device slots in use.": "Użyto %1$d z %2$d miejsc dla urządzeń.",
     "%1$d of %2$d seats assigned": "%1$d z %2$d miejsc przypisanych",
+    "%n rows": "%n wiersze",
+    "%n settings": "%n ustawienia",
     "%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s pozostaje bezpłatna (AGPL) na Państwa Nextcloud. Zgłoszenia błędów i pomysły na GitHubie są nadal mile widziane — to część darmowego utrzymania open source. Jeśli Państwa organizacja potrzebuje pomocy z fakturą — albo oficjalnych licencji mobilnych — proszę wybrać opcję poniżej:",
     "%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s pozostaje bezpłatna (AGPL) na Państwa Nextcloud. Zgłoszenia błędów i pomysły na GitHubie są nadal mile widziane — to część darmowego utrzymania open source. Jeśli Państwa organizacja potrzebuje pomocy z fakturą, proszę wybrać opcję poniżej:",
     "(opens in a new tab)": "(otwiera się w nowej karcie)",
     "(unknown — skipped)": "(nieznane — pominięto)",
+    "1 row": "1 wiersz",
+    "1 setting": "1 ustawienie",
     "_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
       "(1 opróżniona wartość związana z instancją)",
       "(%n opróżnione wartości związane z instancją)",
@@ -40,6 +44,16 @@
       "Pominięto 1 wiersz.",
       "Pominięto %n wiersze.",
       "Pominięto %n wierszy."
+    ],
+    "_1 row_::_%n rows_": [
+      "1 wiersz",
+      "%n wiersze",
+      "%n wierszy"
+    ],
+    "_1 setting_::_%n settings_": [
+      "1 ustawienie",
+      "%n ustawienia",
+      "%n ustawień"
     ],
     "_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
       "Ostrzeżenie: 1 wiersz zostanie trwale usunięty, a następnie dane z pliku zostaną wczytane.",
@@ -282,6 +296,7 @@
     "Icon": "Ikona",
     "Icon (emoji, optional)": "Ikona (emoji, opcjonalnie)",
     "Icon (optional)": "Ikona (opcjonalnie)",
+    "Import applied. %1$s and %2$s written.": "Import zastosowany. Zapisano %1$s i %2$s.",
     "Import applied. %d settings and %d rows written.": "Import zastosowany. Zapisano %d ustawień i %d wierszy.",
     "Import configuration": "Importuj konfigurację",
     "Import failed — nothing was changed.": "Import nie powiódł się — nic nie zmieniono.",
@@ -612,6 +627,7 @@
     "This file was exported from this instance.": "Ten plik wyeksportowano z tej instancji.",
     "This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.": "ID instancji Nextcloud tego serwera (dla wsparcia / sprzedaży). Licencje nie są powiązane z instancją.",
     "This token is shown only once. Paste it into the companion app on the device.": "Ten token jest wyświetlany tylko raz. Wklej go w aplikacji towarzyszącej na urządzeniu.",
+    "This will update %1$s and %2$s — nothing is deleted.": "Spowoduje to aktualizację %1$s i %2$s — nic nie zostanie usunięte.",
     "This will update %d settings and %d rows — nothing is deleted.": "Spowoduje to aktualizację %d ustawień i %d wierszy — nic nie zostanie usunięte.",
     "Thu": "Cz",
     "Time of day": "Pora dnia",
@@ -679,23 +695,7 @@
     "You do not have the rights for this action.": "Nie masz uprawnień do tej czynności.",
     "You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Wybrano %1$d osób, ale pozostało tylko %2$d miejsc. Przypisane zostaną tylko wolne miejsca.",
     "Your license expires within 30 days. Contact your vendor to renew.": "Licencja wygaśnie w ciągu 30 dni. Skontaktuj się z dostawcą w sprawie odnowienia.",
-    "Zentrale": "Centrala",
-    "1 setting": "1 ustawienie",
-    "%n settings": "%n ustawienia",
-    "1 row": "1 wiersz",
-    "%n rows": "%n wiersze",
-    "_1 row_::_%n rows_": [
-      "1 wiersz",
-      "%n wiersze",
-      "%n wierszy"
-    ],
-    "_1 setting_::_%n settings_": [
-      "1 ustawienie",
-      "%n ustawienia",
-      "%n ustawień"
-    ],
-    "This will update %1$s and %2$s — nothing is deleted.": "Spowoduje to aktualizację %1$s i %2$s — nic nie zostanie usunięte.",
-    "Import applied. %1$s and %2$s written.": "Import zastosowany. Zapisano %1$s i %2$s."
+    "Zentrale": "Centrala"
   },
   "pluralForm": "nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
 }

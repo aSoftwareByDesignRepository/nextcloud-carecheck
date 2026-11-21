@@ -2,10 +2,14 @@
   "translations": {
     "%1$d of %2$d device slots in use.": "%1$d emplacements d’appareil sur %2$d utilisés.",
     "%1$d of %2$d seats assigned": "%1$d sur %2$d places attribuées",
+    "%n rows": "%n lignes",
+    "%n settings": "%n paramètres",
     "%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice — or official mobile licenses — choose an option below:": "%s reste gratuit (AGPL) sur votre Nextcloud. Signalements de bugs et idées restent les bienvenus sur GitHub — cela fait partie du maintien open source. Si votre organisation a besoin d’une aide facturable — ou de licences mobiles officielles — choisissez une option ci-dessous :",
     "%s stays free (AGPL) on your Nextcloud. Bug reports and ideas on GitHub stay welcome — that is free open-source care. If your organisation needs bookable help on an invoice, choose an option below:": "%s reste gratuit (AGPL) sur votre Nextcloud. Signalements de bugs et idées restent les bienvenus sur GitHub — cela fait partie du maintien open source. Si votre organisation a besoin d’une aide facturable, choisissez une option ci-dessous :",
     "(opens in a new tab)": "(s'ouvre dans un nouvel onglet)",
     "(unknown — skipped)": "(inconnu — ignoré)",
+    "1 row": "1 ligne",
+    "1 setting": "1 paramètre",
     "_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
       "(1 valeur liée à l’instance vidée)",
       "(%n valeurs liées à l’instance vidées)"
@@ -33,6 +37,14 @@
     "_1 row skipped._::_%n rows skipped._": [
       "1 ligne ignorée.",
       "%n lignes ignorées."
+    ],
+    "_1 row_::_%n rows_": [
+      "1 ligne",
+      "%n lignes"
+    ],
+    "_1 setting_::_%n settings_": [
+      "1 paramètre",
+      "%n paramètres"
     ],
     "_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
       "Avertissement : 1 ligne sera définitivement supprimée, puis les données du fichier seront chargées.",
@@ -274,6 +286,7 @@
     "Icon": "Icône",
     "Icon (emoji, optional)": "Icône (emoji, facultatif)",
     "Icon (optional)": "Icône (facultative)",
+    "Import applied. %1$s and %2$s written.": "Import appliqué. %1$s et %2$s écrits.",
     "Import applied. %d settings and %d rows written.": "Import appliqué. %d paramètres et %d lignes écrits.",
     "Import configuration": "Importer la configuration",
     "Import failed — nothing was changed.": "Échec de l’import — rien n’a été modifié.",
@@ -604,6 +617,7 @@
     "This file was exported from this instance.": "Ce fichier a été exporté depuis cette instance.",
     "This server’s Nextcloud instance ID (for support / sales reference). Licenses are not instance-bound.": "ID d’instance Nextcloud de ce serveur (référence pour le support / les ventes). Les licences ne sont pas liées à une instance.",
     "This token is shown only once. Paste it into the companion app on the device.": "Ce jeton n’est affiché qu’une seule fois. Collez-le dans l’application compagnon sur l’appareil.",
+    "This will update %1$s and %2$s — nothing is deleted.": "Cette opération mettra à jour %1$s et %2$s — rien ne sera supprimé.",
     "This will update %d settings and %d rows — nothing is deleted.": "Cette opération mettra à jour %d paramètres et %d lignes — rien ne sera supprimé.",
     "Thu": "Jeu",
     "Time of day": "Moment de la journée",
@@ -671,21 +685,7 @@
     "You do not have the rights for this action.": "Vous n’avez pas les droits pour cette action.",
     "You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "Vous avez sélectionné %1$d personnes mais seulement %2$d places restent. Seules les places libres seront attribuées.",
     "Your license expires within 30 days. Contact your vendor to renew.": "Votre licence expire dans les 30 jours. Contactez votre fournisseur pour renouveler.",
-    "Zentrale": "Siège",
-    "1 setting": "1 paramètre",
-    "%n settings": "%n paramètres",
-    "1 row": "1 ligne",
-    "%n rows": "%n lignes",
-    "_1 row_::_%n rows_": [
-      "1 ligne",
-      "%n lignes"
-    ],
-    "_1 setting_::_%n settings_": [
-      "1 paramètre",
-      "%n paramètres"
-    ],
-    "This will update %1$s and %2$s — nothing is deleted.": "Cette opération mettra à jour %1$s et %2$s — rien ne sera supprimé.",
-    "Import applied. %1$s and %2$s written.": "Import appliqué. %1$s et %2$s écrits."
+    "Zentrale": "Siège"
   },
   "pluralForm": "nplurals=2; plural=(n > 1);"
 }
