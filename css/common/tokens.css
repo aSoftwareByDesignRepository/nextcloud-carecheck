@@ -1,7 +1,9 @@
+/* Auto-adapted from arbeitszeitcheck/css/common/tokens.css for the Check-family shell. Do not invent divergent layout rules here. */
 /*
- * CareCheck design tokens (--cck-*).
+ * Carecheck design tokens (--cck-*).
  * Colors derive from Nextcloud theme variables; no raw hex in feature CSS.
- * Spacing/typography on :root; theme colors on body (NC sets --color-* on body).
+ * Spacing/typography on :root; theme colors on body + themed app surfaces
+ * (NC sets --color-* on body [data-theme-*]).
  */
 :root {
 	--cck-space-1: 4px;
@@ -13,12 +15,33 @@
 	--cck-space-7: 48px;
 	--cck-space-8: 64px;
 
-	--cck-radius-sm: 6px;
-	--cck-radius-md: 12px;
-	--cck-radius-lg: 16px;
-	--cck-radius-pill: 999px;
+	/* Legacy --space-* aliases used by ported AZC layout/dialog sheets */
+	--space-1: var(--cck-space-1);
+	--space-2: var(--cck-space-2);
+	--space-3: var(--cck-space-3);
+	--space-4: var(--cck-space-4);
+	--space-5: var(--cck-space-5);
+	--space-6: var(--cck-space-6);
+	--space-7: var(--cck-space-7);
+	--space-8: var(--cck-space-8);
+	--space-10: 80px;
+	--space-12: 96px;
 
-	--cck-fs-xs: 0.75rem;
+	/* Radii — design-system scale, bound to NC --border-radius-* when present */
+	--cck-radius-sm: var(--border-radius, 6px);
+	--cck-radius-md: var(--border-radius-element, var(--border-radius-large, 12px));
+	--cck-radius-lg: var(--border-radius-large, 16px);
+	--cck-radius-pill: var(--border-radius-pill, 999px);
+
+	/* Legacy --radius-* used by ported app-layout / dialogs sheets */
+	--radius-base: var(--cck-radius-sm);
+	--radius-lg: var(--cck-radius-md);
+	--radius-xl: var(--cck-radius-lg);
+	--radius-2xl: var(--cck-radius-lg);
+	--radius-full: var(--cck-radius-pill);
+
+	/* Floor 0.875rem (14px) — no type below 14px on mobile (responsive directive) */
+	--cck-fs-xs: 0.875rem;
 	--cck-fs-sm: 0.875rem;
 	--cck-fs-md: 1rem;
 	--cck-fs-lg: 1.125rem;
@@ -32,7 +55,7 @@
 	--cck-breakpoint-md: 768px;
 	--cck-breakpoint-lg: 1024px;
 
-	/* Inline SVG catalogue (IconCatalog) */
+	/* Inline SVG catalogue (IconCatalog / AzcCatalog) */
 	--cck-icon-sm: 1rem;
 	--cck-icon-md: 1.125rem;
 	--cck-icon-lg: 1.375rem;
@@ -40,81 +63,207 @@
 	--cck-icon-stroke: 2;
 
 	--cck-tab-num: tabular-nums;
-
-	/* Touch targets (WCAG 2.5.5 / design-system §0.4) */
+	/* Touch targets (WCAG 2.5.5 / design-system) */
 	--cck-touch: 44px;
 	--cck-touch-lg: 48px;
+
+	/*
+	 * QR / barcode canvas must stay light for scannability in every theme.
+	 * This is the only intentional non-theme surface in Carecheck feature CSS.
+	 */
+	--cck-qr-canvas: #ffffff;
 }
 
-/* Theme-bound tokens — must follow body [data-theme-*] where NC defines --color-* */
-body {
-	/* Fixed overlays (mobile nav drawer) sit below NC #header, not under the profile menu */
+/*
+ * Theme-dependent tokens MUST resolve where Nextcloud sets --color-* (body /
+ * [data-theme-*]) and on themed app surfaces. Resolving color-mix only on
+ * :root can fall back to light surfaces while text inherits dark-theme ink.
+ */
+body,
+#content.app-carecheck,
+#app-content.cck-app,
+.cck-app,
+.cck-dialog,
+.cck-modal,
+.cck-toast-region,
+.cck-toasts,
+.cck-license-modal {
+	/* Fixed overlays (panels, backdrops, mobile nav) sit below NC #header */
 	--cck-overlay-top: var(--header-height, 50px);
 	--cck-overlay-height: calc(100dvh - var(--header-height, 50px));
 
-	--cck-bg: var(--color-main-background);
 	--cck-bg-soft: color-mix(in srgb, var(--color-main-background) 96%, var(--color-main-text) 4%);
 	--cck-bg-card: var(--color-main-background);
+	--cck-bg-stripe: color-mix(in srgb, var(--color-main-background) 92%, var(--color-main-text) 8%);
+	--cck-bg-hover: var(--color-background-hover);
 	--cck-text: var(--color-main-text);
 	--cck-muted: var(--color-text-maxcontrast);
+	/* Muted ink on tinted surfaces (callouts/badges): main-text keeps it
+	   readable where pure maxcontrast washes out on the tint fill. */
+	--cck-muted-on-tint: color-mix(in srgb, var(--color-text-maxcontrast) 55%, var(--color-main-text));
+	/* Monospace for codes/refs (claim numbers, payment refs): NC ships no mono
+	   var, so pin a platform-native stack. */
+	--cck-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Liberation Mono', Menlo, Consolas, monospace;
 	--cck-border: color-mix(in srgb, var(--color-main-text) 12%, transparent);
-	--cck-border-strong: color-mix(in srgb, var(--color-main-text) 24%, transparent);
+	/* Boundaries of cards/controls/callouts/dialogs need >=3:1 vs the adjacent
+	   surface (WCAG 1.4.11): NC's --color-border-maxcontrast is theme-tuned for
+	   exactly that (dark + high-contrast themes included). The faint 24% mix
+	   measured ~1.3:1 — below the floor in every theme. */
+	--cck-border-strong: var(--color-border-maxcontrast, color-mix(in srgb, var(--color-main-text) 24%, transparent));
 	/* Interactive controls need >=3:1 (WCAG 1.4.11): maxcontrast is NC's own
 	   input border; --color-border / --cck-border stay surface-only. */
 	--cck-form-border: var(--color-border-maxcontrast, var(--cck-border-strong));
+	/* Filled controls (secondary/ghost/summary buttons): the border sits on a
+	   mid-gray fill, so it must read against BOTH fill and page — maxcontrast
+	   lands ~2.9:1 on the 18%-ink secondary fill. Ink-tuned maxcontrast text
+	   token clears 3:1 against both in every theme. */
+	--cck-control-border: var(--color-text-maxcontrast, var(--color-border-maxcontrast, var(--cck-border-strong)));
+
+	/* Primary / focus — track NC accent for custom branding */
+	--cck-primary: var(--color-primary-element);
+	--cck-primary-text: var(--color-primary-element-text);
+	/* Accent used as text/icon ink on surfaces: pure --color-primary-element
+	   drops below WCAG AA 4.5:1 on dark themes (~4.3:1); the dark override
+	   below blends it toward main-text. Fills keep --cck-primary. */
+	--cck-accent-ink: var(--color-primary-element);
+	--cck-focus: 3px solid var(--color-primary-element);
+	--cck-focus-offset: 2px;
 
 	/* Mix with main background — not transparent — so callouts stay visible on all NC themes */
 	--cck-tint-success: color-mix(in srgb, var(--color-success-text, var(--color-success)) 18%, var(--color-main-background));
 	--cck-tint-warning: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 22%, var(--color-main-background));
 	--cck-tint-danger: color-mix(in srgb, var(--color-error-text, var(--color-error)) 18%, var(--color-main-background));
+	/* Alias used by badges/callouts/toasts — mix into main-bg (never transparent) so dark themes stay visible */
+	--cck-tint-critical: var(--cck-tint-danger);
 	--cck-tint-info: color-mix(in srgb, var(--color-primary-element) 16%, var(--color-main-background));
-
-	--cck-shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
-	--cck-shadow-md: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
-
-	/* Modal / drawer scrim — theme-aware, never raw black rgba */
-	--cck-scrim: color-mix(in srgb, var(--color-main-text) 45%, transparent);
 
 	/*
 	 * Solid danger CTA fill (design-system §3.3 / WCAG 1.4.3).
 	 * NC 30+ maps --color-error to a pale tint — never put on-fill text on that.
-	 * Use --color-element-error; dark themes darken the fill so ink stays ≥ 4.5:1.
 	 */
-	/* NC 30+: element-error is the solid element red (#c90000 default).
-	   If a theme lacks it, error-text (dark ink, e.g. #8A0000) is a safer
-	   fill than the pale --color-error tint (#FFE7E7) under white text. */
-	--cck-danger-fill: var(--color-element-error, var(--color-error-text, var(--color-error)));
-	/* On-fill ink must follow the theme (family convention: arbeitszeitcheck).
-	   primary-element-text is the theme-tuned ink for solid accent fills. */
+	--cck-danger-fill: var(--color-element-error, var(--color-error));
 	--cck-danger-on-fill: var(--color-primary-element-text, var(--color-primary-text));
 	--cck-danger-ink: var(--color-error-text, var(--color-error));
+
+	/*
+	 * Notification icon wells — pale tint + semantic stroke (see .cck-page-header__icon).
+	 * NC *-text tokens are tuned per theme for contrast on main-background.
+	 */
+	--cck-notif-fg-info: var(--color-primary-element);
+	--cck-notif-fg-warning: var(--color-warning-text, var(--color-warning));
+	--cck-notif-fg-success: var(--color-success-text, var(--color-success));
+	--cck-notif-fg-danger: var(--color-error-text, var(--color-error));
+
+	--cck-shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
+	--cck-shadow-md: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+	--cck-shadow-lg: 0 1rem 3rem color-mix(in srgb, var(--color-main-text) 28%, transparent);
+
+	/* Overlay scrims — theme ink, never hardcoded #000 */
+	--cck-scrim: color-mix(in srgb, var(--color-main-text) 45%, transparent);
+	--cck-scrim-strong: color-mix(in srgb, var(--color-main-text) 55%, transparent);
+
+	/*
+	 * Legacy --carecheck-* aliases (shell dialogs / app-layout ported from AZC).
+	 * Feature CSS should prefer --cck-*; every alias maps to NC/--cck-* so
+	 * undefined custom properties never blank out surfaces in any theme.
+	 */
+	--carecheck-color-modal-background: var(--cck-bg-card);
+	--carecheck-color-modal-border: var(--cck-border);
+	--carecheck-color-modal-footer-background: var(--cck-bg-soft);
+	--carecheck-color-background: var(--color-main-background);
+	--carecheck-color-background-elevated: var(--cck-bg-card);
+	--carecheck-color-background-secondary: var(--cck-bg-soft);
+	--carecheck-color-background-tertiary: var(--cck-bg-soft);
+	--carecheck-color-text: var(--cck-text);
+	--carecheck-color-text-muted: var(--cck-muted);
+	--carecheck-color-text-maxcontrast: var(--cck-muted);
+	--carecheck-color-text-secondary: var(--cck-muted);
+	--carecheck-color-text-tertiary: var(--cck-muted);
+	--carecheck-color-primary: var(--color-primary-element);
+	--carecheck-color-primary-element: var(--color-primary-element);
+	--carecheck-color-primary-light: color-mix(in srgb, var(--color-primary-element) 28%, transparent);
+	--carecheck-color-border: var(--cck-border);
+	--carecheck-color-border-focus: var(--color-primary-element);
+	--carecheck-color-border-warning: var(--color-warning-text, var(--color-warning));
+	--carecheck-color-error: var(--cck-danger-ink);
+	--carecheck-color-error-light: color-mix(in srgb, var(--cck-danger-ink) 28%, transparent);
+	--carecheck-color-success-light: color-mix(in srgb, var(--color-success-text, var(--color-success)) 28%, transparent);
+	--carecheck-color-warning-light: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 28%, transparent);
+	--carecheck-color-form-required: var(--cck-danger-ink);
+	--carecheck-color-form-label: var(--cck-text);
+	--carecheck-color-form-background: var(--color-main-background);
+	--carecheck-color-form-border: var(--color-border-maxcontrast, var(--cck-border-strong));
+	--carecheck-color-form-border-focus: var(--color-primary-element);
+	--carecheck-color-form-border-error: var(--cck-danger-ink);
+	--carecheck-color-form-border-success: var(--color-success-text, var(--color-success));
+	--carecheck-color-table-border: var(--cck-border);
+	--carecheck-color-table-header-background: var(--color-background-dark, var(--cck-bg-stripe));
+	--carecheck-font-family-sans: var(--font-face, inherit);
+	--carecheck-font-size-sm: var(--cck-fs-sm);
+	--carecheck-font-size-base: var(--cck-fs-md);
+	--carecheck-font-size-lg: var(--cck-fs-lg);
+	--carecheck-font-size-xl: var(--cck-fs-xl);
+	--carecheck-font-size-3xl: var(--cck-fs-2xl);
+	--carecheck-font-weight-medium: 500;
+	--carecheck-font-weight-semibold: 600;
+	--carecheck-font-weight-bold: 700;
+	--carecheck-letter-spacing-tight: -0.02em;
+	--carecheck-line-height-tight: var(--cck-line-tight);
+	--carecheck-line-height-normal: var(--cck-line-base);
+	--carecheck-line-height-relaxed: 1.6;
 }
 
-/* Dark themes turn --color-element-error into a bright accent — darken the
- * solid CTA fill so ink stays >= 4.5:1 (design-system §3.1).
- * primary-element-text is often dark (for light CTAs) — unusable on red;
- * main-text is the near-white ink in dark themes. */
+/* Bright accent fills on dark themes fail AA with white ink — darken fill + use main-text. */
 body[data-theme-dark],
-body[data-themes*="dark"],
-body.theme--dark {
-	--cck-danger-fill: color-mix(in srgb, var(--color-element-error, var(--color-error-text, var(--color-error))) 40%, var(--color-main-background));
+body[data-theme-dark-highcontrast],
+body[data-theme-dark] #content.app-carecheck,
+body[data-theme-dark-highcontrast] #content.app-carecheck {
+	--cck-danger-fill: color-mix(
+		in srgb,
+		var(--color-element-error, var(--color-error)) 40%,
+		var(--color-main-background)
+	);
 	--cck-danger-on-fill: var(--color-main-text);
+	--cck-accent-ink: color-mix(in srgb, var(--color-primary-element) 70%, var(--color-main-text));
+}
+
+/* NC high-contrast themes: stronger borders / shadows for 3:1 UI chrome */
+body[data-theme-light-highcontrast],
+body[data-theme-dark-highcontrast],
+body[data-theme-light-highcontrast] #content.app-carecheck,
+body[data-theme-dark-highcontrast] #content.app-carecheck {
+	--cck-border: color-mix(in srgb, var(--color-main-text) 32%, transparent);
+	/* HC themes push --color-border-maxcontrast to near-ink — keep it first so
+	   boundary chrome stays >=3:1 against HC surfaces. */
+	--cck-border-strong: var(--color-border-maxcontrast, color-mix(in srgb, var(--color-main-text) 48%, transparent));
+	--cck-shadow-sm: 0 0 0 1px var(--cck-border-strong);
+	--cck-shadow-md: 0 0 0 2px var(--cck-border-strong);
+	--carecheck-color-border: var(--cck-border);
+	--carecheck-color-modal-border: var(--cck-border);
 }
 
 @media (prefers-contrast: more) {
-	body {
+	:root {
+		--cck-icon-stroke: 2.25;
+	}
+
+	body,
+	#content.app-carecheck,
+	#app-content.cck-app,
+	.cck-app,
+	.cck-dialog,
+	.cck-modal,
+	.cck-toast-region,
+	.cck-toasts,
+	.cck-license-modal {
 		--cck-border: color-mix(in srgb, var(--color-main-text) 28%, transparent);
-		--cck-border-strong: color-mix(in srgb, var(--color-main-text) 40%, transparent);
+		--cck-border-strong: var(--color-border-maxcontrast, color-mix(in srgb, var(--color-main-text) 40%, transparent));
+		--cck-shadow-sm: 0 0 0 1px var(--cck-border-strong);
+		--cck-shadow-md: 0 0 0 1px var(--cck-border-strong);
 	}
 }
 
-/* Accent ink for text-on-surface: --color-primary-element as text drops below
-   WCAG AA (~4.3:1) on dark themes — blend toward main-text there. */
+/* Alias for dead-name ref (literal fallback masked it). */
 body {
-	--cck-accent-ink: var(--color-primary-element);
-}
-
-body[data-theme-dark],
-body[data-theme-dark-highcontrast] {
-	--cck-accent-ink: color-mix(in srgb, var(--color-primary-element) 70%, var(--color-main-text));
+	--cck-bg: var(--cck-bg-card);
 }
