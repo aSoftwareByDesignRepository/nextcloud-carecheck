@@ -9,11 +9,76 @@
 	<summary>Mobile care documentation — tours, visit bundles, tamper-evident journal, coverage board</summary>
 	<summary lang="de">Mobile Pflegedokumentation — Touren, Besuchsprotokolle, manipulationssicheres Journal, Zentrale-Tagesübersicht</summary>
 	<description><![CDATA[
-# CareCheck — tour, visit & care documentation
+# CareCheck — tours, visits and care documentation on your own server
 
-Ambulatory care documentation on your own Nextcloud: recurring tour templates that materialize into daily tours, offline-first visit bundles with plan snapshots and signatures, an append-only hash-chained journal with external timestamp anchoring, audited break-glass cover access, and encrypted client records.
+Ambulatory care teams run their day here: recurring tour templates that become real daily tours, a coverage board that shows every stop and every caregiver at a glance, offline-first visit bundles for the field — plan snapshot, task checklist, notes, photos, signature — and a tamper-evident journal that proves what happened, when, and by whom.
 
-**Free AGPL web app.** The native companion (worker & paired-member modes) is licensed separately (`CCK2`). The web is never paywalled.
+Client records stay encrypted on your Nextcloud. Cover visits through break-glass access are logged and audited — never silent.
+
+## Why care services install it
+
+- **Coverage board** — every stop today: planned, uncovered, in progress, done; unassigned stops surface immediately
+- **Tours that materialize** — weekly templates with weekday rules become daily tours; assign and reassign in seconds
+- **Visit bundles for the field** — offline-first: plan snapshot, task checklist, notes, photos, client signature
+- **Tamper-evident journal** — append-only, hash-chained record with external timestamp anchoring
+- **Encrypted client records** — record, care plan, client log and photos per client
+- **Break-glass cover access** — a covering caregiver sees what they must — audited and visible afterwards
+- **Billing-ready exports** — service record as CSV/PDF, billing data as JSON/XML; send a draft straight to InvoiceCheck
+- **Catalog-driven care plans** — a reusable task catalog per client
+
+**Free AGPL web app.** The native companion (worker and paired-member modes) is licensed separately (`CCK2`) — the web app is never paywalled.
+
+## Clear limits
+
+- CareCheck documents care work — it does not replace payer-specific audit formats or legal advice.
+- Billing data is exported, not settled — no live insurance billing inside the app.
+- Declared databases: MySQL and PostgreSQL.
+
+## Feedback welcome
+
+A workflow gap on a real tour? Open a GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-carecheck/issues) or write to info@software-by-design.de.
+
+## Requirements
+
+- Nextcloud 32–35
+- PHP 8.2–8.5
+- MySQL or PostgreSQL
+	]]></description>
+	<description lang="de"><![CDATA[
+# CareCheck — Touren, Besuche und Pflegedokumentation auf dem eigenen Server
+
+Ambulante Pflegedienste steuern hier ihren Tag: wiederkehrende Tourvorlagen, die zu echten Tagestouren werden, eine Zentrale-Tagesübersicht mit jedem Stopp und jeder Pflegekraft auf einen Blick, offline-taugliche Besuchspakete für draußen — Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Unterschrift — und ein manipulationssicheres Journal, das beweist, was wann und durch wen passiert ist.
+
+Klientenakten bleiben verschlüsselt auf Ihrer Nextcloud. Vertretungsbesuche über den Notfall-Zugriff werden protokolliert und geprüft — niemals lautlos.
+
+## Warum Pflegedienste es installieren
+
+- **Zentrale Tagesübersicht** — jeder Stopp heute: geplant, ungedeckt, läuft, erledigt; unzugewiesene Stopps fallen sofort auf
+- **Touren, die entstehen** — Wochenvorlagen mit Wochentagsregeln werden zu Tagestouren; in Sekunden zuweisen und umbesetzen
+- **Besuchspakete für draußen** — offline-first: Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Klienten-Unterschrift
+- **Manipulationssicheres Journal** — append-only, hash-verkettetes Protokoll mit externem Zeitstempel-Anker
+- **Verschlüsselte Klientenakten** — Akte, Pflegeplan, Klientenverlauf und Fotos je Klient
+- **Notfall-Zugriff bei Vertretung** — die springende Kraft sieht, was sie braucht — geprüft und hinterher sichtbar
+- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an InvoiceCheck senden
+- **Katalogbasierte Pflegepläne** — wiederverwendbarer Aufgabenkatalog je Klient
+
+**Kostenlose AGPL-Web-App.** Der native Companion (Worker- und Paired-Member-Modi) ist separat lizenziert (`CCK2`) — die Web-App ist niemals paywallt.
+
+## Klare Grenzen
+
+- CareCheck dokumentiert Pflegearbeit — es ersetzt weder kostenträgerspezifische Prüfformate noch Rechtsberatung.
+- Abrechnungsdaten werden exportiert, nicht abgerechnet — keine Live-Kassenabrechnung in der App.
+- Deklarierte Datenbanken: MySQL und PostgreSQL.
+
+## Feedback willkommen
+
+Eine Lücke im Ablauf auf einer echten Tour? Öffnen Sie ein GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-carecheck/issues) oder schreiben Sie an info@software-by-design.de.
+
+## Voraussetzungen
+
+- Nextcloud 32–35
+- PHP 8.2–8.5
+- MySQL oder PostgreSQL
 	]]></description>
 	<version>0.4.3</version>
 	<licence>agpl</licence>
@@ -23,25 +88,18 @@ Ambulatory care documentation on your own Nextcloud: recurring tour templates th
 	<category>tools</category>
 	<website>https://nextcloud.software-by-design.de/</website>
 	<bugs>https://github.com/aSoftwareByDesignRepository/nextcloud-carecheck/issues</bugs>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/01.png</screenshot>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/02.png</screenshot>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/03.png</screenshot>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/04.png</screenshot>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/05.png</screenshot>
-	<screenshot>https://nextcloud.software-by-design.de/assets/screenshots/carecheck/06.png</screenshot>
+	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/01.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/01.png</screenshot>
+	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/02.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/02.png</screenshot>
+	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/03.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/03.png</screenshot>
+	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/04.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/04.png</screenshot>
+	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/05.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-carecheck/main/screenshots/appstore/05.png</screenshot>
 	<dependencies>
 		<nextcloud min-version="32" max-version="35"/>
 		<php min-version="8.2" max-version="8.5"/>
 		<database>pgsql</database>
 		<database>mysql</database>
 	</dependencies>
-	<commands>
-		<command>OCA\CareCheck\Command\UpgradeBackupCommand</command>
-		<command>OCA\CareCheck\Command\VerifyChainCommand</command>
-		<command>OCA\CareCheck\Command\ConfigExportCommand</command>
-		<command>OCA\CareCheck\Command\ConfigImportCommand</command>
-		<command>OCA\CareCheck\Command\ConfigReconcileCommand</command>
-	</commands>
+
 	<background-jobs>
 		<job>OCA\CareCheck\Cron\TourGenerateJob</job>
 		<job>OCA\CareCheck\Cron\OverdueDetectionJob</job>
@@ -53,20 +111,27 @@ Ambulatory care documentation on your own Nextcloud: recurring tour templates th
 		<job>OCA\CareCheck\Cron\VoiceTranscribeJob</job>
 	</background-jobs>
 	<repair-steps>
-		<install>
-			<step>OCA\CareCheck\Repair\EnsureCareCheckSchema</step>
-		</install>
 		<pre-migration>
 			<step>OCA\CareCheck\Repair\BackupBeforeUpdate</step>
 		</pre-migration>
-
 		<post-migration>
 			<step>OCA\CareCheck\Repair\EnsureCareCheckSchema</step>
 		</post-migration>
+		<install>
+			<step>OCA\CareCheck\Repair\EnsureCareCheckSchema</step>
+		</install>
 		<uninstall>
 			<step>OCA\CareCheck\Repair\UninstallDropTables</step>
 		</uninstall>
+
 	</repair-steps>
+	<commands>
+		<command>OCA\CareCheck\Command\UpgradeBackupCommand</command>
+		<command>OCA\CareCheck\Command\VerifyChainCommand</command>
+		<command>OCA\CareCheck\Command\ConfigExportCommand</command>
+		<command>OCA\CareCheck\Command\ConfigImportCommand</command>
+		<command>OCA\CareCheck\Command\ConfigReconcileCommand</command>
+	</commands>
 	<!-- No <navigation> here: the menu entry is registered conditionally via
 	     NavGate (hasAppAccess) — a static entry would advertise the app to
 	     excluded users when access_mode=restricted. -->
