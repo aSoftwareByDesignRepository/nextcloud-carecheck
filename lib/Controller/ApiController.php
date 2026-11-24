@@ -730,7 +730,7 @@ class ApiController extends Controller
 	}
 
 	/**
-	 * F15: PrivacyCheck VVT proposal state for the settings surface.
+	 * F15: the privacy register app VVT proposal state for the settings surface.
 	 * Staff may read the state (it reveals nothing beyond "proposed: yes/no");
 	 * minting the draft is admin-gated below.
 	 */
@@ -747,7 +747,7 @@ class ApiController extends Controller
 	}
 
 	/**
-	 * F15: create the draft register entry (+ seeded DPIA) in PrivacyCheck.
+	 * F15: create the draft register entry (+ seeded DPIA) in the privacy register app.
 	 * Admin-only like the access door — a VVT entry is a provider-level
 	 * compliance artifact. Idempotent: the stored activity id makes repeat
 	 * clicks return the existing draft instead of minting another.
@@ -1047,7 +1047,7 @@ class ApiController extends Controller
 
 	/**
 	 * F13 push — send this client's signed-evidence billing draft to
-	 * InvoiceCheck. Staff + client scope; the sibling decides the rest.
+	 * the invoicing app. Staff + client scope; the sibling decides the rest.
 	 * Coded errors are user-actionable (link the client first, no signed
 	 * visits, …) — never an existence oracle beyond the client id itself.
 	 */
@@ -1078,8 +1078,8 @@ class ApiController extends Controller
 					'not_linked' => 'Link a CustomerCheck company to this client first.',
 					'no_pc_customer' => 'The linked company has no billing customer.',
 					'no_visits' => 'No signed visits in this period.',
-					'sibling_unavailable' => 'InvoiceCheck is not enabled.',
-					'sibling_error' => 'InvoiceCheck rejected the draft.',
+					'sibling_unavailable' => 'The invoicing app is not enabled.',
+					'sibling_error' => 'The invoicing app rejected the draft.',
 				];
 				$code = (string)$r['code'];
 				if ($code === 'not_found') {
@@ -1518,7 +1518,7 @@ class ApiController extends Controller
 	/**
 	 * NH-08 / suite flange F11: versioned drive-segments read facade.
 	 * Tour-bound legs only (check-out N → check-in N+1), allow-listed fields,
-	 * generic purpose — MobilityCheck turns them into confirmable drafts.
+	 * generic purpose — the mobility app turns them into confirmable drafts.
 	 */
 	#[NoAdminRequired]
 	public function driveSegments(string $from = '', string $to = ''): JSONResponse
@@ -1592,7 +1592,7 @@ class ApiController extends Controller
 
 	/**
 	 * NH-21 / F13 — `check:billing-drafts` pull facade (staff). Generic
-	 * allow-listed line text only — InvoiceCheck maps external_ref to its
+	 * allow-listed line text only — the invoicing app maps external_ref to its
 	 * own customer and never auto-finalizes.
 	 */
 	#[NoAdminRequired]

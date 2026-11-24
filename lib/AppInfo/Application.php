@@ -138,7 +138,7 @@ class Application extends App implements IBootstrap
 		// must never escape to core's HTML 500 on /api/* surfaces.
 		$context->registerMiddleware(\OCA\CareCheck\Middleware\ApiExceptionMiddleware::class);
 
-		// Suite flange F11 — advertise check:drive-segments to MobilityCheck.
+		// Suite flange F11 — advertise check:drive-segments to the mobility app.
 		$context->registerCapability(\OCA\CareCheck\Capabilities::class);
 	}
 

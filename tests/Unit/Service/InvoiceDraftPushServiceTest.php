@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * F13 push adapter — unit env has no InvoiceCheck container, so the live
+ * F13 push adapter — unit env has no the invoicing app container, so the live
  * facade call runs in-container; here we prove the coded fail-soft surface
  * (never throws, never fabricates identity) around it.
  */
@@ -49,7 +49,7 @@ final class InvoiceDraftPushServiceTest extends TestCase
 
 	public function testRejectsNonUidActor(): void
 	{
-		// member:/station: refs cannot own an InvoiceCheck draft — the facade
+		// member:/station: refs cannot own an the invoicing app draft — the facade
 		// needs a real uid to authorize against.
 		$r = $this->svc(true, $this->client())->push('member:7', 3, '2026-10', 'haeusliche_betreuung');
 		$this->assertSame(['ok' => false, 'code' => 'bad_request'], $r);

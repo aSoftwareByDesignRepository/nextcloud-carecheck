@@ -8,8 +8,8 @@ import { login } from './helpers/auth.js'
  * integrations. Nothing is mocked — every leg drives the real sibling.
  *   F12 board duty strip    <- DutyCheck on-duty feed (advisory)
  *   F14 client CRM link     -> CustomerCheck company picker + soft link
- *   F13 invoice-draft push  -> InvoiceCheck draft facade (exports panel)
- *   F15 privacy proposal    -> PrivacyCheck VVT draft entry
+ *   F13 invoice-draft push  -> the invoicing app draft facade (exports panel)
+ *   F15 privacy proposal    -> the privacy register app VVT draft entry
  * Seeds: member(+device) → client → plan → template → generate → checkin
  * + submit (done visit this period) → CUC company → pc customer link.
  * Cleanup in afterAll removes every sibling row it minted.
@@ -250,7 +250,7 @@ test('F13 invoice push: unlinked client errors, linked client drafts + dedupes',
 	expect(link.success).toBe(true)
 	await push.click()
 	await expect.poll(() => status.textContent(), { timeout: 10000 })
-		.toContain('InvoiceCheck') // i18n: product name is locale-stable
+		.toContain('the invoicing app') // i18n: product name is locale-stable
 	// read back the invoice id from the wire for cleanup
 	const again = await papi(page, `/api/clients/${clientId}/invoice-draft`, {
 		method: 'POST', data: { period: today().slice(0, 7), kind: 'haeusliche_betreuung' },

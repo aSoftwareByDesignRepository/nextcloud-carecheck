@@ -10,10 +10,10 @@ use OCP\IDBConnection;
 /**
  * NH-08 / suite flange F11 companion half — read-only pool-vehicle badge.
  *
- * If MobilityCheck is installed and the tour day has an approved booking
+ * If the mobility app is installed and the tour day has an approved booking
  * for this caregiver (uid actors only — member identities have no NC
  * account and can never be drivers), the tour header shows the vehicle.
- * Read-only: booking/changes stay in MobilityCheck. Capability detection
+ * Read-only: booking/changes stay in the mobility app. Capability detection
  * fails soft — absent app, missing tables, or a schema drift returns null,
  * never an error. Only plate+name cross the flange (minimal data).
  */

@@ -114,7 +114,7 @@ class CompanionApiController extends Controller
 			return $this->ok([
 				'date' => $date,
 				'tours' => $tours,
-				// NH-08: pool-vehicle badge — null unless MobilityCheck has an
+				// NH-08: pool-vehicle badge — null unless the mobility app has an
 				// approved booking for this worker today.
 				'vehicle' => $this->mobility->vehicleFor($actor, $date),
 			]);

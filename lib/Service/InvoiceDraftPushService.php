@@ -10,16 +10,16 @@ use Psr\Log\LoggerInterface;
 
 /**
  * F13 producer push (spec §4.4.1): sends one client's allow-listed
- * billing draft to InvoiceCheck's `CareBillingDraftWriteFacade`, where it
+ * billing draft to the invoicing app's `CareBillingDraftWriteFacade`, where it
  * lands as a draft invoice a human still has to price and finalize.
  *
  * Identity chain, all explicit — nothing is guessed:
  *   cck_client.crm_company_id (F14 link)
  *     → CustomerCheck facade → pc_customer_id
- *     → InvoiceCheck createDraft(actorUid, pc_customer_id, ...)
+ *     → the invoicing app createDraft(actorUid, pc_customer_id, ...)
  *
  * Dedupe rides on the deterministic source_ref
- * (`cck:{clientId}:{period}:{kind}`) — InvoiceCheck dedupes on
+ * (`cck:{clientId}:{period}:{kind}`) — the invoicing app dedupes on
  * (src_app, src_ref), so a repeat click returns the same draft instead
  * of minting a second invoice.
  *
@@ -48,7 +48,7 @@ final class InvoiceDraftPushService
 	public function push(string $actorRef, int $clientId, string $period, string $kind): array
 	{
 		// Only real session users push (member/station refs cannot own an
-		// InvoiceCheck draft — the facade needs a uid to authorize against).
+		// the invoicing app draft — the facade needs a uid to authorize against).
 		$actorUid = str_starts_with($actorRef, 'uid:') ? substr($actorRef, 4) : '';
 		if ($actorUid === '' || !isset(BillingDraftService::LINE_TEXTS[$kind])
 			|| preg_match('/^\d{4}-\d{2}$/', $period) !== 1) {
@@ -61,7 +61,7 @@ final class InvoiceDraftPushService
 			return ['ok' => false, 'code' => 'not_found'];
 		}
 		// Link checks before the availability gate: "link a company first"
-		// is more actionable than "InvoiceCheck not enabled" when both hold.
+		// is more actionable than "the invoicing app not enabled" when both hold.
 		$companyId = $client->getCrmCompanyId();
 		if ($companyId === null || (int)$companyId <= 0) {
 			return ['ok' => false, 'code' => 'not_linked'];

@@ -64,7 +64,7 @@ no third-party telemetry.
   acknowledgement workflow and review queue for rejected sync bundles
 - **Leistungsnachweis export** — PDF + CSV (formula-injection-safe,
   allow-listed fields), structured JSON/XML billing input (NH-07),
-  InvoiceCheck draft invoices (NH-21)
+  the invoicing app draft invoices (NH-21)
 - **QM dashboard (NH-17)** — incident/overdue/unsigned-visit statistics;
   vital-value trends (NH-18)
 - **Client CSV import (NH-20)** — switch-onboarding for Klientenstamm

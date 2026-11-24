@@ -10,7 +10,7 @@ use OCP\IDBConnection;
 
 /**
  * NH-21 / suite flange F13 (producer half) — `check:billing-drafts` read
- * facade. InvoiceCheck pulls draft line candidates for pauschal /
+ * facade. The invoicing app pulls draft line candidates for pauschal /
  * § 45b / private / SGB XII billing; drafts never auto-finalize and
  * generic text is allow-listed — no client name or health field ever
  * crosses into invoice copy (F13 contract).

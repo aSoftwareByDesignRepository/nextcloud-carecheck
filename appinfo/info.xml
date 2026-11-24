@@ -23,7 +23,7 @@ Client records stay encrypted on your Nextcloud. Cover visits through break-glas
 - **Tamper-evident journal** — append-only, hash-chained record with external timestamp anchoring
 - **Encrypted client records** — record, care plan, client log and photos per client
 - **Break-glass cover access** — a covering caregiver sees what they must — audited and visible afterwards
-- **Billing-ready exports** — service record as CSV/PDF, billing data as JSON/XML; send a draft straight to InvoiceCheck
+- **Billing-ready exports** — service record as CSV/PDF, billing data as JSON/XML; send a draft straight to the invoicing app
 - **Catalog-driven care plans** — a reusable task catalog per client
 
 **Free AGPL web app.** The native companion (worker and paired-member modes) is licensed separately (`CCK2`) — the web app is never paywalled.
@@ -59,7 +59,7 @@ Klientenakten bleiben verschlüsselt auf Ihrer Nextcloud. Vertretungsbesuche üb
 - **Manipulationssicheres Journal** — append-only, hash-verkettetes Protokoll mit externem Zeitstempel-Anker
 - **Verschlüsselte Klientenakten** — Akte, Pflegeplan, Klientenverlauf und Fotos je Klient
 - **Notfall-Zugriff bei Vertretung** — die springende Kraft sieht, was sie braucht — geprüft und hinterher sichtbar
-- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an InvoiceCheck senden
+- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an the invoicing app senden
 - **Katalogbasierte Pflegepläne** — wiederverwendbarer Aufgabenkatalog je Klient
 
 **Kostenlose AGPL-Web-App.** Der native Companion (Worker- und Paired-Member-Modi) ist separat lizenziert (`CCK2`) — die Web-App ist niemals paywallt.

@@ -973,7 +973,7 @@
 		window.location = OC.generateUrl('/apps/carecheck/api/clients/' + currentClient + '/export/billing?period=' + p + '&fmt=xml');
 	});
 
-	// F13: push this client's billing draft to InvoiceCheck (draft only — a
+	// F13: push this client's billing draft to the invoicing app (draft only — a
 	// human still prices and finalizes it there). Guarded: the whole block
 	// is omitted server-side when the facade is unavailable.
 	var invoicePushBtn = document.querySelector('[data-cck-invoice-push]');
@@ -983,22 +983,22 @@
 			var p = document.querySelector('[data-cck-export-period]').value || today().slice(0, 7);
 			var kind = document.querySelector('[data-cck-invoice-kind]').value;
 			invoicePushBtn.disabled = true;
-			statusEl.textContent = tr('Sending to InvoiceCheck …');
+			statusEl.textContent = tr('Sending to the invoicing app …');
 			api('/api/clients/' + currentClient + '/invoice-draft', {
 				method: 'POST',
 				body: JSON.stringify({ period: p, kind: kind })
 			}).then(function (r) {
 				if (r && r.success && r.data) {
 					statusEl.textContent = r.data.created
-						? tr('Draft invoice created in InvoiceCheck.')
-						: tr('Draft already exists in InvoiceCheck — nothing duplicated.');
+						? tr('Draft invoice created in the invoicing app.')
+						: tr('Draft already exists in the invoicing app — nothing duplicated.');
 				} else {
 					var errMap = {
-						SIBLING_UNAVAILABLE: tr('InvoiceCheck is not enabled.'),
+						SIBLING_UNAVAILABLE: tr('The invoicing app is not enabled.'),
 						NOT_LINKED: tr('Link a CustomerCheck company to this client first.'),
 						NO_PC_CUSTOMER: tr('The linked company has no billing customer.'),
 						NO_VISITS: tr('No signed visits in this period.'),
-						SIBLING_ERROR: tr('InvoiceCheck rejected the draft.'),
+						SIBLING_ERROR: tr('The invoicing app rejected the draft.'),
 					};
 					statusEl.textContent = (r && errMap[r.error]) || (r && r.message) || tr('Could not send the draft.');
 				}
@@ -1799,21 +1799,21 @@
 		return p;
 	}
 
-	// F15: PrivacyCheck VVT proposal card — muted text when the sibling is
+	// F15: the privacy register app VVT proposal card — muted text when the sibling is
 	// absent, a one-click CTA for admins when a draft is missing, and a link
-	// into PrivacyCheck once the draft exists.
+	// into the privacy register app once the draft exists.
 	function renderPrivacyProposal(p) {
 		var stateEl = document.querySelector('[data-cck-privacy-state]');
 		var btn = document.querySelector('[data-cck-privacy-propose]');
 		var open = document.querySelector('[data-cck-privacy-open]');
 		if (!stateEl || !btn || !open) { return; }
 		if (!p.available) {
-			stateEl.textContent = tr('PrivacyCheck is not installed — the register proposal is unavailable.');
+			stateEl.textContent = tr('The privacy register app is not installed — the register proposal is unavailable.');
 			btn.hidden = true; open.hidden = true;
 			return;
 		}
 		if (p.activityId) {
-			stateEl.textContent = tr('Draft register entry filed — a privacy lead reviews and publishes it in PrivacyCheck.');
+			stateEl.textContent = tr('Draft register entry filed — a privacy lead reviews and publishes it in the privacy register app.');
 			btn.hidden = true;
 			open.hidden = false;
 			open.setAttribute('href', OC.generateUrl('/apps/privacycheck/'));
@@ -1821,8 +1821,8 @@
 		}
 		if (p.ok === false) {
 			stateEl.textContent = tr(p.code === 'sibling_unavailable'
-				? 'PrivacyCheck is not installed — the register proposal is unavailable.'
-				: 'The proposal failed — try again or file the entry directly in PrivacyCheck.');
+				? 'The privacy register app is not installed — the register proposal is unavailable.'
+				: 'The proposal failed — try again or file the entry directly in the privacy register app.');
 		} else {
 			stateEl.textContent = tr('No register draft filed yet.');
 		}

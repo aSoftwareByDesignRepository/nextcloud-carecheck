@@ -296,7 +296,7 @@ $settingsNav = static function () use ($l): string {
 							<option value="sgb_xii"><?php p($l->t('Hilfe zur Pflege SGB XII')); ?></option>
 						</select>
 					</label>
-					<button type="button" data-cck-invoice-push class="cck-btn cck-btn--primary"><?php p($l->t('Send draft to InvoiceCheck')); ?></button>
+					<button type="button" data-cck-invoice-push class="cck-btn cck-btn--primary"><?php p($l->t('Send draft to the invoicing app')); ?></button>
 					<p class="cck-hint" data-cck-invoice-status role="status" aria-live="polite"></p>
 				</div>
 				<?php } ?>
@@ -649,11 +649,11 @@ $settingsNav = static function () use ($l): string {
 <template data-cck-settings-tpl="privacy">
 	<section class="cck-panel">
 		<h2><?php p($l->t('Privacy & register')); ?></h2>
-		<p class="cck-hint"><?php p($l->t('PrivacyCheck keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in PrivacyCheck.')); ?></p>
+		<p class="cck-hint"><?php p($l->t('The privacy register app keeps your GDPR processing register (VVT) and privacy impact assessments. One click files a ready-made draft entry for CareCheck — a privacy lead still reviews and publishes it in the privacy register app.')); ?></p>
 		<p class="cck-hint" data-cck-privacy-state role="status"><?php p($l->t('Loading…')); ?></p>
 		<div class="cck-form">
 			<button type="button" class="cck-btn cck-btn--primary" data-cck-privacy-propose hidden><?php p($l->t('Create draft register entry')); ?></button>
-			<a class="cck-btn cck-btn--secondary" data-cck-privacy-open hidden href="#"><?php p($l->t('Open PrivacyCheck')); ?></a>
+			<a class="cck-btn cck-btn--secondary" data-cck-privacy-open hidden href="#"><?php p($l->t('Open the privacy register app')); ?></a>
 		</div>
 	</section>
 </template>
