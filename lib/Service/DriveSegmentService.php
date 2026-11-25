@@ -11,7 +11,7 @@ use OCP\IDBConnection;
 /**
  * NH-08 / suite flange F11 — `check:drive-segments` read facade.
  *
- * the mobility app pulls these and turns them into Fahrtenbuch DRAFTS the
+ * The mobility app pulls these and turns them into Fahrtenbuch DRAFTS the
  * driver confirms (km/Tachostand are never auto-final). A segment exists
  * only between two consecutive COMPLETED stops on the same tour —
  * departure = check-out of stop N, arrival = check-in of stop N+1.

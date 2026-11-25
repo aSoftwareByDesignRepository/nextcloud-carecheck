@@ -66,7 +66,7 @@ final class TransferManifest extends AbstractTransferManifest
 			// ── instance-bound bookkeeping — never transferred ──
 			// Install timestamp written by the diagnostics probe.
 			'installed_ts' => 'env',
-			// the privacy register app VVT activity row id — references a row in another
+			// The privacy register app VVT activity row id — references a row in another
 			// app's table on THIS instance; meaningless anywhere else.
 			'privacy_vvt_activity_id' => 'env',
 			'schema_ok' => 'internal',

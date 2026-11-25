@@ -48,7 +48,7 @@ final class InvoiceDraftPushService
 	public function push(string $actorRef, int $clientId, string $period, string $kind): array
 	{
 		// Only real session users push (member/station refs cannot own an
-		// the invoicing app draft — the facade needs a uid to authorize against).
+		// invoicing-app draft — the facade needs a uid to authorize against).
 		$actorUid = str_starts_with($actorRef, 'uid:') ? substr($actorRef, 4) : '';
 		if ($actorUid === '' || !isset(BillingDraftService::LINE_TEXTS[$kind])
 			|| preg_match('/^\d{4}-\d{2}$/', $period) !== 1) {

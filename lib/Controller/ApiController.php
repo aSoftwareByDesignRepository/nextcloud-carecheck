@@ -1047,7 +1047,7 @@ class ApiController extends Controller
 
 	/**
 	 * F13 push — send this client's signed-evidence billing draft to
-	 * the invoicing app. Staff + client scope; the sibling decides the rest.
+	 * The invoicing app. Staff + client scope; the sibling decides the rest.
 	 * Coded errors are user-actionable (link the client first, no signed
 	 * visits, …) — never an existence oracle beyond the client id itself.
 	 */

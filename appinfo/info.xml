@@ -59,7 +59,7 @@ Klientenakten bleiben verschlüsselt auf Ihrer Nextcloud. Vertretungsbesuche üb
 - **Manipulationssicheres Journal** — append-only, hash-verkettetes Protokoll mit externem Zeitstempel-Anker
 - **Verschlüsselte Klientenakten** — Akte, Pflegeplan, Klientenverlauf und Fotos je Klient
 - **Notfall-Zugriff bei Vertretung** — die springende Kraft sieht, was sie braucht — geprüft und hinterher sichtbar
-- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an the invoicing app senden
+- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an die Rechnungs-App senden
 - **Katalogbasierte Pflegepläne** — wiederverwendbarer Aufgabenkatalog je Klient
 
 **Kostenlose AGPL-Web-App.** Der native Companion (Worker- und Paired-Member-Modi) ist separat lizenziert (`CCK2`) — die Web-App ist niemals paywallt.

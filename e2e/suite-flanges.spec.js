@@ -21,6 +21,10 @@ const db = (sql) => execSync(
 	`docker compose -f ${COMPOSE} exec -T mariadb mariadb -u nextcloud -pnextcloud_password nextcloud -N -e "${sql}"`,
 	{ encoding: 'utf8' },
 ).trim()
+const occ = (cmd) => execSync(
+	`docker compose -f ${COMPOSE} exec -T -u www-data nextcloud php occ ${cmd}`,
+	{ encoding: 'utf8' },
+).trim()
 
 let rt = ''
 let deviceToken = ''
@@ -63,6 +67,7 @@ test.beforeAll(async ({ browser }, testInfo) => {
 	testInfo.setTimeout(13 * 60 * 1000)
 	const ctx = await browser.newContext()
 	const page = await ctx.newPage()
+	occ('user:setting cck_smoke core lang en')
 	await login(page, CREDS)
 	const request = page.context().request
 	const html = await (await request.get('/apps/carecheck/')).text()
@@ -250,7 +255,7 @@ test('F13 invoice push: unlinked client errors, linked client drafts + dedupes',
 	expect(link.success).toBe(true)
 	await push.click()
 	await expect.poll(() => status.textContent(), { timeout: 10000 })
-		.toContain('the invoicing app') // i18n: product name is locale-stable
+		.toContain('the invoicing app') // i18n: fixture user pinned to en in beforeAll — the generic sibling handle is translatable
 	// read back the invoice id from the wire for cleanup
 	const again = await papi(page, `/api/clients/${clientId}/invoice-draft`, {
 		method: 'POST', data: { period: today().slice(0, 7), kind: 'haeusliche_betreuung' },

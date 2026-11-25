@@ -1799,7 +1799,7 @@
 		return p;
 	}
 
-	// F15: the privacy register app VVT proposal card — muted text when the sibling is
+	// F15: The privacy register app VVT proposal card — muted text when the sibling is
 	// absent, a one-click CTA for admins when a draft is missing, and a link
 	// into the privacy register app once the draft exists.
 	function renderPrivacyProposal(p) {

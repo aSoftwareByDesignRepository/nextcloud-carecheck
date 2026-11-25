@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * F15 consumer (spec §4.4.2): proposes a draft VVT register entry in
- * the privacy register app. The facade only ever lands a DRAFT + seeded DPIA — the
+ * The privacy register app. The facade only ever lands a DRAFT + seeded DPIA — the
  * privacy lead still reviews and publishes in the privacy register app. We store the
  * created activity id so repeat clicks never mint a second draft.
  *
@@ -53,7 +53,7 @@ final class PrivacyProposalService
 			return ['ok' => true, 'already' => true, 'activityId' => $existing];
 		}
 		if (!$this->available()) {
-			return ['ok' => false, 'code' => 'sibling_unavailable', 'message' => 'the privacy register app is not enabled.'];
+			return ['ok' => false, 'code' => 'sibling_unavailable', 'message' => 'The privacy register app is not enabled.'];
 		}
 		$retentionYears = max(1, (int)$this->settings->get('retention_years'));
 		$proposal = [
@@ -78,7 +78,7 @@ final class PrivacyProposalService
 			$activity = $service->proposeActivity($proposal, $bareUid);
 		} catch (\Throwable $e) {
 			$this->logger->warning('privacycheck VVT proposal failed', ['exception' => $e]);
-			return ['ok' => false, 'code' => 'sibling_error', 'message' => 'the privacy register app rejected the proposal.'];
+			return ['ok' => false, 'code' => 'sibling_error', 'message' => 'The privacy register app rejected the proposal.'];
 		}
 		$id = $activity->getId();
 		$this->appConfig->setValueInt(Constants::APP_ID, self::STORE_KEY, $id);
