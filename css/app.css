@@ -268,7 +268,7 @@ dialog.cck-dialog :is(input, button, a):focus:not(:focus-visible) {
 #app-content .cck-btn[aria-busy='true'] { opacity: 0.7; pointer-events: none; }
 
 /* ---------- cards / panels (§3.3) ---------- */
-.cck-panel {
+.cck-panel, .cck-card {
 	background: var(--cck-bg-card);
 	border: 1px solid var(--cck-border);
 	border-radius: var(--cck-radius-md);

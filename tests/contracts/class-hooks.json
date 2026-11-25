@@ -1,0 +1,13 @@
+{
+	"cck-brand__text": "text column wrapper inside styled .cck-brand flex row (NC .app-info context; icon sibling is flex-shrink:0)",
+	"cck-crm": "CRM-link fieldset marker; JS binds via data-cck-crm attributes; fieldset chrome via styled .cck-refpick-field",
+	"cck-nav-link": "JS hook (carecheck-main.js active-state toggle + aria-current) co-emitted on styled .cck-nav__link",
+	"cck-nav__item": "structural li inside styled .cck-nav__list; anchors styled via .cck-nav__link",
+	"cck-nav__subitem": "structural li inside styled .cck-nav__sublist; anchors styled via .cck-nav__sublink",
+	"cck-refpick--multi": "multi-select modifier read via classList by buildRefPick on styled .cck-refpick",
+	"cck-section": "config-transfer pack section marker; card chrome + section rhythm via .cck-card",
+	"cck-skip-link--nav": "nav-target modifier on styled .cck-skip-link (distinguishes the second skip link)",
+	"cck-table-actions": "shared-pack topology co-emitted on styled .cck-license-table-actions (synced license-page template, ds-owned)",
+	"cck-transfer-report": "import-report dialog marker on styled .cck-dialog (transfer.js fills rows by id)",
+	"cck-view-head__text": "middle grid item; track already clamped by minmax(0,1fr) in styled .cck-view-head"
+}
