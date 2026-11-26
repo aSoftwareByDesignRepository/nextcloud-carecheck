@@ -1,37 +1,37 @@
 <?xml version="1.0"?>
 <!--
-  - SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
-  - SPDX-License-Identifier: AGPL-3.0-or-later
+ - SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
+ - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>carecheck</id>
 	<name>CareCheck</name>
-	<summary>Mobile care documentation — tours, visit bundles, tamper-evident journal, coverage board</summary>
-	<summary lang="de">Mobile Pflegedokumentation — Touren, Besuchsprotokolle, manipulationssicheres Journal, Zentrale-Tagesübersicht</summary>
+	<summary>Mobile care documentation: tours, visit bundles, tamper-evident journal, coverage board</summary>
+	<summary lang="de">Mobile Pflegedokumentation: Touren, Besuchsprotokolle, manipulationssicheres Journal, Zentrale-Tagesübersicht</summary>
 	<description><![CDATA[
-# CareCheck — tours, visits and care documentation on your own server
+# CareCheck: tours, visits and care documentation on your own server
 
-Ambulatory care teams run their day here: recurring tour templates that become real daily tours, a coverage board that shows every stop and every caregiver at a glance, offline-first visit bundles for the field — plan snapshot, task checklist, notes, photos, signature — and a tamper-evident journal that proves what happened, when, and by whom.
+Ambulatory care teams run their day here: recurring tour templates that become real daily tours, a coverage board that shows every stop and every caregiver at a glance, offline-first visit bundles for the field (plan snapshot, task checklist, notes, photos, signature), and a tamper-evident journal that proves what happened, when, and by whom.
 
-Client records stay encrypted on your Nextcloud. Cover visits through break-glass access are logged and audited — never silent.
+Client records stay encrypted on your Nextcloud. Cover visits through break-glass access are logged and audited, never silent.
 
 ## Why care services install it
 
-- **Coverage board** — every stop today: planned, uncovered, in progress, done; unassigned stops surface immediately
-- **Tours that materialize** — weekly templates with weekday rules become daily tours; assign and reassign in seconds
-- **Visit bundles for the field** — offline-first: plan snapshot, task checklist, notes, photos, client signature
-- **Tamper-evident journal** — append-only, hash-chained record with external timestamp anchoring
-- **Encrypted client records** — record, care plan, client log and photos per client
-- **Break-glass cover access** — a covering caregiver sees what they must — audited and visible afterwards
-- **Billing-ready exports** — service record as CSV/PDF, billing data as JSON/XML; send a draft straight to the invoicing app
-- **Catalog-driven care plans** — a reusable task catalog per client
+- **Coverage board**: every stop today: planned, uncovered, in progress, done; unassigned stops surface immediately
+- **Tours that materialize**: weekly templates with weekday rules become daily tours; assign and reassign in seconds
+- **Visit bundles for the field**: offline-first: plan snapshot, task checklist, notes, photos, client signature
+- **Tamper-evident journal**: append-only, hash-chained record with external timestamp anchoring
+- **Encrypted client records**: record, care plan, client log and photos per client
+- **Break-glass cover access**: a covering caregiver sees what they must, audited and visible afterwards
+- **Billing-ready exports**: service record as CSV/PDF, billing data as JSON/XML; send a draft straight to the invoicing app
+- **Catalog-driven care plans**: a reusable task catalog per client
 
-**Free AGPL web app.** The native companion (worker and paired-member modes) is licensed separately (`CCK2`) — the web app is never paywalled.
+**Free AGPL web app.** The native companion (worker and paired-member modes) is licensed separately. The web app is never paywalled.
 
 ## Clear limits
 
-- CareCheck documents care work — it does not replace payer-specific audit formats or legal advice.
-- Billing data is exported, not settled — no live insurance billing inside the app.
+- CareCheck documents care work. It does not replace payer-specific audit formats or legal advice.
+- Billing data is exported, not settled. No live insurance billing inside the app.
 - Declared databases: MySQL and PostgreSQL.
 
 ## Feedback welcome
@@ -45,29 +45,29 @@ A workflow gap on a real tour? Open a GitHub Issue (https://github.com/aSoftware
 - MySQL or PostgreSQL
 	]]></description>
 	<description lang="de"><![CDATA[
-# CareCheck — Touren, Besuche und Pflegedokumentation auf dem eigenen Server
+# CareCheck: Touren, Besuche und Pflegedokumentation auf dem eigenen Server
 
-Ambulante Pflegedienste steuern hier ihren Tag: wiederkehrende Tourvorlagen, die zu echten Tagestouren werden, eine Zentrale-Tagesübersicht mit jedem Stopp und jeder Pflegekraft auf einen Blick, offline-taugliche Besuchspakete für draußen — Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Unterschrift — und ein manipulationssicheres Journal, das beweist, was wann und durch wen passiert ist.
+Ambulante Pflegedienste steuern hier ihren Tag: wiederkehrende Tourvorlagen, die zu echten Tagestouren werden, eine Zentrale-Tagesübersicht mit jedem Stopp und jeder Pflegekraft auf einen Blick, offline-taugliche Besuchspakete für draußen (Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Unterschrift) und ein manipulationssicheres Journal, das beweist, was wann und durch wen passiert ist.
 
-Klientenakten bleiben verschlüsselt auf Ihrer Nextcloud. Vertretungsbesuche über den Notfall-Zugriff werden protokolliert und geprüft — niemals lautlos.
+Klientenakten bleiben verschlüsselt auf Ihrer Nextcloud. Vertretungsbesuche über den Notfall-Zugriff werden protokolliert und geprüft, niemals lautlos.
 
 ## Warum Pflegedienste es installieren
 
-- **Zentrale Tagesübersicht** — jeder Stopp heute: geplant, ungedeckt, läuft, erledigt; unzugewiesene Stopps fallen sofort auf
-- **Touren, die entstehen** — Wochenvorlagen mit Wochentagsregeln werden zu Tagestouren; in Sekunden zuweisen und umbesetzen
-- **Besuchspakete für draußen** — offline-first: Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Klienten-Unterschrift
-- **Manipulationssicheres Journal** — append-only, hash-verkettetes Protokoll mit externem Zeitstempel-Anker
-- **Verschlüsselte Klientenakten** — Akte, Pflegeplan, Klientenverlauf und Fotos je Klient
-- **Notfall-Zugriff bei Vertretung** — die springende Kraft sieht, was sie braucht — geprüft und hinterher sichtbar
-- **Abrechnungsfertige Exporte** — Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an die Rechnungs-App senden
-- **Katalogbasierte Pflegepläne** — wiederverwendbarer Aufgabenkatalog je Klient
+- **Zentrale Tagesübersicht**: jeder Stopp heute: geplant, ungedeckt, läuft, erledigt; unzugewiesene Stopps fallen sofort auf
+- **Touren, die entstehen**: Wochenvorlagen mit Wochentagsregeln werden zu Tagestouren; in Sekunden zuweisen und umbesetzen
+- **Besuchspakete für draußen**: offline-first: Plan-Snapshot, Aufgabenliste, Notizen, Fotos, Klienten-Unterschrift
+- **Manipulationssicheres Journal**: append-only, hash-verkettetes Protokoll mit externem Zeitstempel-Anker
+- **Verschlüsselte Klientenakten**: Akte, Pflegeplan, Klientenverlauf und Fotos je Klient
+- **Notfall-Zugriff bei Vertretung**: die springende Kraft sieht, was sie braucht, geprüft und hinterher sichtbar
+- **Abrechnungsfertige Exporte**: Leistungsnachweis als CSV/PDF, Abrechnungsdaten als JSON/XML; Entwurf direkt an die Rechnungs-App senden
+- **Katalogbasierte Pflegepläne**: wiederverwendbarer Aufgabenkatalog je Klient
 
-**Kostenlose AGPL-Web-App.** Der native Companion (Worker- und Paired-Member-Modi) ist separat lizenziert (`CCK2`) — die Web-App ist niemals paywallt.
+**Kostenlose AGPL-Web-App.** Der native Companion (Worker- und Paired-Member-Modi) ist separat lizenziert. Die Web-App ist niemals paywallt.
 
 ## Klare Grenzen
 
-- CareCheck dokumentiert Pflegearbeit — es ersetzt weder kostenträgerspezifische Prüfformate noch Rechtsberatung.
-- Abrechnungsdaten werden exportiert, nicht abgerechnet — keine Live-Kassenabrechnung in der App.
+- CareCheck dokumentiert Pflegearbeit. Es ersetzt weder kostenträgerspezifische Prüfformate noch Rechtsberatung.
+- Abrechnungsdaten werden exportiert, nicht abgerechnet. Keine Live-Kassenabrechnung in der App.
 - Deklarierte Datenbanken: MySQL und PostgreSQL.
 
 ## Feedback willkommen
@@ -133,6 +133,6 @@ Eine Lücke im Ablauf auf einer echten Tour? Öffnen Sie ein GitHub Issue (https
 		<command>OCA\CareCheck\Command\ConfigReconcileCommand</command>
 	</commands>
 	<!-- No <navigation> here: the menu entry is registered conditionally via
-	     NavGate (hasAppAccess) — a static entry would advertise the app to
-	     excluded users when access_mode=restricted. -->
+	 NavGate (hasAppAccess) — a static entry would advertise the app to
+	 excluded users when access_mode=restricted. -->
 </info>
