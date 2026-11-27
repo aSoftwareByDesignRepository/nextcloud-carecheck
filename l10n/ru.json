@@ -10,16 +10,56 @@
 		"(unknown — skipped)": "(неизвестно — пропущено)",
 		"1 row": "1 строка",
 		"1 setting": "1 настройка",
-		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": ["(1 привязанное к инстансу значение очищено)","(%n привязанных к инстансу значения очищены)","(%n привязанных к инстансу значений очищено)"],
-		"_(1 filtered)_::_(%n filtered)_": ["(отфильтрована 1 строка)","(отфильтрованы %n строки)","(отфильтровано %n строк)"],
-		"_(1 secret redacted)_::_(%n secrets redacted)_": ["(скрыт 1 секрет)","(скрыты %n секрета)","(скрыто %n секретов)"],
-		"_(1 unresolved ref)_::_(%n unresolved refs)_": ["(1 неразрешённая ссылка)","(%n неразрешённые ссылки)","(%n неразрешённых ссылок)"],
-		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": ["1 ссылка не разрешена — см. группы ниже.","%n ссылки не разрешены — см. группы ниже.","%n ссылок не разрешены — см. группы ниже."],
-		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": ["Для 1 строки требуется значение на этом инстансе","Для %n строки требуется значение на этом инстансе","Для %n строк требуется значение на этом инстансе"],
-		"_1 row skipped._::_%n rows skipped._": ["Пропущена 1 строка.","Пропущены %n строки.","Пропущено %n строк."],
-		"_1 row_::_%n rows_": ["1 строка","%n строки","%n строк"],
-		"_1 setting_::_%n settings_": ["1 настройка","%n настройки","%n настроек"],
-		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": ["Внимание: будет безвозвратно удалена 1 строка, затем данные файла будут загружены.","Внимание: будут безвозвратно удалены %n строки, затем данные файла будут загружены.","Внимание: будет безвозвратно удалено %n строк, затем данные файла будут загружены."],
+		"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_": [
+			"(1 привязанное к инстансу значение очищено)",
+			"(%n привязанных к инстансу значения очищены)",
+			"(%n привязанных к инстансу значений очищено)"
+		],
+		"_(1 filtered)_::_(%n filtered)_": [
+			"(отфильтрована 1 строка)",
+			"(отфильтрованы %n строки)",
+			"(отфильтровано %n строк)"
+		],
+		"_(1 secret redacted)_::_(%n secrets redacted)_": [
+			"(скрыт 1 секрет)",
+			"(скрыты %n секрета)",
+			"(скрыто %n секретов)"
+		],
+		"_(1 unresolved ref)_::_(%n unresolved refs)_": [
+			"(1 неразрешённая ссылка)",
+			"(%n неразрешённые ссылки)",
+			"(%n неразрешённых ссылок)"
+		],
+		"_1 reference unresolved — see the groups below._::_%n references unresolved — see the groups below._": [
+			"1 ссылка не разрешена — см. группы ниже.",
+			"%n ссылки не разрешены — см. группы ниже.",
+			"%n ссылок не разрешены — см. группы ниже."
+		],
+		"_1 row needs a value on this instance_::_%n rows need a value on this instance_": [
+			"Для 1 строки требуется значение на этом инстансе",
+			"Для %n строки требуется значение на этом инстансе",
+			"Для %n строк требуется значение на этом инстансе"
+		],
+		"_1 row skipped._::_%n rows skipped._": [
+			"Пропущена 1 строка.",
+			"Пропущены %n строки.",
+			"Пропущено %n строк."
+		],
+		"_1 row_::_%n rows_": [
+			"1 строка",
+			"%n строки",
+			"%n строк"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 настройка",
+			"%n настройки",
+			"%n настроек"
+		],
+		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
+			"Внимание: будет безвозвратно удалена 1 строка, затем данные файла будут загружены.",
+			"Внимание: будут безвозвратно удалены %n строки, затем данные файла будут загружены.",
+			"Внимание: будет безвозвратно удалено %n строк, затем данные файла будут загружены."
+		],
 		"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update.": "Ключ лицензии сохранён, но сервер не может проверить его подпись открытым ключом поставщика. Приложения-компаньоны будут отклонять лицензию, пока ключ не подписан соответствующим ключом поставщика. Примените корректно подписанную лицензию заново или обратитесь в поддержку, если проблема сохраняется после обновления приложения.",
 		"A pre-flight check failed — see the report for details.": "Не удалась предварительная проверка — подробности в отчёте.",
 		"A register draft already exists.": "Черновик записи реестра уже существует.",
@@ -388,7 +428,7 @@
 		"Notices and rejected visit bundles that need a decision.": "Уведомления и отклонённые пакеты визитов, требующие решения.",
 		"Nächster geplanter Besuch:": "Следующий запланированный визит:",
 		"Official mobile & terminal licenses": "Официальные лицензии для мобильных устройств и терминалов",
-		"OK": "OK",
+		"OK": "Хорошо.",
 		"OK — a longer passphrase is safer.": "Подойдёт, но более длинная парольная фраза надёжнее.",
 		"On duty (DutyCheck)": "На смене (DutyCheck)",
 		"Only JPEG, PNG or WebP photos.": "Только фото JPEG, PNG или WebP.",

@@ -119,7 +119,7 @@ OC.L10N.register(
 	"Caregiver" : "Cuidador",
 	"Catalog" : "Catálogo",
 	"Check in, document tasks, collect signatures." : "Registre a chegada, documente tarefas e colete assinaturas.",
-	"Check Partner" : "Check Partner",
+	"Check Partner" : "Verifique o parceiro",
 	"Check-in" : "Entrada",
 	"Choose a passphrase of at least 12 characters." : "Escolha uma senha longa com pelo menos 12 caracteres.",
 	"Choose day" : "Escolher dia",

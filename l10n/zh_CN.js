@@ -389,7 +389,7 @@ OC.L10N.register(
 	"Notices and rejected visit bundles that need a decision." : "需要处理的通知和被退回的访视包。",
 	"Nächster geplanter Besuch:" : "下次计划访视：",
 	"Official mobile & terminal licenses" : "官方移动端与终端许可证",
-	"OK" : "OK",
+	"OK" : "确定",
 	"OK — a longer passphrase is safer." : "好——更长的密码短语更安全。",
 	"On duty (DutyCheck)" : "在岗（DutyCheck）",
 	"Only JPEG, PNG or WebP photos." : "仅限 JPEG、PNG 或 WebP 照片。",

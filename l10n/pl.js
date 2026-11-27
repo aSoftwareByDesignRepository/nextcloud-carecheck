@@ -119,7 +119,7 @@ OC.L10N.register(
 	"Caregiver" : "Opiekun",
 	"Catalog" : "Katalog",
 	"Check in, document tasks, collect signatures." : "Melduj się, dokumentuj zadania, zbieraj podpisy.",
-	"Check Partner" : "Check Partner",
+	"Check Partner" : "Przejdź do partnera",
 	"Check-in" : "Zameldowanie",
 	"Choose a passphrase of at least 12 characters." : "Wybierz frazę o długości co najmniej 12 znaków.",
 	"Choose day" : "Wybierz dzień",

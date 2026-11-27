@@ -389,7 +389,7 @@ OC.L10N.register(
 	"Notices and rejected visit bundles that need a decision." : "Уведомления и отклонённые пакеты визитов, требующие решения.",
 	"Nächster geplanter Besuch:" : "Следующий запланированный визит:",
 	"Official mobile & terminal licenses" : "Официальные лицензии для мобильных устройств и терминалов",
-	"OK" : "OK",
+	"OK" : "Хорошо.",
 	"OK — a longer passphrase is safer." : "Подойдёт, но более длинная парольная фраза надёжнее.",
 	"On duty (DutyCheck)" : "На смене (DutyCheck)",
 	"Only JPEG, PNG or WebP photos." : "Только фото JPEG, PNG или WebP.",

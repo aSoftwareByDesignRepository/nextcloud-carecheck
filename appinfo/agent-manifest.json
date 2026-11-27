@@ -2,6 +2,5 @@
   "schemaVersion": 1,
   "appId": "carecheck",
   "agentExposure": "none",
-  "tools": [],
-  "notes": "Reviewed: intentionally no agent surface in v1. Any future surface needs a mini-spec before tools are declared here."
+  "tools": []
 }
