@@ -472,7 +472,7 @@ if (!is_string($i18nJson)) {
 					aria-autocomplete="list"
 					role="combobox"
 					<?php echo $mobileFull ? 'disabled aria-disabled="true"' : ''; ?>>
-				<ul id="cck-seat-search-results" class="cck-seat-search-results" role="listbox" hidden></ul>
+				<ul id="cck-seat-search-results" class="cck-seat-search-results" role="listbox" aria-multiselectable="true" hidden></ul>
 			</div>
 			<p id="cck-seat-picker-hint" class="cck-license-field__hint"><?php p($l->t('Type at least two characters, tick several people, then assign them together.')); ?></p>
 			<p id="cck-seat-count" class="cck-license-seat-count" aria-live="polite">

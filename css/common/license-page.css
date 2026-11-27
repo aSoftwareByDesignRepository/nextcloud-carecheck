@@ -703,8 +703,18 @@ dialog .cck-license-btn--danger:active,
 	background: var(--color-background-hover);
 }
 
-.cck-seat-search-results li[role='option'][aria-selected='true'],
+/* Keyboard cursor (aria-activedescendant target): ring + hover tint —
+   deliberately distinct from the selection affordance below, and placed
+   first so a selected+active row keeps its selection tint. */
 .cck-seat-search-results li[role='option'].is-active {
+	background: var(--color-background-hover);
+	outline: 2px solid var(--color-primary-element);
+	outline-offset: -2px;
+}
+
+/* Selection truth: tint + edge bar + painted check live on
+   aria-selected only — the highlight path must never write it. */
+.cck-seat-search-results li[role='option'][aria-selected='true'] {
 	background: color-mix(in srgb, var(--color-primary-element) 14%, transparent);
 	box-shadow: inset 3px 0 0 var(--color-primary-element);
 }
@@ -722,6 +732,29 @@ dialog .cck-license-btn--danger:active,
 	height: 1.1rem;
 	margin: 0;
 	flex: 0 0 auto;
+	display: inline-block;
+	position: relative;
+	box-sizing: border-box;
+	border: 1px solid var(--color-border-dark, var(--color-border));
+	border-radius: var(--cck-radius-sm, 3px);
+	background: var(--color-main-background);
+}
+
+.cck-seat-search-results li[role='option'][aria-selected='true'] .cck-seat-search-results__check {
+	background: var(--color-primary-element);
+	border-color: var(--color-primary-element);
+}
+
+.cck-seat-search-results li[role='option'][aria-selected='true'] .cck-seat-search-results__check::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 45%;
+	width: 30%;
+	height: 55%;
+	border: solid var(--color-primary-element-text, var(--color-primary-text));
+	border-width: 0 2px 2px 0;
+	transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .cck-seat-search-results__empty {
