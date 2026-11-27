@@ -206,6 +206,9 @@ button.cck-stat-tile:hover, button.cck-stat-tile:focus-visible {
 	flex-wrap: wrap;
 	margin: 0 0 var(--cck-space-3, 12px);
 }
+/* Inside a gap'd flex panel the head's own margin doubles the spacing —
+   the parent's gap already supplies the rhythm. */
+.cck-panel > .cck-list-head { margin-bottom: 0; }
 .cck-list-head__title { margin: 0; font-size: var(--cck-fs-lg, 1.125rem); font-weight: 600; }
 .cck-list-head__count { color: var(--cck-muted, var(--color-text-maxcontrast)); font-size: var(--cck-fs-sm, 0.875rem); font-variant-numeric: var(--cck-tab-num, tabular-nums); }
 .cck-list-head__actions { margin-inline-start: auto; display: flex; gap: var(--cck-space-2, 8px); flex-wrap: wrap; }
